@@ -16,6 +16,7 @@ process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
 import { app, BrowserWindow, shell, ipcMain } from 'electron'
 import { release } from 'os'
 import { join } from 'path'
+import { registerEventHandlers } from './eventsHandler'
 
 // Disable GPU Acceleration for Windows 7
 if (release().startsWith('6.1')) app.disableHardwareAcceleration()
@@ -37,7 +38,11 @@ const indexHtml = join(process.env.DIST, 'index.html')
 async function createWindow() {
   win = new BrowserWindow({
     title: 'Main window',
-    icon: join(process.env.PUBLIC, 'favicon.svg'),
+    icon: join(ROOT_PATH.PUBLIC, 'favicon.svg'),
+    minWidth: 800,
+    minHeight: 600,
+    width: 1600,
+    height: 1020,
     webPreferences: {
       preload,
       nodeIntegration: true,
@@ -49,13 +54,15 @@ async function createWindow() {
     win.loadFile(indexHtml)
   } else {
     win.loadURL(url)
-    // win.webContents.openDevTools()
+    win.webContents.openDevTools()
   }
 
   // Test actively push message to the Electron-Renderer
-  win.webContents.on('did-finish-load', () => {
-    win?.webContents.send('main-process-message', new Date().toLocaleString())
-  })
+  // win.webContents.on('did-finish-load', () => {
+  //   win?.webContents.send('main-process-message', new Date().toLocaleString())
+  // })
+
+  registerEventHandlers(win);
 
   // Make all links open with the browser, not with the application
   win.webContents.setWindowOpenHandler(({ url }) => {

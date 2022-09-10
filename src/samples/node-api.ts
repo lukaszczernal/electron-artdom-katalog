@@ -1,8 +1,8 @@
 import { lstat } from 'fs/promises'
 import { cwd } from 'process'
-import { ipcRenderer } from 'electron'
+import { ipcRenderer as nodeEventBus } from 'electron'
 
-ipcRenderer.on('main-process-message', (_event, ...args) => {
+nodeEventBus.on('main-process-message', (_event, ...args) => {
   console.log('[Receive Main-process message]:', ...args)
 })
 

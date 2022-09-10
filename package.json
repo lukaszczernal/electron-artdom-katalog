@@ -14,7 +14,6 @@
   "engines": {
     "node": "^14.18.0 || >=16.0.0"
   },
-  "dependencies": {},
   "devDependencies": {
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
@@ -34,5 +33,8 @@
       "VITE_DEV_SERVER_PORT": 7777,
       "VITE_DEV_SERVER_URL": "http://127.0.0.1:7777"
     }
+  },
+  "dependencies": {
+    "rxjs": "^7.5.6"
   }
 }
