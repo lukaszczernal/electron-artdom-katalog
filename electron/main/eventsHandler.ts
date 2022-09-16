@@ -4,7 +4,7 @@ import {
   IpcMainEvent,
 } from "electron";
 import { BROWSER_EVENTS as EVENTS } from "../events";
-import { readPages, refreshPage } from "./services/pages";
+import { readPages, refreshPage, editPage } from "./services/pages";
 
 const registerEventHandlers = (_: BrowserWindow) => {
   browserEventBus.on(EVENTS.PAGES_FETCH, (event: IpcMainEvent) => {
@@ -20,6 +20,10 @@ const registerEventHandlers = (_: BrowserWindow) => {
       );
     }
   );
+
+  browserEventBus.on(EVENTS.PAGES_EDIT, (event: IpcMainEvent, filename: string) => {
+    editPage(filename, () => event.reply(EVENTS.PAGES_EDIT_SUCCESS));
+  });
 
   // browser.webContents.on("did-finish-load", () => {
   //   browser.webContents.send("smthngForBrowser", "weird");

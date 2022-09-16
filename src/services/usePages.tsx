@@ -14,6 +14,10 @@ export const usePages = () => {
     nodeEventBus.send(EVENTS.PAGES_REFRESH, filename)
   }
 
+  const editPage = (filePath: string) => {
+    nodeEventBus.send(EVENTS.PAGES_EDIT, filePath)
+  }
+
   useEffect(() => {
     const callback = (_: IpcRendererEvent, pages: Page[]) => setData(pages);
     nodeEventBus.on(EVENTS.PAGES_FETCH_SUCCESS, callback);
@@ -26,7 +30,7 @@ export const usePages = () => {
     () => nodeEventBus.removeListener(EVENTS.PAGES_REFRESH_SUCCESS, callback);
   }, []);
 
-  return { request, data, refreshPage };
+  return { request, data, refreshPage, editPage };
 };
 
 export default usePages;
