@@ -11,12 +11,4 @@
 .app__page {
   display: block;
   margin: 0  1rem 1rem 0;
-  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
-  transition: box-shadow 300ms ease-out, transform 300ms ease-out;
-  width: 200px;
-
-  &:hover {
-    box-shadow: 15px 15px 35px rgba(0, 0, 0, 0.1);
-    transform: translate(-3px, -8px);
-  }
 }

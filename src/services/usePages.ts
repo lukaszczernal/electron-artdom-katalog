@@ -18,6 +18,10 @@ export const usePages = () => {
     nodeEventBus.send(EVENTS.PAGES_EDIT, filePath)
   }
 
+  const updateKeywords = (keywords: string[]) => {
+    nodeEventBus.send(EVENTS.PAGES_UPDATE_KEYWORDS, keywords);
+  }
+
   useEffect(() => {
     const callback = (_: IpcRendererEvent, pages: Page[]) => setData(pages);
     nodeEventBus.on(EVENTS.PAGES_FETCH_SUCCESS, callback);
@@ -30,7 +34,7 @@ export const usePages = () => {
     () => nodeEventBus.removeListener(EVENTS.PAGES_REFRESH_SUCCESS, callback);
   }, []);
 
-  return { request, data, refreshPage, editPage };
+  return { request, data, refreshPage, editPage, updateKeywords };
 };
 
 export default usePages;

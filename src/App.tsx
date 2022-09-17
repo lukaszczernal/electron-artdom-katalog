@@ -1,7 +1,9 @@
-import { Button, Drawer } from "@mantine/core";
+import { Drawer } from "@mantine/core";
 import { Page } from "electron/models";
 import { useEffect, useState } from "react";
 import styles from "./app.module.scss";
+import { PageDetails } from "./components/PageDetails";
+import { Thumbnail } from "./components/Thumbnail";
 import { usePages } from "./services";
 
 const App: React.FC = () => {
@@ -20,7 +22,7 @@ const App: React.FC = () => {
   const [selectedPage, setSelectedPage] = useState<Page | null>(null);
   const [updateCount, setUpdateCount] = useState(0);
 
-  const { data: pages, request, refreshPage, editPage } = usePages();
+  const { data: pages, request } = usePages();
 
   useEffect(() => {
     request();
@@ -39,13 +41,10 @@ const App: React.FC = () => {
           {pages?.map((page) => {
             return (
               <li className={styles.app__listItem} key={page.svg.file}>
-                <a
-                  className={styles.app__page}
-                  onClick={() => setSelectedPage(page)}
-                >
-                  <img
+                <a className={styles.app__page} onClick={() => setSelectedPage(page)}>
+                  <Thumbnail
                     src={`png/${page.svg.file}.png?${updateCount}`}
-                    width="200"
+                    width={200}
                   />
                 </a>
               </li>
@@ -62,20 +61,7 @@ const App: React.FC = () => {
         padding="xl"
         size="xl"
       >
-        {selectedPage && (
-          <>
-            <img
-              src={`png/${selectedPage?.svg.file}.png?${updateCount}`}
-              width="200"
-            />
-            <Button onClick={() => refreshPage(selectedPage?.svg.file)}>
-              Refresh
-            </Button>
-            <Button onClick={() => editPage(selectedPage?.svg.path)}>
-              Edit
-            </Button>
-          </>
-        )}
+        {selectedPage && <PageDetails page={selectedPage} />}
       </Drawer>
     </>
   );

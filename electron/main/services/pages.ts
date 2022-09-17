@@ -3,12 +3,44 @@ import { spawn } from "child_process";
 import { Page } from "../../models";
 import svgConverter from "./svgConverter";
 
+const PAGE_STORAGE_PATH = "public/data/pages-array.json";
+const PAGE_STORAGE_PATH_BACKUP = "public/data/temp.pages-array.json";
+
 const readPages = (): Page[] => {
-  const res = fs.readFileSync("public/data/pages-array.json", {
+  const res = fs.readFileSync(PAGE_STORAGE_PATH, {
     encoding: "utf8",
   });
   const pages = JSON.parse(res);
   return pages;
+};
+
+const savePrimaryStorage = (pages: Page[]) => {
+  return saveStorage(pages, PAGE_STORAGE_PATH);
+};
+
+const saveBackupStorage = (pages: Page[]) => {
+  return saveStorage(pages, PAGE_STORAGE_PATH_BACKUP);
+};
+
+const saveStorage = (pages: Page[], path: string) => {
+  const promise = new Promise<string>((resolve, reject) => {
+    if (!pages && pages.length === 0) {
+      reject("Nothing to be stored.");
+    }
+
+    fs.writeFile(path, JSON.stringify(pages), (error) => {
+      if (error) {
+        reject(`Storage update failed: ${path}`);
+      }
+      resolve(`Storage saved successfully: ${path}`);
+    });
+  });
+
+  return promise;
+};
+
+const savePages = (pages: Page[]): Promise<any> => {
+  return saveBackupStorage(pages).then(() => savePrimaryStorage(pages));
 };
 
 const refreshPage = (filename: string) => {
@@ -48,4 +80,34 @@ const editPage = (filePath: string, successCallback: () => void) => {
   });
 };
 
-export { readPages, refreshPage, editPage };
+const updatePage = (
+  page: Page,
+  successCallback: () => void,
+  failCallback: (message: string) => void
+) => {
+  fs.exists(PAGE_STORAGE_PATH, function (exists) {
+    if (exists) {
+      const pages = readPages();
+      const pageIndex = pages.findIndex(
+        (item) => item.svg.file === page.svg.file
+      );
+
+      if (pageIndex < 0) {
+        failCallback("page to update could not be found");
+        return;
+      }
+
+      pages[pageIndex] = page;
+
+      savePages(pages)
+        .then(successCallback)
+        .catch(() => {
+          failCallback("Saving page storage failed");
+        });
+    } else {
+      failCallback("page storage does not exist");
+    }
+  });
+};
+
+export { readPages, refreshPage, editPage, updatePage };
