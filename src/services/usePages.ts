@@ -11,30 +11,34 @@ export const usePages = () => {
   };
 
   const refreshPage = (filename: string) => {
-    nodeEventBus.send(EVENTS.PAGES_REFRESH, filename)
-  }
+    nodeEventBus.send(EVENTS.PAGES_REFRESH, filename);
+  };
 
   const editPage = (filePath: string) => {
-    nodeEventBus.send(EVENTS.PAGES_EDIT, filePath)
-  }
-
-  const updateKeywords = (keywords: string[]) => {
-    nodeEventBus.send(EVENTS.PAGES_UPDATE_KEYWORDS, keywords);
-  }
+    nodeEventBus.send(EVENTS.PAGES_EDIT, filePath);
+  };
 
   useEffect(() => {
     const callback = (_: IpcRendererEvent, pages: Page[]) => setData(pages);
     nodeEventBus.on(EVENTS.PAGES_FETCH_SUCCESS, callback);
-    () => nodeEventBus.removeListener(EVENTS.PAGES_FETCH_SUCCESS, callback);
+    return () => {
+      nodeEventBus.removeListener(EVENTS.PAGES_FETCH_SUCCESS, callback);
+    };
   }, []);
 
   useEffect(() => {
-    const callback = (_: IpcRendererEvent, fileName: string) => setData(data => [...data]);
+    const callback = (_: IpcRendererEvent) => {
+      setData((data) => [...data]);
+    };
     nodeEventBus.on(EVENTS.PAGES_REFRESH_SUCCESS, callback);
-    () => nodeEventBus.removeListener(EVENTS.PAGES_REFRESH_SUCCESS, callback);
+    nodeEventBus.on(EVENTS.PAGES_EDIT_SUCCESS, callback);
+    return () => {
+      nodeEventBus.removeListener(EVENTS.PAGES_REFRESH_SUCCESS, callback);
+      nodeEventBus.removeListener(EVENTS.PAGES_EDIT_SUCCESS, callback);
+    };
   }, []);
 
-  return { request, data, refreshPage, editPage, updateKeywords };
+  return { request, data, refreshPage, editPage };
 };
 
 export default usePages;

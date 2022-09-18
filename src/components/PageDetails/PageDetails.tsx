@@ -24,7 +24,7 @@ const useStyles = createStyles(() => ({
     height: "100%",
   },
   page: {
-    padding: "0 1rem",
+    paddingRight: "1rem",
   },
   actions: {
     margin: "0 1rem",

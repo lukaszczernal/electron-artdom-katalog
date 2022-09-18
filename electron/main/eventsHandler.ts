@@ -4,8 +4,14 @@ import {
   IpcMainEvent,
 } from "electron";
 import { BROWSER_EVENTS as EVENTS } from "../events";
-import { Page } from "../models";
-import { readPages, refreshPage, editPage, updatePage } from "./services/pages";
+import { FileInfo, Page } from "../models";
+import {
+  readPages,
+  refreshPage,
+  editPage,
+  updatePage,
+  uploadPage,
+} from "./services/pages";
 
 const registerEventHandlers = (_: BrowserWindow) => {
   browserEventBus.on(EVENTS.PAGES_FETCH, (event: IpcMainEvent) => {
@@ -29,13 +35,21 @@ const registerEventHandlers = (_: BrowserWindow) => {
     }
   );
 
+  browserEventBus.on(EVENTS.PAGES_UPDATE, (event: IpcMainEvent, page: Page) => {
+    updatePage(
+      page,
+      () => event.reply(EVENTS.PAGES_UPDATE_SUCCESS),
+      () => event.reply(EVENTS.PAGES_UPDATE_FAIL)
+    );
+  });
+
   browserEventBus.on(
-    EVENTS.PAGES_UPDATE_KEYWORDS,
-    (event: IpcMainEvent, page: Page) => {
-      updatePage(
-        page,
-        () => event.reply(EVENTS.PAGES_UPDATE_KEYWORDS_SUCCESS),
-        () => event.reply(EVENTS.PAGES_UPDATE_KEYWORDS_FAIL)
+    EVENTS.PAGE_UPLOAD,
+    (event: IpcMainEvent, file: FileInfo) => {
+      uploadPage(
+        file,
+        (filename: string) => event.reply(EVENTS.PAGE_UPLOAD_SUCCESS, filename),
+        () => event.reply(EVENTS.PAGE_UPLOAD_FAIL, file)
       );
     }
   );

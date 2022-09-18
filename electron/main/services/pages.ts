@@ -1,10 +1,13 @@
 import fs from "fs";
 import { spawn } from "child_process";
-import { Page } from "../../models";
+import { FileInfo, Page } from "../../models";
 import svgConverter from "./svgConverter";
+import { findNewFilename } from "./utils";
 
 const PAGE_STORAGE_PATH = "public/data/pages-array.json";
 const PAGE_STORAGE_PATH_BACKUP = "public/data/temp.pages-array.json";
+const SVG_STORAGE_PATH = "public/svg";
+const PNG_STORAGE_PATH = "public/png";
 
 const readPages = (): Page[] => {
   const res = fs.readFileSync(PAGE_STORAGE_PATH, {
@@ -44,14 +47,10 @@ const savePages = (pages: Page[]): Promise<any> => {
 };
 
 const refreshPage = (filename: string) => {
-  const pages = readPages();
-  const page = pages.find((page) => page.svg.file === filename);
+  const pngPath = `${PNG_STORAGE_PATH}/${filename}.png`;
+  const svgPath = `${SVG_STORAGE_PATH}/${filename}`;
 
-  if (!page) return; // TODO send error message
-
-  const pngPath = `public/png/${page.svg.file}.png`;
-
-  return svgConverter(page.svg.path, pngPath, { width: 2000 });
+  return svgConverter(svgPath, pngPath, { width: 400 });
 };
 
 const editPage = (filePath: string, successCallback: () => void) => {
@@ -85,7 +84,7 @@ const updatePage = (
   successCallback: () => void,
   failCallback: (message: string) => void
 ) => {
-  fs.exists(PAGE_STORAGE_PATH, function (exists) {
+  fs.exists(PAGE_STORAGE_PATH, (exists) => {
     if (exists) {
       const pages = readPages();
       const pageIndex = pages.findIndex(
@@ -93,11 +92,12 @@ const updatePage = (
       );
 
       if (pageIndex < 0) {
-        failCallback("page to update could not be found");
-        return;
+        // Page does not exist - create new
+        pages.push(page);
+      } else {
+        // Update existing page
+        pages[pageIndex] = page;
       }
-
-      pages[pageIndex] = page;
 
       savePages(pages)
         .then(successCallback)
@@ -105,9 +105,31 @@ const updatePage = (
           failCallback("Saving page storage failed");
         });
     } else {
-      failCallback("page storage does not exist");
+      failCallback("Page storage does not exist");
     }
   });
 };
 
-export { readPages, refreshPage, editPage, updatePage };
+const uploadPage = (
+  file: FileInfo,
+  successCallback: (filename: string) => void,
+  failCallback: (message: string) => void
+) => {
+  const pages = readPages();
+  const filename = findNewFilename(file.name, pages);
+
+  var is = fs.createReadStream(file.path);
+  var os = fs.createWriteStream(`${SVG_STORAGE_PATH}/${filename}`);
+
+  is.pipe(os);
+
+  os.on("error", () => {
+    failCallback("Saving new page failed");
+  });
+
+  os.on("close", () => {
+    successCallback(filename);
+  });
+};
+
+export { readPages, refreshPage, editPage, updatePage, uploadPage };

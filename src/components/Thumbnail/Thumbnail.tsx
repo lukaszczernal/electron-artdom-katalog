@@ -13,7 +13,7 @@ const useStyles = createStyles(() => ({
 
     ["&:hover"]: {
       boxShadow: "8px 13px 35px rgba(0, 0, 0, 0.1)",
-      transform: "translate(-3px, -8px)",
+      transform: "translate(0, -8px)",
     },
   },
 }));

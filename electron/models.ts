@@ -1,20 +1,15 @@
-enum PageStatus {
-  READY = "ready",
-  REFRESH = "refresh",
-}
-
-enum PageVisibility {
-  READY = "ready",
-  REFRESH = "refresh",
-}
-
 export interface Page {
   svg: {
     dir: string;
     file: string;
     path: string;
   };
-  status?: PageStatus;
-  visibility?: PageVisibility;
+  status: "enable";
+  refresh?: boolean;
   keywords?: string[];
+}
+
+export interface FileInfo {
+  path: string;
+  name: string;
 }
