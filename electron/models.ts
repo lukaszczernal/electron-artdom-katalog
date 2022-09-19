@@ -4,7 +4,7 @@ export interface Page {
     file: string;
     path: string;
   };
-  status: "enable";
+  status: "enable" | "disable";
   refresh?: boolean;
   keywords?: string[];
 }

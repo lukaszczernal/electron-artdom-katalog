@@ -27,6 +27,7 @@ const useUploadPage = () => {
     const callback = (_: IpcRendererEvent, filename: string) => {
       setIsUploading(false);
       const page = pageMetadata(filename);
+      refreshPage(filename);
       updatePage(page);
     };
     nodeEventBus.on(EVENTS.PAGE_UPLOAD_SUCCESS, callback);

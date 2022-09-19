@@ -51,7 +51,7 @@ const PageDetails: React.FC<Prosp> = ({ page }) => {
 
   const addKeyword = (values: typeof keywordInitialValues) => {
     const keywords = (page.keywords || []).concat(values.keyword);
-    updatePage({...page, keywords});
+    updatePage({ ...page, keywords });
   };
 
   const removeKeyword = (key: string) => {
@@ -59,13 +59,23 @@ const PageDetails: React.FC<Prosp> = ({ page }) => {
     const keyIndex = keywords.findIndex((item) => item === key);
 
     keywords.splice(keyIndex, 1);
-    updatePage({...page, keywords});
-  }
+    updatePage({ ...page, keywords });
+  };
+
+  const togglePage = () => {
+    const status: Page["status"] =
+      page.status === "enable" ? "disable" : "enable";
+    updatePage({ ...page, status });
+  };
 
   return (
     <div className={classes.overview}>
       <div className={classes.page}>
-        <Thumbnail src={`png/${page?.svg.file}.png`} width={280} />
+        <Thumbnail
+          disabled={page.status !== "enable"}
+          src={`png/${page?.svg.file}.png`}
+          width={280}
+        />
       </div>
       <div className={classes.keywords}>
         <Stack>
@@ -92,6 +102,9 @@ const PageDetails: React.FC<Prosp> = ({ page }) => {
       </div>
       <div className={classes.actions}>
         <Stack spacing="xs">
+          <Button onClick={() => togglePage()}>
+            {page?.status === "enable" ? "Ukryj" : "Aktywuj"}
+          </Button>
           <Button onClick={() => refreshPage(page?.svg.file)}>Odśwież</Button>
           <Button onClick={() => editPage(page?.svg.file)}>Edytuj</Button>
         </Stack>

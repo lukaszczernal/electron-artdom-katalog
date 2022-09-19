@@ -42,6 +42,14 @@ export const usePages = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const callback = (_: IpcRendererEvent) => fetchPages();
+    nodeEventBus.on(EVENTS.PAGES_UPDATE_SUCCESS, callback);
+    return () => {
+      nodeEventBus.removeListener(EVENTS.PAGES_UPDATE_SUCCESS, callback);
+    };
+  }, []);
+
   return { fetchPages, data, refreshPage, editPage };
 };
 

@@ -1,7 +1,6 @@
 import { ActionIcon, Affix, Center, Drawer, FileButton } from "@mantine/core";
 import { IconPlus } from "@tabler/icons";
-import { Page } from "electron/models";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./app.module.scss";
 import { PageDetails } from "./components/PageDetails";
 import { Thumbnail } from "./components/Thumbnail";
@@ -20,11 +19,15 @@ const App: React.FC = () => {
   //   }
   // })
 
-  const [selectedPage, setSelectedPage] = useState<Page | null>(null);
+  const [selectedPageKey, setSelectedPageKey] = useState<string | null>(null);
   const [updateCount, setUpdateCount] = useState(0);
 
   const { data: pages, fetchPages } = usePages();
   const { uploadPage } = useUploadPage();
+
+  const selectedPage = useMemo(() => {
+    return pages.find((page) => page.svg.file === selectedPageKey);
+  }, [selectedPageKey, pages]);
 
   useEffect(() => {
     fetchPages();
@@ -47,9 +50,10 @@ const App: React.FC = () => {
               <li className={styles.app__listItem} key={page.svg.file}>
                 <a
                   className={styles.app__page}
-                  onClick={() => setSelectedPage(page)}
+                  onClick={() => setSelectedPageKey(page.svg.file)}
                 >
                   <Thumbnail
+                    disabled={page.status !== 'enable'}
                     src={`png/${page.svg.file}.png?${updateCount}`}
                     width={200}
                   />
@@ -77,9 +81,9 @@ const App: React.FC = () => {
       </Affix>
 
       <Drawer
-        opened={Boolean(selectedPage)}
-        onClose={() => setSelectedPage(null)}
-        title={selectedPage?.svg.file}
+        opened={Boolean(selectedPageKey)}
+        onClose={() => setSelectedPageKey(null)}
+        title={selectedPageKey}
         position="bottom"
         padding="xl"
         size="xl"
