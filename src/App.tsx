@@ -23,11 +23,11 @@ const App: React.FC = () => {
   const [selectedPage, setSelectedPage] = useState<Page | null>(null);
   const [updateCount, setUpdateCount] = useState(0);
 
-  const { data: pages, request } = usePages();
+  const { data: pages, fetchPages } = usePages();
   const { uploadPage } = useUploadPage();
 
   useEffect(() => {
-    request();
+    fetchPages();
   }, []);
 
   // TODO this refresh method is so lame

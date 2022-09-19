@@ -53,7 +53,8 @@ const refreshPage = (filename: string) => {
   return svgConverter(svgPath, pngPath, { width: 400 });
 };
 
-const editPage = (filePath: string, successCallback: () => void) => {
+const editPage = (filename: string, successCallback: () => void) => {
+  const filePath = `${SVG_STORAGE_PATH}/${filename}`;
   fs.exists(filePath, function (exists) {
     if (exists) {
       console.log("file exists", filePath);

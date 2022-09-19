@@ -28,7 +28,6 @@ const useUploadPage = () => {
       setIsUploading(false);
       const page = pageMetadata(filename);
       updatePage(page);
-      refreshPage(filename);
     };
     nodeEventBus.on(EVENTS.PAGE_UPLOAD_SUCCESS, callback);
     return () => {

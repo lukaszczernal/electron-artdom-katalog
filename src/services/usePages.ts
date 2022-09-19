@@ -6,7 +6,7 @@ import { Page } from "../../electron/models";
 export const usePages = () => {
   const [data, setData] = useState<Page[]>([]);
 
-  const request = () => {
+  const fetchPages = () => {
     nodeEventBus.send(EVENTS.PAGES_FETCH);
   };
 
@@ -14,8 +14,8 @@ export const usePages = () => {
     nodeEventBus.send(EVENTS.PAGES_REFRESH, filename);
   };
 
-  const editPage = (filePath: string) => {
-    nodeEventBus.send(EVENTS.PAGES_EDIT, filePath);
+  const editPage = (filename: string) => {
+    nodeEventBus.send(EVENTS.PAGES_EDIT, filename);
   };
 
   useEffect(() => {
@@ -27,18 +27,22 @@ export const usePages = () => {
   }, []);
 
   useEffect(() => {
-    const callback = (_: IpcRendererEvent) => {
-      setData((data) => [...data]);
-    };
+    const callback = (_: IpcRendererEvent) => setData((data) => [...data]);
     nodeEventBus.on(EVENTS.PAGES_REFRESH_SUCCESS, callback);
-    nodeEventBus.on(EVENTS.PAGES_EDIT_SUCCESS, callback);
     return () => {
       nodeEventBus.removeListener(EVENTS.PAGES_REFRESH_SUCCESS, callback);
+    };
+  }, []);
+
+  useEffect(() => {
+    const callback = (_: IpcRendererEvent, filename: string) => refreshPage(filename);
+    nodeEventBus.on(EVENTS.PAGES_EDIT_SUCCESS, callback);
+    return () => {
       nodeEventBus.removeListener(EVENTS.PAGES_EDIT_SUCCESS, callback);
     };
   }, []);
 
-  return { request, data, refreshPage, editPage };
+  return { fetchPages, data, refreshPage, editPage };
 };
 
 export default usePages;

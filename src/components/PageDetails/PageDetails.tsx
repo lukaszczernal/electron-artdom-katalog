@@ -93,7 +93,7 @@ const PageDetails: React.FC<Prosp> = ({ page }) => {
       <div className={classes.actions}>
         <Stack spacing="xs">
           <Button onClick={() => refreshPage(page?.svg.file)}>Odśwież</Button>
-          <Button onClick={() => editPage(page?.svg.path)}>Edytuj</Button>
+          <Button onClick={() => editPage(page?.svg.file)}>Edytuj</Button>
         </Stack>
       </div>
     </div>

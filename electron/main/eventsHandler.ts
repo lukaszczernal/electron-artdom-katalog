@@ -31,7 +31,7 @@ const registerEventHandlers = (_: BrowserWindow) => {
   browserEventBus.on(
     EVENTS.PAGES_EDIT,
     (event: IpcMainEvent, filename: string) => {
-      editPage(filename, () => event.reply(EVENTS.PAGES_EDIT_SUCCESS));
+      editPage(filename, () => event.reply(EVENTS.PAGES_EDIT_SUCCESS, filename));
     }
   );
 
