@@ -1,6 +1,7 @@
 import { ActionIcon, Affix, Center, Drawer, FileButton } from "@mantine/core";
 import { IconPlus } from "@tabler/icons";
 import { useEffect, useMemo, useState } from "react";
+import { ItemInterface, ReactSortable } from "react-sortablejs";
 import styles from "./app.module.scss";
 import { PageDetails } from "./components/PageDetails";
 import { Thumbnail } from "./components/Thumbnail";
@@ -21,6 +22,7 @@ const App: React.FC = () => {
 
   const [selectedPageKey, setSelectedPageKey] = useState<string | null>(null);
   const [updateCount, setUpdateCount] = useState(0);
+  const [pageList, setPageList] = useState<ItemInterface[]>([]);
 
   const { data: pages, fetchPages } = usePages();
   const { uploadPage } = useUploadPage();
@@ -38,6 +40,19 @@ const App: React.FC = () => {
     setUpdateCount((prev) => prev + 1);
   }, [pages]);
 
+  useEffect(() => {
+    const sortedList = pages.map((page) => ({
+      ...page,
+      id: page.svg.file,
+    }));
+    setPageList(sortedList);
+    console.log('new page version?')
+  }, [pages]);
+
+  useEffect(() => {
+    console.log('save new page sorting');
+  }, [pageList])
+
   return (
     <>
       <div className={styles.app}>
@@ -45,22 +60,26 @@ const App: React.FC = () => {
           <header className={styles.app__header}>Katalog Produktów</header>
         </Center>
         <ul className={styles.app__list}>
-          {pages?.map((page) => {
-            return (
-              <li className={styles.app__listItem} key={page.svg.file}>
+          <ReactSortable
+            list={pageList}
+            setList={setPageList}
+            className={styles.app__listDraggable}
+          >
+            {pageList.map((page) => (
+              <li key={page.svg.file}>
                 <a
                   className={styles.app__page}
                   onClick={() => setSelectedPageKey(page.svg.file)}
                 >
                   <Thumbnail
-                    disabled={page.status !== 'enable'}
+                    disabled={page.status !== "enable"}
                     src={`png/${page.svg.file}.png?${updateCount}`}
                     width={200}
                   />
                 </a>
               </li>
-            );
-          })}
+            ))}
+          </ReactSortable>
         </ul>
       </div>
 
