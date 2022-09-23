@@ -8,16 +8,16 @@ export const useUpdatePage = () => {
 
   const updatePage = (page: Page) => {
     setIsUpdating(true);
-    nodeEventBus.send(EVENTS.PAGES_UPDATE, page);
+    nodeEventBus.send(EVENTS.PAGE_UPDATE, page);
   };
 
   useEffect(() => {
     const callback = (_: IpcRendererEvent) => setIsUpdating(false);
-    nodeEventBus.on(EVENTS.PAGES_UPDATE_SUCCESS, callback);
-    nodeEventBus.on(EVENTS.PAGES_UPDATE_FAIL, callback);
+    nodeEventBus.on(EVENTS.PAGE_UPDATE_SUCCESS, callback);
+    nodeEventBus.on(EVENTS.PAGE_UPDATE_FAIL, callback);
     return () => {
-      nodeEventBus.removeListener(EVENTS.PAGES_UPDATE_SUCCESS, callback);
-      nodeEventBus.removeListener(EVENTS.PAGES_UPDATE_FAIL, callback);
+      nodeEventBus.removeListener(EVENTS.PAGE_UPDATE_SUCCESS, callback);
+      nodeEventBus.removeListener(EVENTS.PAGE_UPDATE_FAIL, callback);
     };
   }, []);
 

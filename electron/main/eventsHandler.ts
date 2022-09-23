@@ -11,6 +11,7 @@ import {
   editPage,
   updatePage,
   uploadPage,
+  savePages,
 } from "./services/pages";
 
 const registerEventHandlers = (_: BrowserWindow) => {
@@ -20,37 +21,47 @@ const registerEventHandlers = (_: BrowserWindow) => {
   });
 
   browserEventBus.on(
-    EVENTS.PAGES_REFRESH,
+    EVENTS.PAGE_REFRESH,
     (event: IpcMainEvent, filename: string) => {
       refreshPage(filename).on("finish", () =>
-        event.reply(EVENTS.PAGES_REFRESH_SUCCESS, filename)
+        event.reply(EVENTS.PAGE_REFRESH_SUCCESS, filename)
       );
     }
   );
 
   browserEventBus.on(
-    EVENTS.PAGES_EDIT,
+    EVENTS.PAGE_EDIT,
     (event: IpcMainEvent, filename: string) => {
-      editPage(filename, () => event.reply(EVENTS.PAGES_EDIT_SUCCESS, filename));
+      editPage(filename, () => event.reply(EVENTS.PAGE_EDIT_SUCCESS, filename));
     }
   );
 
-  browserEventBus.on(EVENTS.PAGES_UPDATE, (event: IpcMainEvent, page: Page) => {
+  browserEventBus.on(EVENTS.PAGE_UPDATE, (event: IpcMainEvent, page: Page) => {
     updatePage(
       page,
-      () => event.reply(EVENTS.PAGES_UPDATE_SUCCESS),
-      () => event.reply(EVENTS.PAGES_UPDATE_FAIL)
+      () => event.reply(EVENTS.PAGE_UPDATE_SUCCESS),
+      () => event.reply(EVENTS.PAGE_UPDATE_FAIL)
     );
   });
 
   browserEventBus.on(
     EVENTS.PAGE_UPLOAD,
     (event: IpcMainEvent, file: FileInfo) => {
+      console.log("uploadPage");
       uploadPage(
         file,
         (filename: string) => event.reply(EVENTS.PAGE_UPLOAD_SUCCESS, filename),
         () => event.reply(EVENTS.PAGE_UPLOAD_FAIL, file)
       );
+    }
+  );
+
+  browserEventBus.on(
+    EVENTS.PAGES_SAVE,
+    (event: IpcMainEvent, pages: Page[]) => {
+      savePages(pages)
+        .then(() => event.reply(EVENTS.PAGES_SAVE_SUCCESS))
+        .catch(() => event.reply(EVENTS.PAGES_SAVE_FAIL));
     }
   );
 

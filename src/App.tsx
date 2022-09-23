@@ -1,11 +1,13 @@
 import { ActionIcon, Affix, Center, Drawer, FileButton } from "@mantine/core";
 import { IconPlus } from "@tabler/icons";
+import { Page } from "electron/models";
 import { useEffect, useMemo, useState } from "react";
-import { ItemInterface, ReactSortable } from "react-sortablejs";
+import { ReactSortable } from "react-sortablejs";
 import styles from "./app.module.scss";
 import { PageDetails } from "./components/PageDetails";
 import { Thumbnail } from "./components/Thumbnail";
 import { usePages, useUploadPage } from "./services";
+import { Subject, withLatestFrom } from "rxjs";
 
 const App: React.FC = () => {
   // TODO wrap in separate hook
@@ -22,9 +24,13 @@ const App: React.FC = () => {
 
   const [selectedPageKey, setSelectedPageKey] = useState<string | null>(null);
   const [updateCount, setUpdateCount] = useState(0);
-  const [pageList, setPageList] = useState<ItemInterface[]>([]);
+  const [pageList, setPageList] = useState<Page[]>([]);
 
-  const { data: pages, fetchPages } = usePages();
+  const pageListStream = useMemo(() => new Subject<Page[]>(), []);
+
+  const onSortEndStream = useMemo(() => new Subject(), []);
+
+  const { data: pages, fetchPages, savePages } = usePages();
   const { uploadPage } = useUploadPage();
 
   const selectedPage = useMemo(() => {
@@ -46,23 +52,42 @@ const App: React.FC = () => {
       id: page.svg.file,
     }));
     setPageList(sortedList);
-    console.log('new page version?')
   }, [pages]);
 
+  const setSorted = (pages: Page[]) => {
+    pageListStream.next(pages);
+  };
+
+  const onSortEnd = () => {
+    onSortEndStream.next(true);
+  };
+
   useEffect(() => {
-    console.log('save new page sorting');
-  }, [pageList])
+    const stream = pageListStream.subscribe(setPageList);
+
+    const sortStream = onSortEndStream
+      .pipe(withLatestFrom(pageListStream))
+      .subscribe(([_, pages]) => savePages(pages));
+
+    return () => {
+      stream.unsubscribe();
+      sortStream.unsubscribe();
+    };
+  }, []);
 
   return (
     <>
       <div className={styles.app}>
         <Center>
-          <header className={styles.app__header}>Katalog Produktów</header>
+          <header className={styles.app__header}>
+            Katalog Produktów {updateCount}
+          </header>
         </Center>
         <ul className={styles.app__list}>
           <ReactSortable
             list={pageList}
-            setList={setPageList}
+            setList={setSorted}
+            onEnd={onSortEnd}
             className={styles.app__listDraggable}
           >
             {pageList.map((page) => (

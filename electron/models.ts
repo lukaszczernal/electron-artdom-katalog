@@ -1,4 +1,6 @@
-export interface Page {
+import { ItemInterface } from 'react-sortablejs';
+
+export interface Page extends ItemInterface {
   svg: {
     dir: string;
     file: string;

@@ -10,12 +10,16 @@ export const usePages = () => {
     nodeEventBus.send(EVENTS.PAGES_FETCH);
   };
 
+  const savePages = (pages: Page[]) => {
+    nodeEventBus.send(EVENTS.PAGES_SAVE, pages);
+  };
+
   const refreshPage = (filename: string) => {
-    nodeEventBus.send(EVENTS.PAGES_REFRESH, filename);
+    nodeEventBus.send(EVENTS.PAGE_REFRESH, filename);
   };
 
   const editPage = (filename: string) => {
-    nodeEventBus.send(EVENTS.PAGES_EDIT, filename);
+    nodeEventBus.send(EVENTS.PAGE_EDIT, filename);
   };
 
   useEffect(() => {
@@ -28,29 +32,31 @@ export const usePages = () => {
 
   useEffect(() => {
     const callback = (_: IpcRendererEvent) => setData((data) => [...data]);
-    nodeEventBus.on(EVENTS.PAGES_REFRESH_SUCCESS, callback);
+    nodeEventBus.on(EVENTS.PAGE_REFRESH_SUCCESS, callback);
     return () => {
-      nodeEventBus.removeListener(EVENTS.PAGES_REFRESH_SUCCESS, callback);
+      nodeEventBus.removeListener(EVENTS.PAGE_REFRESH_SUCCESS, callback);
     };
   }, []);
 
   useEffect(() => {
     const callback = (_: IpcRendererEvent, filename: string) => refreshPage(filename);
-    nodeEventBus.on(EVENTS.PAGES_EDIT_SUCCESS, callback);
+    nodeEventBus.on(EVENTS.PAGE_EDIT_SUCCESS, callback);
     return () => {
-      nodeEventBus.removeListener(EVENTS.PAGES_EDIT_SUCCESS, callback);
+      nodeEventBus.removeListener(EVENTS.PAGE_EDIT_SUCCESS, callback);
     };
   }, []);
 
   useEffect(() => {
     const callback = (_: IpcRendererEvent) => fetchPages();
-    nodeEventBus.on(EVENTS.PAGES_UPDATE_SUCCESS, callback);
+    nodeEventBus.on(EVENTS.PAGE_UPDATE_SUCCESS, callback);
+    nodeEventBus.on(EVENTS.PAGES_SAVE_SUCCESS, callback);
     return () => {
-      nodeEventBus.removeListener(EVENTS.PAGES_UPDATE_SUCCESS, callback);
+      nodeEventBus.removeListener(EVENTS.PAGE_UPDATE_SUCCESS, callback);
+      nodeEventBus.removeListener(EVENTS.PAGES_SAVE_SUCCESS, callback);
     };
   }, []);
 
-  return { fetchPages, data, refreshPage, editPage };
+  return { fetchPages, data, refreshPage, editPage, savePages };
 };
 
 export default usePages;

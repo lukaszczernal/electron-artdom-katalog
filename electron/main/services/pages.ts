@@ -133,4 +133,4 @@ const uploadPage = (
   });
 };
 
-export { readPages, refreshPage, editPage, updatePage, uploadPage };
+export { readPages, refreshPage, editPage, updatePage, uploadPage, savePages };
