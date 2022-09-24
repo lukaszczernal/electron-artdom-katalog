@@ -1,5 +1,7 @@
 import fs from "fs";
 import { spawn } from "child_process";
+import PDFkit from 'pdfkit';
+import Jimp from "jimp";
 import { FileInfo, Page } from "../../models";
 import svgConverter from "./svgConverter";
 import { findNewFilename } from "./utils";
@@ -133,4 +135,54 @@ const uploadPage = (
   });
 };
 
-export { readPages, refreshPage, editPage, updatePage, uploadPage, savePages };
+const generatePDF = () => {
+  const pages = readPages();
+
+  // 1. Check for which svg we need to generate jpg because its not created
+  const pagesToUpdate = pages.filter(
+    (page) => fs.existsSync(`public/jpg/${page.svg.file}.jpg`) === false
+  );
+
+  // 2. TODO Check for which svg we need to generate jpg because it was updated
+
+  // 3. Generate missing jpg's
+  const imageConvertion = Promise.all(
+    pagesToUpdate.map((page) => {
+      const pngPath = `public/png/${page.svg.file}.png`; // TODO this should be env const
+      const jpgPath = `public/jpg/${page.svg.file}.jpg`; // TODO this should be env const
+      const promise = new Promise((resolve, reject) => {
+        Jimp.read(pngPath, (err, buffer) => {
+          if (err) {
+            reject(`File could not be converted: ${pngPath}`);
+          }
+          buffer.quality(55).write(jpgPath);
+        });
+      });
+      return promise;
+    })
+  );
+
+  // 4. Generate PDF
+  return imageConvertion.then(() => {
+    const pdf = new PDFkit({'size': [631.36, 841.89]});  //CUSTOM VALUES TO FILL OUT IPAD'S 4:3 SCREEN
+    pages.forEach(page => {
+      const jpgPath = `public/jpg/${page.svg.file}.jpg`; // TODO this should be env const
+      pdf.addPage();
+      pdf.image(jpgPath, 20, 0, {'fit': [595, 841]});
+    });
+    pdf.end();
+    pdf.pipe(fs.createWriteStream('public/pdf/katalog.pdf')) // TOOD change to env constant
+  });
+
+  // 5. TODO Remove old PDF's
+};
+
+export {
+  readPages,
+  refreshPage,
+  editPage,
+  updatePage,
+  uploadPage,
+  savePages,
+  generatePDF,
+};

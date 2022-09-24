@@ -12,6 +12,7 @@ import {
   updatePage,
   uploadPage,
   savePages,
+  generatePDF,
 } from "./services/pages";
 
 const registerEventHandlers = (_: BrowserWindow) => {
@@ -47,7 +48,6 @@ const registerEventHandlers = (_: BrowserWindow) => {
   browserEventBus.on(
     EVENTS.PAGE_UPLOAD,
     (event: IpcMainEvent, file: FileInfo) => {
-      console.log("uploadPage");
       uploadPage(
         file,
         (filename: string) => event.reply(EVENTS.PAGE_UPLOAD_SUCCESS, filename),
@@ -64,6 +64,12 @@ const registerEventHandlers = (_: BrowserWindow) => {
         .catch(() => event.reply(EVENTS.PAGES_SAVE_FAIL));
     }
   );
+
+  browserEventBus.on(EVENTS.PDF_GENERATE, (event: IpcMainEvent) => {
+    generatePDF()
+      .then(() => event.reply(EVENTS.PDF_GENERATE_SUCCESS))
+      .catch(() => event.reply(EVENTS.PDF_GENERATE_FAIL));
+  });
 
   // browser.webContents.on("did-finish-load", () => {
   //   browser.webContents.send("smthngForBrowser", "weird");

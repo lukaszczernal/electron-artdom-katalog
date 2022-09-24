@@ -1,5 +1,12 @@
-import { ActionIcon, Affix, Center, Drawer, FileButton } from "@mantine/core";
-import { IconPlus } from "@tabler/icons";
+import {
+  ActionIcon,
+  Affix,
+  Center,
+  Drawer,
+  FileButton,
+  Tooltip,
+} from "@mantine/core";
+import { IconFileExport, IconFilePlus } from "@tabler/icons";
 import { Page } from "electron/models";
 import { useEffect, useMemo, useState } from "react";
 import { ReactSortable } from "react-sortablejs";
@@ -30,7 +37,7 @@ const App: React.FC = () => {
 
   const onSortEndStream = useMemo(() => new Subject(), []);
 
-  const { data: pages, fetchPages, savePages } = usePages();
+  const { data: pages, fetchPages, savePages, generatePDF } = usePages();
   const { uploadPage } = useUploadPage();
 
   const selectedPage = useMemo(() => {
@@ -108,21 +115,37 @@ const App: React.FC = () => {
         </ul>
       </div>
 
-      <Affix position={{ bottom: 40, right: 40 }}>
-        <FileButton onChange={uploadPage} accept="image/svg">
-          {(props) => (
-            <ActionIcon
-              color="blue"
-              size="xl"
-              radius="xl"
-              variant="filled"
-              {...props}
-            >
-              <IconPlus size={18} />
-            </ActionIcon>
-          )}
-        </FileButton>
-      </Affix>
+      <Tooltip label="Generuj PDF" position="left" withArrow>
+        <Affix position={{ bottom: 100, right: 40 }}>
+          <ActionIcon
+            color="blue"
+            size="xl"
+            radius="xl"
+            variant="filled"
+            onClick={generatePDF}
+          >
+            <IconFileExport size={18} />
+          </ActionIcon>
+        </Affix>
+      </Tooltip>
+
+      <Tooltip label="Dodaj nową stronę" position="left" withArrow>
+        <Affix position={{ bottom: 40, right: 40 }}>
+          <FileButton onChange={uploadPage} accept="image/svg">
+            {(props) => (
+              <ActionIcon
+                color="blue"
+                size="xl"
+                radius="xl"
+                variant="filled"
+                {...props}
+              >
+                <IconFilePlus size={18} />
+              </ActionIcon>
+            )}
+          </FileButton>
+        </Affix>
+      </Tooltip>
 
       <Drawer
         opened={Boolean(selectedPageKey)}

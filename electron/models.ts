@@ -1,10 +1,8 @@
-import { ItemInterface } from 'react-sortablejs';
+import { ItemInterface } from "react-sortablejs";
 
 export interface Page extends ItemInterface {
   svg: {
-    dir: string;
     file: string;
-    path: string;
   };
   status: "enable" | "disable";
   refresh?: boolean;
