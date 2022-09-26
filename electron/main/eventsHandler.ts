@@ -16,10 +16,13 @@ import {
 } from "./services/pages";
 
 const registerEventHandlers = (_: BrowserWindow) => {
-  browserEventBus.on(EVENTS.PAGES_FETCH, (event: IpcMainEvent) => {
-    const pages = readPages();
-    event.reply(EVENTS.PAGES_FETCH_SUCCESS, pages);
-  });
+  browserEventBus.on(
+    EVENTS.PAGES_FETCH,
+    (event: IpcMainEvent, sourcePath: string) => {
+      const pages = readPages(sourcePath); // TODO create separete setup method
+      event.reply(EVENTS.PAGES_FETCH_SUCCESS, pages);
+    }
+  );
 
   browserEventBus.on(
     EVENTS.PAGE_REFRESH,

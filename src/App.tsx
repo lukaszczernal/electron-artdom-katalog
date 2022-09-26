@@ -13,8 +13,14 @@ import { ReactSortable } from "react-sortablejs";
 import styles from "./app.module.scss";
 import { PageDetails } from "./components/PageDetails";
 import { Thumbnail } from "./components/Thumbnail";
-import { useGenerateCatalog, usePages, useUploadPage } from "./services";
+import {
+  useGenerateCatalog,
+  usePages,
+  useSourcePath,
+  useUploadPage,
+} from "./services";
 import { Subject, withLatestFrom } from "rxjs";
+import { Settings } from "./components/Settings";
 
 const App: React.FC = () => {
   // TODO wrap in separate hook
@@ -37,7 +43,8 @@ const App: React.FC = () => {
 
   const onSortEndStream = useMemo(() => new Subject(), []);
 
-  const { data: pages, fetchPages, savePages } = usePages();
+  const { sourcePath } = useSourcePath();
+  const { data: pages, fetchPages, savePages } = usePages(sourcePath);
   const { uploadPage } = useUploadPage();
   const { generate, isLoading: isGeneratingCatalog } = useGenerateCatalog();
 
@@ -148,6 +155,8 @@ const App: React.FC = () => {
           </FileButton>
         </Affix>
       </Tooltip>
+
+      <Settings />
 
       <Drawer
         opened={Boolean(selectedPageKey)}

@@ -5,14 +5,29 @@ import Jimp from "jimp";
 import { FileInfo, Page } from "../../models";
 import svgConverter from "./svgConverter";
 import { findNewFilename } from "./utils";
+import { SOURCE_FILE_NAME } from "../../constants";
 
-const PAGE_STORAGE_PATH = "public/data/pages-array.json";
-const PAGE_STORAGE_PATH_BACKUP = "public/data/temp.pages-array.json";
-const SVG_STORAGE_PATH = "public/svg";
-const PNG_STORAGE_PATH = "public/png";
+let SOURCE_PATH = null;
 
-const readPages = (): Page[] => {
-  const res = fs.readFileSync(PAGE_STORAGE_PATH, {
+const getPath = () => ({
+  PAGE_STORAGE_PATH: `${SOURCE_PATH}/data/${SOURCE_FILE_NAME}`,
+  PAGE_STORAGE_PATH_BACKUP: `${SOURCE_PATH}/data/temp.${SOURCE_FILE_NAME}`,
+  SVG_STORAGE_PATH: `${SOURCE_PATH}/svg`,
+  PNG_STORAGE_PATH: `${SOURCE_PATH}/png`,
+});
+
+const readPages = (sourcePath?: string): Page[] => {
+  if (sourcePath) {
+    SOURCE_PATH = sourcePath; // TODO move to separate method
+  }
+  console.log('getPath().PAGE_STORAGE_PATH',  sourcePath,  getPath().PAGE_STORAGE_PATH);
+
+  if (SOURCE_PATH === null) {
+    return []; // TODO add error handling or empty state
+  }
+
+
+  const res = fs.readFileSync(getPath().PAGE_STORAGE_PATH, {
     encoding: "utf8",
   });
   const pages = JSON.parse(res);
@@ -20,11 +35,11 @@ const readPages = (): Page[] => {
 };
 
 const savePrimaryStorage = (pages: Page[]) => {
-  return saveStorage(pages, PAGE_STORAGE_PATH);
+  return saveStorage(pages, getPath().PAGE_STORAGE_PATH);
 };
 
 const saveBackupStorage = (pages: Page[]) => {
-  return saveStorage(pages, PAGE_STORAGE_PATH_BACKUP);
+  return saveStorage(pages, getPath().PAGE_STORAGE_PATH_BACKUP);
 };
 
 const saveStorage = (pages: Page[], path: string) => {
@@ -49,14 +64,14 @@ const savePages = (pages: Page[]): Promise<any> => {
 };
 
 const refreshPage = (filename: string) => {
-  const pngPath = `${PNG_STORAGE_PATH}/${filename}.png`;
-  const svgPath = `${SVG_STORAGE_PATH}/${filename}`;
+  const pngPath = `${getPath().PNG_STORAGE_PATH}/${filename}.png`;
+  const svgPath = `${getPath().SVG_STORAGE_PATH}/${filename}`;
 
   return svgConverter(svgPath, pngPath, { width: 400 });
 };
 
 const editPage = (filename: string, successCallback: () => void) => {
-  const filePath = `${SVG_STORAGE_PATH}/${filename}`;
+  const filePath = `${getPath().SVG_STORAGE_PATH}/${filename}`;
   fs.exists(filePath, function (exists) {
     if (exists) {
       console.log("file exists", filePath);
@@ -87,7 +102,7 @@ const updatePage = (
   successCallback: () => void,
   failCallback: (message: string) => void
 ) => {
-  fs.exists(PAGE_STORAGE_PATH, (exists) => {
+  fs.exists(getPath().PAGE_STORAGE_PATH, (exists) => {
     if (exists) {
       const pages = readPages();
       const pageIndex = pages.findIndex(
@@ -122,7 +137,7 @@ const uploadPage = (
   const filename = findNewFilename(file.name, pages);
 
   var is = fs.createReadStream(file.path);
-  var os = fs.createWriteStream(`${SVG_STORAGE_PATH}/${filename}`);
+  var os = fs.createWriteStream(`${getPath().SVG_STORAGE_PATH}/${filename}`);
 
   is.pipe(os);
 

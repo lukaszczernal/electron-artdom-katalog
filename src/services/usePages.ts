@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 import { BROWSER_EVENTS as EVENTS } from "../../electron/events";
 import { Page } from "../../electron/models";
 
-export const usePages = () => {
+export const usePages = (sourcePath: string) => {
   const [data, setData] = useState<Page[]>([]);
 
   const fetchPages = () => {
-    nodeEventBus.send(EVENTS.PAGES_FETCH);
+    nodeEventBus.send(EVENTS.PAGES_FETCH, sourcePath);
   };
 
   const savePages = (pages: Page[]) => {
