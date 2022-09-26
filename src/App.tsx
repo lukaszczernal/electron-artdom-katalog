@@ -13,7 +13,7 @@ import { ReactSortable } from "react-sortablejs";
 import styles from "./app.module.scss";
 import { PageDetails } from "./components/PageDetails";
 import { Thumbnail } from "./components/Thumbnail";
-import { usePages, useUploadPage } from "./services";
+import { useGenerateCatalog, usePages, useUploadPage } from "./services";
 import { Subject, withLatestFrom } from "rxjs";
 
 const App: React.FC = () => {
@@ -37,8 +37,9 @@ const App: React.FC = () => {
 
   const onSortEndStream = useMemo(() => new Subject(), []);
 
-  const { data: pages, fetchPages, savePages, generatePDF } = usePages();
+  const { data: pages, fetchPages, savePages } = usePages();
   const { uploadPage } = useUploadPage();
+  const { generate, isLoading: isGeneratingCatalog } = useGenerateCatalog();
 
   const selectedPage = useMemo(() => {
     return pages.find((page) => page.svg.file === selectedPageKey);
@@ -118,11 +119,12 @@ const App: React.FC = () => {
       <Tooltip label="Generuj PDF" position="left" withArrow>
         <Affix position={{ bottom: 100, right: 40 }}>
           <ActionIcon
+            loading={isGeneratingCatalog}
             color="blue"
             size="xl"
             radius="xl"
             variant="filled"
-            onClick={generatePDF}
+            onClick={generate}
           >
             <IconFileExport size={18} />
           </ActionIcon>

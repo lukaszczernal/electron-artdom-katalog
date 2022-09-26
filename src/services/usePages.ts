@@ -14,10 +14,6 @@ export const usePages = () => {
     nodeEventBus.send(EVENTS.PAGES_SAVE, pages);
   };
 
-  const generatePDF = () => {
-    nodeEventBus.send(EVENTS.PDF_GENERATE);
-  }
-
   const refreshPage = (filename: string) => {
     nodeEventBus.send(EVENTS.PAGE_REFRESH, filename);
   };
@@ -60,7 +56,7 @@ export const usePages = () => {
     };
   }, []);
 
-  return { fetchPages, data, refreshPage, editPage, savePages, generatePDF };
+  return { fetchPages, data, refreshPage, editPage, savePages };
 };
 
 export default usePages;

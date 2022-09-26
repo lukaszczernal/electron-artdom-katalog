@@ -1,6 +1,6 @@
 import fs from "fs";
 import { spawn } from "child_process";
-import PDFkit from 'pdfkit';
+import PDFkit from "pdfkit";
 import Jimp from "jimp";
 import { FileInfo, Page } from "../../models";
 import svgConverter from "./svgConverter";
@@ -155,23 +155,37 @@ const generatePDF = () => {
           if (err) {
             reject(`File could not be converted: ${pngPath}`);
           }
-          buffer.quality(55).write(jpgPath);
+          buffer.quality(55).write(jpgPath, (error) => {
+            if (error) {
+              reject(`${jpgPath} file could not be created`);
+            }
+          });
+          return resolve(`${jpgPath} generated`);
         });
       });
       return promise;
     })
   );
 
+  // 3.5 Generate new pdf file name with timestamp
+
   // 4. Generate PDF
   return imageConvertion.then(() => {
-    const pdf = new PDFkit({'size': [631.36, 841.89]});  //CUSTOM VALUES TO FILL OUT IPAD'S 4:3 SCREEN
-    pages.forEach(page => {
-      const jpgPath = `public/jpg/${page.svg.file}.jpg`; // TODO this should be env const
-      pdf.addPage();
-      pdf.image(jpgPath, 20, 0, {'fit': [595, 841]});
+    const promise = new Promise((resolve) => {
+      const pdf = new PDFkit({ size: [631.36, 841.89] }); //CUSTOM VALUES TO FILL OUT IPAD'S 4:3 SCREEN
+      pages.forEach((page) => {
+        const jpgPath = `public/jpg/${page.svg.file}.jpg`; // TODO this should be env const
+        pdf.addPage();
+        pdf.image(jpgPath, 20, 0, { fit: [595, 841] });
+      });
+      pdf.end();
+      pdf.pipe(fs.createWriteStream("public/pdf/katalog.pdf")); // TOOD change to env constant
+
+      // TODO add error handling for writing stream
+      return resolve("Catalog generated successfully");
     });
-    pdf.end();
-    pdf.pipe(fs.createWriteStream('public/pdf/katalog.pdf')) // TOOD change to env constant
+
+    return promise;
   });
 
   // 5. TODO Remove old PDF's
