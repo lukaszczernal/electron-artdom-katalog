@@ -7,19 +7,15 @@ const KEY = "CATALOG_SOURCE_PATH";
 const useSourcePath = () => {
   const [path, setPath] = useState<string>("");
 
-  const refreshPath = () => {
+  const regiserPath = () => {
     const refreshedPath = localStorage.getItem(KEY);
     nodeEventBus.send(EVENTS.ENV_REGISTER, refreshedPath);
   };
 
   const setSourcePath = (path: string) => {
     localStorage.setItem(KEY, path);
-    refreshPath();
+    regiserPath();
   };
-
-  useEffect(() => {
-    refreshPath();
-  }, []);
 
   useEffect(() => {
     const callback = (_: IpcRendererEvent, sourcePath: string) =>
@@ -30,7 +26,7 @@ const useSourcePath = () => {
     };
   }, []);
 
-  return { sourcePath: path, setSourcePath };
+  return { sourcePath: path, setSourcePath, regiserPath };
 };
 
 export default useSourcePath;

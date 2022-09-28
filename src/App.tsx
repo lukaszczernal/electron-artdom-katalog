@@ -6,8 +6,8 @@ import {
   FileButton,
   Tooltip,
 } from "@mantine/core";
-import { IconFileExport, IconFilePlus } from "@tabler/icons";
-import { Page } from "electron/models";
+import { IconCheck, IconFileExport, IconFilePlus } from "@tabler/icons";
+import { EventError, Page } from "electron/models";
 import { useEffect, useMemo, useState } from "react";
 import { ReactSortable } from "react-sortablejs";
 import styles from "./app.module.scss";
@@ -21,6 +21,7 @@ import {
 } from "./services";
 import { Subject, withLatestFrom } from "rxjs";
 import { Settings } from "./components/Settings";
+import { showNotification, updateNotification } from "@mantine/notifications";
 
 const App: React.FC = () => {
   // TODO wrap in separate hook
@@ -43,18 +44,19 @@ const App: React.FC = () => {
 
   const onSortEndStream = useMemo(() => new Subject(), []);
 
-  const { sourcePath } = useSourcePath();
-  const { data: pages, fetchPages, savePages } = usePages(sourcePath);
+  const { regiserPath } = useSourcePath();
+  const { data: pages, savePages } = usePages();
   const { uploadPage } = useUploadPage();
-  const { generate, isLoading: isGeneratingCatalog } = useGenerateCatalog();
+  const {
+    generate,
+    isLoading: isGeneratingCatalog,
+    onFinish: onGenerateCatalogFinish,
+    onStart: onGenerateCatalogStart,
+  } = useGenerateCatalog();
 
   const selectedPage = useMemo(() => {
     return pages.find((page) => page.svg.file === selectedPageKey);
   }, [selectedPageKey, pages]);
-
-  useEffect(() => {
-    fetchPages();
-  }, []);
 
   // TODO this refresh method is so lame
   useEffect(() => {
@@ -77,16 +79,54 @@ const App: React.FC = () => {
     onSortEndStream.next(true);
   };
 
-  useEffect(() => {
-    const stream = pageListStream.subscribe(setPageList);
+  const onCatalogGenerateStart = () => {
+    showNotification({
+      id: "catalog-generate",
+      color: "teal",
+      title: "Katalog",
+      message: "Trwa generowanie",
+      disallowClose: true,
+      loading: true,
+    });
+  };
 
-    const sortStream = onSortEndStream
+  const onCatalogGenerateFinish = (error: EventError) => {
+    error
+      ? updateNotification({
+          id: "catalog-generate",
+          title: "Katalog nie został wynegerowany",
+          message: <>{error}</>,
+        })
+      : updateNotification({
+          id: "catalog-generate",
+          icon: <IconCheck />,
+          color: "teal",
+          title: "Katalog",
+          message: "Wynegerowany pomyślnie.",
+        });
+  };
+
+  useEffect(() => {
+    regiserPath();
+    const onGenerateCatalogStartSub = onGenerateCatalogStart.subscribe(
+      onCatalogGenerateStart
+    );
+
+    const onGenerateCatalogFinishSub = onGenerateCatalogFinish.subscribe(
+      onCatalogGenerateFinish
+    );
+
+    const sortedPageListSub = pageListStream.subscribe(setPageList);
+
+    const sortEventSub = onSortEndStream
       .pipe(withLatestFrom(pageListStream))
       .subscribe(([_, pages]) => savePages(pages));
 
     return () => {
-      stream.unsubscribe();
-      sortStream.unsubscribe();
+      onGenerateCatalogFinishSub.unsubscribe();
+      onGenerateCatalogStartSub.unsubscribe();
+      sortedPageListSub.unsubscribe();
+      sortEventSub.unsubscribe();
     };
   }, []);
 

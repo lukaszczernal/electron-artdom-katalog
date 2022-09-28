@@ -13,3 +13,5 @@ export interface FileInfo {
   path: string;
   name: string;
 }
+
+export type EventError = string | null;

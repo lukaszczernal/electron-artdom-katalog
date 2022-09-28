@@ -5,10 +5,9 @@ import Jimp from "jimp";
 import { FileInfo, Page } from "../../models";
 import svgConverter from "./svgConverter";
 import { findNewFilename } from "./utils";
-import { getPath } from './env';
+import { getPath } from "./env";
 
 const readPages = (): Page[] => {
-  console.log('getPath().PAGE_STORAGE_PATH', getPath().PAGE_STORAGE_PATH);
   if (getPath().PAGE_STORAGE_PATH === null) {
     return []; // TODO add error handling or empty state
   }
@@ -137,7 +136,7 @@ const uploadPage = (
 };
 
 const generatePDF = () => {
-  const pages = readPages();
+  const pages = readPages().filter(page => page.status === 'enable');
 
   // 1. Check for which svg we need to generate jpg because its not created
   const pagesToUpdate = pages.filter(
