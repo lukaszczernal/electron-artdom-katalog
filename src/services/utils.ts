@@ -1,4 +1,4 @@
-import { Page } from "electron/models";
+import { Page } from "@/models";
 
 export const pageMetadata = (file: string): Page => ({
   svg: {

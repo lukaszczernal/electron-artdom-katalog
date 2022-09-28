@@ -1,8 +1,8 @@
 import { ipcRenderer as nodeEventBus, IpcRendererEvent } from "electron";
 import { useEffect, useMemo, useState } from "react";
 import { Subject } from "rxjs";
-import { BROWSER_EVENTS as EVENTS } from "../../electron/events";
-import { EventError } from "../../electron/models";
+import { BROWSER_EVENTS as EVENTS } from "../events";
+import { EventError } from "../models";
 
 export const useGenerateCatalog = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);

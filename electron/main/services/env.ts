@@ -1,4 +1,4 @@
-import { SOURCE_FILE_NAME } from "../../constants";
+import { SOURCE_FILE_NAME } from "../../../src/constants";
 
 let SOURCE_PATH = null;
 

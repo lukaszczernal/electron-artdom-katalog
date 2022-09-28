@@ -2,7 +2,7 @@ import fs from "fs";
 import { spawn } from "child_process";
 import PDFkit from "pdfkit";
 import Jimp from "jimp";
-import { FileInfo, Page } from "../../models";
+import { FileInfo, Page } from "../../../src/models";
 import svgConverter from "./svgConverter";
 import { findNewFilename } from "./utils";
 import { getPath } from "./env";

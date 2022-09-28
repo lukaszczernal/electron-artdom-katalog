@@ -3,8 +3,8 @@ import {
   ipcMain as browserEventBus,
   IpcMainEvent,
 } from "electron";
-import { BROWSER_EVENTS as EVENTS } from "../events";
-import { FileInfo, Page } from "../models";
+import { BROWSER_EVENTS as EVENTS } from "../../src/events";
+import { FileInfo, Page } from "../../src/models";
 import { registerSourcePath } from './services/env';
 import {
   readPages,

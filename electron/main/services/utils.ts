@@ -1,4 +1,4 @@
-import { Page } from "../../models";
+import { Page } from "../../../src/models";
 
 const nextFilename = (filename: string) => {
   const filenameParts = filename.split("-");

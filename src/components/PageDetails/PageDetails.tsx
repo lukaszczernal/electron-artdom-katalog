@@ -8,7 +8,7 @@ import {
   Title,
   useMantineTheme,
 } from "@mantine/core";
-import { Page } from "electron/models";
+import { Page } from "../../models";
 import { Keywords } from "../Keywords";
 import { IconPlus } from "@tabler/icons";
 import { useForm } from "@mantine/form";
@@ -26,7 +26,7 @@ const useStyles = createStyles(() => ({
   },
   page: {
     paddingRight: "1rem",
-    width: "34%",
+    width: "300px",
   },
   actions: {
     margin: "0 1rem",

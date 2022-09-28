@@ -1,7 +1,7 @@
 import { ipcRenderer as nodeEventBus, IpcRendererEvent } from "electron";
-import { Page } from "electron/models";
+import { Page } from "@/models";
 import { useEffect, useState } from "react";
-import { BROWSER_EVENTS as EVENTS } from "../../electron/events";
+import { BROWSER_EVENTS as EVENTS } from "../events";
 
 export const useUpdatePage = () => {
   const [isUpdating, setIsUpdating] = useState(false);

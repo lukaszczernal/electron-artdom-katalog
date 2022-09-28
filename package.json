@@ -4,12 +4,12 @@
   "private": true,
   "version": "2.0.0",
   "description": "Vite React Electron boilerplate.",
-  "author": "草鞋没号 <308487730@qq.com>",
+  "author": "Łukasz Czernal",
   "license": "MIT",
   "main": "dist/electron/main/index.js",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && electron-builder"
+    "build": "tsc && vite build && electron-builder -mw"
   },
   "engines": {
     "node": "^14.18.0 || >=16.0.0"

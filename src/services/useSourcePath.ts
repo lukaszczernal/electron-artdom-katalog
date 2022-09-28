@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ipcRenderer as nodeEventBus, IpcRendererEvent } from "electron";
-import { BROWSER_EVENTS as EVENTS } from "../../electron/events";
+import { BROWSER_EVENTS as EVENTS } from "../events";
 
 const KEY = "CATALOG_SOURCE_PATH";
 

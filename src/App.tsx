@@ -7,7 +7,7 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { IconCheck, IconFileExport, IconFilePlus } from "@tabler/icons";
-import { EventError, Page } from "electron/models";
+import { EventError, Page } from "./models";
 import { useEffect, useMemo, useState } from "react";
 import { ReactSortable } from "react-sortablejs";
 import styles from "./app.module.scss";

@@ -1,7 +1,7 @@
 import { ipcRenderer as nodeEventBus, IpcRendererEvent } from "electron";
 import { useEffect, useState } from "react";
-import { BROWSER_EVENTS as EVENTS } from "../../electron/events";
-import { Page } from "../../electron/models";
+import { BROWSER_EVENTS as EVENTS } from "../events";
+import { Page } from "../models";
 
 export const usePages = () => {
   const [data, setData] = useState<Page[]>([]);

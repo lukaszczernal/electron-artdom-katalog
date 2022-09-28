@@ -10,7 +10,7 @@ import {
 } from "@mantine/core";
 import { IconFileDatabase, IconSettings } from "@tabler/icons";
 import { useSourcePath } from "@/services";
-import { SOURCE_FILE_NAME } from "../../../electron/constants";
+import { SOURCE_FILE_NAME } from "../../constants";
 
 const Settings: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
