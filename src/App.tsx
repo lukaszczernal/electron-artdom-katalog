@@ -79,6 +79,7 @@ const App: React.FC = () => {
     onSortEndStream.next(true);
   };
 
+  // TODO move catalog-creation code to separate module
   const onCatalogGenerateStart = () => {
     showNotification({
       id: "catalog-generate",
@@ -146,17 +147,12 @@ const App: React.FC = () => {
             className={styles.app__listDraggable}
           >
             {pageList.map((page) => (
-              <li key={page.svg.file}>
-                <a
-                  className={styles.app__page}
+              <li key={page.svg.file} className={styles.app__page}>
+                <Thumbnail
                   onClick={() => setSelectedPageKey(page.svg.file)}
-                >
-                  <Thumbnail
-                    disabled={page.status !== "enable"}
-                    src={`png/${page.svg.file}.png?${updateCount}`}
-                    width={200}
-                  />
-                </a>
+                  disabled={page.status !== "enable"}
+                  src={`png/${page.svg.file}.png?${updateCount}`}
+                />
               </li>
             ))}
           </ReactSortable>
@@ -206,7 +202,7 @@ const App: React.FC = () => {
         padding="xl"
         size="xl"
       >
-        {selectedPage && <PageDetails page={selectedPage} />}
+        {selectedPage && <PageDetails page={selectedPage} imageUpdate={updateCount} />}
       </Drawer>
     </>
   );

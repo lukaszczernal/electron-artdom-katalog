@@ -3,14 +3,16 @@ import { createStyles } from "@mantine/core";
 interface Props {
   disabled?: boolean;
   src: string;
-  width: number;
+  onClick?: () => void;
 }
 
-const useStyles = createStyles(() => ({
+const useStyles = createStyles((theme) => ({
   thumbnail: {
     display: "block",
     boxShadow: "5px 5px 20px rgba(40, 40, 40, 0.2)",
     transition: "box-shadow 300ms ease-out, transform 300ms ease-out",
+    width: "100%",
+    border: `1px solid ${theme.colors.gray[3]}`,
 
     ["&:hover"]: {
       boxShadow: "8px 13px 35px rgba(0, 0, 0, 0.1)",
@@ -18,24 +20,28 @@ const useStyles = createStyles(() => ({
     },
   },
   disabled: {
-    opacity: 0.3,
-    boxShadow: "1px 1px 3px rgba(40, 40, 40, 0.5)",
+    opacity: 0.5,
+    boxShadow: "none",
+    border: `1px solid ${theme.colors.gray[4]}`,
 
     ["&:hover"]: {
-      boxShadow: "1px 1px 3px rgba(40, 40, 40, 0.5)",
-      transform: 'none',
+      boxShadow: "none",
+      transform: "none",
     },
   },
 }));
 
-const Thumbnail: React.FC<Props> = ({ src, width, disabled }) => {
+const noop = () => {};
+
+const Thumbnail: React.FC<Props> = ({ src, disabled, onClick = noop }) => {
   const { classes } = useStyles();
   return (
-    <img
-      className={`${classes.thumbnail} ${disabled ? classes.disabled : ""}`}
-      src={src}
-      width={width}
-    />
+    <a onClick={onClick}>
+      <img
+        className={`${classes.thumbnail} ${disabled ? classes.disabled : ""}`}
+        src={src}
+      />
+    </a>
   );
 };
 

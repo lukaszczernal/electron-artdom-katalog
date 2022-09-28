@@ -16,6 +16,7 @@ import { Thumbnail } from "../Thumbnail";
 
 interface Prosp {
   page: Page;
+  imageUpdate: any; // TODO need better image refresh method
 }
 
 const useStyles = createStyles(() => ({
@@ -25,6 +26,7 @@ const useStyles = createStyles(() => ({
   },
   page: {
     paddingRight: "1rem",
+    width: "34%",
   },
   actions: {
     margin: "0 1rem",
@@ -39,7 +41,7 @@ const keywordInitialValues = {
   keyword: "",
 };
 
-const PageDetails: React.FC<Prosp> = ({ page }) => {
+const PageDetails: React.FC<Prosp> = ({ page, imageUpdate }) => {
   const { classes } = useStyles();
   const { refreshPage, editPage } = usePages();
   const { updatePage } = useUpdatePage();
@@ -73,8 +75,7 @@ const PageDetails: React.FC<Prosp> = ({ page }) => {
       <div className={classes.page}>
         <Thumbnail
           disabled={page.status !== "enable"}
-          src={`png/${page?.svg.file}.png`}
-          width={280}
+          src={`png/${page?.svg.file}.png?=${imageUpdate}`}
         />
       </div>
       <div className={classes.keywords}>
