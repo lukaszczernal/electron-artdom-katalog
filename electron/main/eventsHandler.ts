@@ -5,6 +5,7 @@ import {
 } from "electron";
 import { BROWSER_EVENTS as EVENTS } from "../events";
 import { FileInfo, Page } from "../models";
+import { registerSourcePath } from './services/env';
 import {
   readPages,
   refreshPage,
@@ -16,10 +17,19 @@ import {
 } from "./services/pages";
 
 const registerEventHandlers = (_: BrowserWindow) => {
+
+  browserEventBus.on(
+    EVENTS.ENV_REGISTER,
+    (event: IpcMainEvent, sourcePath: string) => {
+      registerSourcePath(sourcePath);
+      event.reply(EVENTS.ENV_REGISTER_SUCCESS, sourcePath);
+    }
+  );
+
   browserEventBus.on(
     EVENTS.PAGES_FETCH,
-    (event: IpcMainEvent, sourcePath: string) => {
-      const pages = readPages(sourcePath); // TODO create separete setup method
+    (event: IpcMainEvent) => {
+      const pages = readPages();
       event.reply(EVENTS.PAGES_FETCH_SUCCESS, pages);
     }
   );

@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { ipcRenderer as nodeEventBus, IpcRendererEvent } from "electron";
+import { BROWSER_EVENTS as EVENTS } from "../../electron/events";
 
 const KEY = "CATALOG_SOURCE_PATH";
 
@@ -7,8 +9,7 @@ const useSourcePath = () => {
 
   const refreshPath = () => {
     const refreshedPath = localStorage.getItem(KEY);
-    setPath(refreshedPath || "");
-    return refreshedPath;
+    nodeEventBus.send(EVENTS.ENV_REGISTER, refreshedPath);
   };
 
   const setSourcePath = (path: string) => {
@@ -18,6 +19,15 @@ const useSourcePath = () => {
 
   useEffect(() => {
     refreshPath();
+  }, []);
+
+  useEffect(() => {
+    const callback = (_: IpcRendererEvent, sourcePath: string) =>
+      setPath(sourcePath || "");
+    nodeEventBus.on(EVENTS.ENV_REGISTER_SUCCESS, callback);
+    return () => {
+      nodeEventBus.removeListener(EVENTS.ENV_REGISTER_SUCCESS, callback);
+    };
   }, []);
 
   return { sourcePath: path, setSourcePath };

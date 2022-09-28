@@ -5,27 +5,13 @@ import Jimp from "jimp";
 import { FileInfo, Page } from "../../models";
 import svgConverter from "./svgConverter";
 import { findNewFilename } from "./utils";
-import { SOURCE_FILE_NAME } from "../../constants";
+import { getPath } from './env';
 
-let SOURCE_PATH = null;
-
-const getPath = () => ({
-  PAGE_STORAGE_PATH: `${SOURCE_PATH}/data/${SOURCE_FILE_NAME}`,
-  PAGE_STORAGE_PATH_BACKUP: `${SOURCE_PATH}/data/temp.${SOURCE_FILE_NAME}`,
-  SVG_STORAGE_PATH: `${SOURCE_PATH}/svg`,
-  PNG_STORAGE_PATH: `${SOURCE_PATH}/png`,
-});
-
-const readPages = (sourcePath?: string): Page[] => {
-  if (sourcePath) {
-    SOURCE_PATH = sourcePath; // TODO move to separate method
-  }
-  console.log('getPath().PAGE_STORAGE_PATH',  sourcePath,  getPath().PAGE_STORAGE_PATH);
-
-  if (SOURCE_PATH === null) {
+const readPages = (): Page[] => {
+  console.log('getPath().PAGE_STORAGE_PATH', getPath().PAGE_STORAGE_PATH);
+  if (getPath().PAGE_STORAGE_PATH === null) {
     return []; // TODO add error handling or empty state
   }
-
 
   const res = fs.readFileSync(getPath().PAGE_STORAGE_PATH, {
     encoding: "utf8",

@@ -39,7 +39,8 @@ export const usePages = (sourcePath: string) => {
   }, []);
 
   useEffect(() => {
-    const callback = (_: IpcRendererEvent, filename: string) => refreshPage(filename);
+    const callback = (_: IpcRendererEvent, filename: string) =>
+      refreshPage(filename);
     nodeEventBus.on(EVENTS.PAGE_EDIT_SUCCESS, callback);
     return () => {
       nodeEventBus.removeListener(EVENTS.PAGE_EDIT_SUCCESS, callback);
@@ -53,6 +54,14 @@ export const usePages = (sourcePath: string) => {
     return () => {
       nodeEventBus.removeListener(EVENTS.PAGE_UPDATE_SUCCESS, callback);
       nodeEventBus.removeListener(EVENTS.PAGES_SAVE_SUCCESS, callback);
+    };
+  }, []);
+
+  useEffect(() => {
+    const callback = (_: IpcRendererEvent) => fetchPages();
+    nodeEventBus.on(EVENTS.ENV_REGISTER_SUCCESS, callback);
+    return () => {
+      nodeEventBus.removeListener(EVENTS.ENV_REGISTER_SUCCESS, callback);
     };
   }, []);
 

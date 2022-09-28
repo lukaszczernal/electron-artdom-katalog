@@ -62,7 +62,7 @@ const Settings: React.FC = () => {
           label="Ścieka do pliku z danymi"
           placeholder="Źródło danych"
           radius="xl"
-          value={sourcePath}
+          defaultValue={sourcePath}
           rightSection={
             <FileButton onChange={handleSourceSelection}>
               {(props) => (
