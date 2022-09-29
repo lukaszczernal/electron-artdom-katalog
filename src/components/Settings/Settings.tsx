@@ -1,3 +1,4 @@
+import os from 'os';
 import { useState } from "react";
 import {
   ActionIcon,
@@ -11,6 +12,8 @@ import {
 import { IconFileDatabase, IconSettings } from "@tabler/icons";
 import { useSourcePath } from "@/services";
 import { SOURCE_FILE_NAME } from "@/constants";
+
+const isWindows = os.platform() === 'win32';
 
 const Settings: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -26,7 +29,9 @@ const Settings: React.FC = () => {
   };
 
   const handleSourceSelection = (file: File) => {
-    const pathParts = file.path.split("/"); // TODO check if slash works on windows
+    const pathDivider = isWindows ? '\\' : '/';
+
+    const pathParts = file.path.split(pathDivider);
     const dataStorageSubPath = pathParts.splice(-2);
     const [_, filename] = dataStorageSubPath;
 
@@ -34,7 +39,7 @@ const Settings: React.FC = () => {
       return;
     }
 
-    setSourcePath(pathParts.join("/")); // TODO check if slash works on windows
+    setSourcePath(pathParts.join(pathDivider));
   };
 
   return (
