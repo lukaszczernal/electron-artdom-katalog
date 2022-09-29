@@ -19,6 +19,8 @@ import { join } from 'path'
 import { registerEventHandlers } from './eventsHandler'
 import contextMenu from 'electron-context-menu';
 
+require('update-electron-app')()
+
 contextMenu();
 
 // Disable GPU Acceleration for Windows 7
