@@ -4,7 +4,7 @@ import PDFkit from "pdfkit";
 import Jimp from "jimp";
 import { FileInfo, Page } from "../../../src/models";
 import svgConverter from "./svgConverter";
-import { findNewFilename } from "./utils";
+import { findNewFilename, removeFileAsync } from "./utils";
 import { getPath } from "./env";
 
 const readPages = (): Page[] => {
@@ -102,11 +102,7 @@ const updatePage = (
         pages[pageIndex] = page;
       }
 
-      savePages(pages)
-        .then(successCallback)
-        .catch(() => {
-          failCallback("Saving page storage failed");
-        });
+      savePages(pages).then(successCallback).catch(failCallback);
     } else {
       failCallback("Page storage does not exist");
     }
@@ -136,7 +132,7 @@ const uploadPage = (
 };
 
 const generatePDF = () => {
-  const pages = readPages().filter(page => page.status === 'enable');
+  const pages = readPages().filter((page) => page.status === "enable");
 
   // 1. Check for which svg we need to generate jpg because its not created
   const pagesToUpdate = pages.filter(
@@ -191,6 +187,19 @@ const generatePDF = () => {
   // 5. TODO Remove old PDF's
 };
 
+const removePageImages = (filename: string) =>
+  removeFileAsync(`${getPath().JPG_STORAGE_PATH}/${filename}.jpg`)
+    .then(() =>
+      removeFileAsync(`${getPath().PNG_STORAGE_PATH}/${filename}.png`)
+    )
+    .then(() => removeFileAsync(`${getPath().SVG_STORAGE_PATH}/${filename}`));
+
+const removePage = (filename: string) =>
+  removePageImages(filename).then(() => {
+    const pages = readPages().filter((page) => page.svg.file !== filename);
+    return savePages(pages);
+  });
+
 export {
   readPages,
   refreshPage,
@@ -199,4 +208,5 @@ export {
   uploadPage,
   savePages,
   generatePDF,
+  removePage,
 };

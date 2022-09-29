@@ -1,3 +1,4 @@
+import fs from "fs";
 import { Page } from "../../../src/models";
 
 const nextFilename = (filename: string) => {
@@ -20,4 +21,25 @@ export const findNewFilename = (filename: string, pages: Page[]) => {
 
   const newFilename = nextFilename(filename);
   return findNewFilename(newFilename, pages);
+};
+
+export const removeFileAsync = (path: string) => {
+  const promise = new Promise((resolve, reject) => {
+    if (fs.existsSync(path) === false) {
+      resolve("File already deleted");
+    }
+
+    try {
+      fs.accessSync(path);
+      fs.unlink(path, (err) => {
+        err
+          ? reject(`File could not be deleted: ${err} ${path}`)
+          : resolve(`File deleted successfully: ${path}`);
+      });
+    } catch (err) {
+      reject(`File access denied: ${err} ${path}`);
+    }
+  });
+
+  return promise;
 };

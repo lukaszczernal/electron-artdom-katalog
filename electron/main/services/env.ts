@@ -7,6 +7,7 @@ const getPath = () => ({
   PAGE_STORAGE_PATH_BACKUP: SOURCE_PATH ? `${SOURCE_PATH}/data/temp.${SOURCE_FILE_NAME}` : null,
   SVG_STORAGE_PATH:SOURCE_PATH ? `${SOURCE_PATH}/svg` : null,
   PNG_STORAGE_PATH: SOURCE_PATH ?`${SOURCE_PATH}/png` : null,
+  JPG_STORAGE_PATH: SOURCE_PATH ?`${SOURCE_PATH}/jpg` : null,
 });
 
 const registerSourcePath = (sourcePath?: string) => {

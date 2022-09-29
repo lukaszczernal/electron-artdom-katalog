@@ -22,6 +22,10 @@ export const usePages = () => {
     nodeEventBus.send(EVENTS.PAGE_EDIT, filename);
   };
 
+  const removePage = (filename: string) => {
+    nodeEventBus.send(EVENTS.PAGE_DELETE, filename);
+  }
+
   useEffect(() => {
     const callback = (_: IpcRendererEvent, pages: Page[]) => setData(pages);
     nodeEventBus.on(EVENTS.PAGES_FETCH_SUCCESS, callback);
@@ -51,9 +55,11 @@ export const usePages = () => {
     const callback = (_: IpcRendererEvent) => fetchPages();
     nodeEventBus.on(EVENTS.PAGE_UPDATE_SUCCESS, callback);
     nodeEventBus.on(EVENTS.PAGES_SAVE_SUCCESS, callback);
+    nodeEventBus.on(EVENTS.PAGE_DELETE_SUCCESS, callback);
     return () => {
       nodeEventBus.removeListener(EVENTS.PAGE_UPDATE_SUCCESS, callback);
       nodeEventBus.removeListener(EVENTS.PAGES_SAVE_SUCCESS, callback);
+      nodeEventBus.removeListener(EVENTS.PAGE_DELETE_SUCCESS, callback);
     };
   }, []);
 
@@ -65,7 +71,7 @@ export const usePages = () => {
     };
   }, []);
 
-  return { fetchPages, data, refreshPage, editPage, savePages };
+  return { fetchPages, data, refreshPage, editPage, savePages, removePage };
 };
 
 export default usePages;

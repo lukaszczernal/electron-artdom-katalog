@@ -5,7 +5,7 @@ import {
 } from "electron";
 import { BROWSER_EVENTS as EVENTS } from "../../src/events";
 import { FileInfo, Page } from "../../src/models";
-import { registerSourcePath } from './services/env';
+import { registerSourcePath } from "./services/env";
 import {
   readPages,
   refreshPage,
@@ -14,10 +14,10 @@ import {
   uploadPage,
   savePages,
   generatePDF,
+  removePage,
 } from "./services/pages";
 
 const registerEventHandlers = (_: BrowserWindow) => {
-
   browserEventBus.on(
     EVENTS.ENV_REGISTER,
     (event: IpcMainEvent, sourcePath: string) => {
@@ -26,13 +26,10 @@ const registerEventHandlers = (_: BrowserWindow) => {
     }
   );
 
-  browserEventBus.on(
-    EVENTS.PAGES_FETCH,
-    (event: IpcMainEvent) => {
-      const pages = readPages();
-      event.reply(EVENTS.PAGES_FETCH_SUCCESS, pages);
-    }
-  );
+  browserEventBus.on(EVENTS.PAGES_FETCH, (event: IpcMainEvent) => {
+    const pages = readPages();
+    event.reply(EVENTS.PAGES_FETCH_SUCCESS, pages);
+  });
 
   browserEventBus.on(
     EVENTS.PAGE_REFRESH,
@@ -47,6 +44,15 @@ const registerEventHandlers = (_: BrowserWindow) => {
     EVENTS.PAGE_EDIT,
     (event: IpcMainEvent, filename: string) => {
       editPage(filename, () => event.reply(EVENTS.PAGE_EDIT_SUCCESS, filename));
+    }
+  );
+
+  browserEventBus.on(
+    EVENTS.PAGE_DELETE,
+    (event: IpcMainEvent, filename: string) => {
+      removePage(filename)
+        .then((message) => event.reply(EVENTS.PAGE_DELETE_SUCCESS, message))
+        .catch((message) => event.reply(EVENTS.PAGE_DELETE_FAIL, message));
     }
   );
 

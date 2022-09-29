@@ -43,7 +43,7 @@ const keywordInitialValues = {
 
 const PageDetails: React.FC<Prosp> = ({ page, imageUpdate }) => {
   const { classes } = useStyles();
-  const { refreshPage, editPage } = usePages();
+  const { refreshPage, editPage, removePage } = usePages();
   const { updatePage } = useUpdatePage();
   const theme = useMantineTheme();
 
@@ -108,6 +108,7 @@ const PageDetails: React.FC<Prosp> = ({ page, imageUpdate }) => {
           </Button>
           <Button onClick={() => refreshPage(page?.svg.file)}>Odśwież</Button>
           <Button onClick={() => editPage(page?.svg.file)}>Edytuj</Button>
+          <Button onClick={() => removePage(page?.svg.file)}>Usuń</Button>
         </Stack>
       </div>
     </div>
