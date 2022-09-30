@@ -1,4 +1,4 @@
-import os from 'os';
+import os from "os";
 import { useState } from "react";
 import {
   ActionIcon,
@@ -13,7 +13,7 @@ import { IconFileDatabase, IconSettings } from "@tabler/icons";
 import { useSourcePath } from "@/services";
 import { SOURCE_FILE_NAME } from "@/constants";
 
-const isWindows = os.platform() === 'win32';
+const isWindows = os.platform() === "win32";
 
 const Settings: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -28,10 +28,14 @@ const Settings: React.FC = () => {
     setModalVisible(false);
   };
 
-  const handleSourceSelection = (file: File) => {
-    const pathDivider = isWindows ? '\\' : '/';
+  const handleSourceSelection = (filePath?: string) => {
+    if (!filePath) {
+      return;
+    }
 
-    const pathParts = file.path.split(pathDivider);
+    const pathDivider = isWindows ? "\\" : "/";
+
+    const pathParts = filePath.split(pathDivider);
     const dataStorageSubPath = pathParts.splice(-2);
     const [_, filename] = dataStorageSubPath;
 
@@ -39,7 +43,7 @@ const Settings: React.FC = () => {
       return;
     }
 
-    setSourcePath(pathParts.join(pathDivider));
+    setSourcePath(pathParts.join("/"));
   };
 
   return (
@@ -69,7 +73,7 @@ const Settings: React.FC = () => {
           radius="xl"
           defaultValue={sourcePath}
           rightSection={
-            <FileButton onChange={handleSourceSelection}>
+            <FileButton onChange={(file) => handleSourceSelection(file?.path)}>
               {(props) => (
                 <ActionIcon
                   radius="xl"

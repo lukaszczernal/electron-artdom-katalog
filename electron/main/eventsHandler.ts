@@ -5,6 +5,7 @@ import {
 } from "electron";
 import { BROWSER_EVENTS as EVENTS } from "../../src/events";
 import { FileInfo, Page } from "../../src/models";
+import { setDirectories } from "./services/directories";
 import { registerSourcePath } from "./services/env";
 import {
   readPages,
@@ -22,6 +23,7 @@ const registerEventHandlers = (_: BrowserWindow) => {
     EVENTS.ENV_REGISTER,
     (event: IpcMainEvent, sourcePath: string) => {
       registerSourcePath(sourcePath);
+      setDirectories();
       event.reply(EVENTS.ENV_REGISTER_SUCCESS, sourcePath);
     }
   );

@@ -44,7 +44,7 @@ const App: React.FC = () => {
 
   const onSortEndStream = useMemo(() => new Subject(), []);
 
-  const { regiserPath } = useSourcePath();
+  const { sourcePath, regiserPath } = useSourcePath();
   const { data: pages, savePages } = usePages();
   const { uploadPage } = useUploadPage();
   const {
@@ -151,7 +151,7 @@ const App: React.FC = () => {
                 <Thumbnail
                   onClick={() => setSelectedPageKey(page.svg.file)}
                   disabled={page.status !== "enable"}
-                  src={`png/${page.svg.file}.png?${updateCount}`}
+                  src={`file:///${sourcePath}/png/${page.svg.file}.png?${updateCount}`}
                 />
               </li>
             ))}
