@@ -37,8 +37,6 @@ const appURL = `${server}/app/${process.platform}/${app.getVersion()}`;
 // Win folder: win32;
 // Example: http://artdom.opole.pl/app/win32/2.0.1;
 
-console.log("appURL", appURL);
-
 if (app.isPackaged) {
   setInterval(() => {
     autoUpdater.checkForUpdates();
@@ -50,8 +48,7 @@ if (app.isPackaged) {
       buttons: ["Restart", "Later"],
       title: "Application Update",
       message: process.platform === "win32" ? releaseNotes : releaseName,
-      detail:
-        "A new version has been downloaded. Restart the application to apply the updates.",
+      detail: `A new version has been downloaded. Restart the application to apply the updates. ${appURL}`,
     };
 
     dialog.showMessageBox(dialogOpts).then((returnValue) => {
@@ -60,7 +57,7 @@ if (app.isPackaged) {
   });
 
   autoUpdater.on("error", (message) => {
-    console.error("There was a problem updating the application");
+    console.error(`There was a problem updating the application: ${appURL}`);
     console.error(message);
   });
 }
