@@ -20,7 +20,8 @@ export const usePages = () => {
     nodeEventBus.send(EVENTS.PAGE_EDIT, filename);
   };
 
-  const removePage = (filename: string) => {
+  const removePage = (filename?: string | null) => {
+    if (!filename) return;
     nodeEventBus.send(EVENTS.PAGE_DELETE, filename);
   };
 
