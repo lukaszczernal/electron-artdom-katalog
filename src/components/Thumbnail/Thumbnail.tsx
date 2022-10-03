@@ -1,8 +1,9 @@
-import { createStyles } from "@mantine/core";
+import { createStyles, LoadingOverlay } from "@mantine/core";
 
 interface Props {
   disabled?: boolean;
   src: string;
+  isLoading?: boolean;
   onClick?: () => void;
 }
 
@@ -29,6 +30,9 @@ const useStyles = createStyles((theme) => ({
       transform: "none",
     },
   },
+  link: {
+    position: "relative",
+  },
 }));
 
 const noop = () => {};
@@ -36,12 +40,14 @@ const noop = () => {};
 const Thumbnail: React.FC<Props> = ({
   src,
   disabled,
+  isLoading = false,
   onClick = noop,
 }) => {
   const { classes } = useStyles();
 
   return (
-    <a onClick={onClick}>
+    <a className={classes.link} onClick={onClick}>
+      <LoadingOverlay visible={isLoading} overlayBlur={2} />
       <img
         className={`${classes.thumbnail} ${disabled ? classes.disabled : ""}`}
         src={src}

@@ -2,9 +2,11 @@ import { ipcRenderer as nodeEventBus, IpcRendererEvent } from "electron";
 import { useEffect, useState } from "react";
 import { BROWSER_EVENTS as EVENTS } from "../events";
 import { Page } from "../models";
+import useRefreshPage from './useRefreshPage';
 
 export const usePages = () => {
   const [data, setData] = useState<Page[]>([]);
+  const { refreshPage } = useRefreshPage();
 
   const fetchPages = () => {
     nodeEventBus.send(EVENTS.PAGES_FETCH);
@@ -12,10 +14,6 @@ export const usePages = () => {
 
   const savePages = (pages: Page[]) => {
     nodeEventBus.send(EVENTS.PAGES_SAVE, pages);
-  };
-
-  const refreshPage = (filename: string) => {
-    nodeEventBus.send(EVENTS.PAGE_REFRESH, filename);
   };
 
   const editPage = (filename: string) => {
@@ -71,7 +69,7 @@ export const usePages = () => {
     };
   }, []);
 
-  return { fetchPages, data, refreshPage, editPage, savePages, removePage };
+  return { fetchPages, data, editPage, savePages, removePage };
 };
 
 export default usePages;

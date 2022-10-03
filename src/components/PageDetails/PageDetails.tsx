@@ -1,4 +1,4 @@
-import { usePages, useUpdatePage } from "../../services";
+import { usePages, useRefreshPage, useUpdatePage } from "../../services";
 import {
   ActionIcon,
   Button,
@@ -44,8 +44,9 @@ const keywordInitialValues = {
 
 const PageDetails: React.FC<Prosp> = ({ page, imageUpdate, sourcePath }) => {
   const { classes } = useStyles();
-  const { refreshPage, editPage, removePage } = usePages();
+  const { editPage, removePage } = usePages();
   const { updatePage } = useUpdatePage();
+  const { refreshPage, isLoading } = useRefreshPage();
   const theme = useMantineTheme();
 
   const form = useForm({
@@ -75,6 +76,7 @@ const PageDetails: React.FC<Prosp> = ({ page, imageUpdate, sourcePath }) => {
     <div className={classes.overview}>
       <div className={classes.page}>
         <Thumbnail
+          isLoading={isLoading}
           disabled={page.status !== "enable"}
           src={`safe-file-protocol://${sourcePath}/png/${page?.svg.file}.png?cache=${imageUpdate}`}
         />
@@ -107,7 +109,12 @@ const PageDetails: React.FC<Prosp> = ({ page, imageUpdate, sourcePath }) => {
           <Button onClick={() => togglePage()}>
             {page?.status === "enable" ? "Ukryj" : "Aktywuj"}
           </Button>
-          <Button onClick={() => refreshPage(page?.svg.file)}>Odśwież</Button>
+          <Button
+            onClick={() => refreshPage(page?.svg.file)}
+            disabled={isLoading}
+          >
+            Odśwież
+          </Button>
           <Button onClick={() => editPage(page?.svg.file)}>Edytuj</Button>
           <Button onClick={() => removePage(page?.svg.file)}>Usuń</Button>
         </Stack>
