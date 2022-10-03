@@ -15,15 +15,55 @@ process.env.PUBLIC = app.isPackaged
   : join(process.env.DIST, "../public");
 process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = "true";
 
-import { app, BrowserWindow, shell, ipcMain, protocol } from "electron";
+import {
+  app,
+  BrowserWindow,
+  shell,
+  ipcMain,
+  protocol,
+  autoUpdater,
+  dialog,
+} from "electron";
 import { release } from "os";
 import { join } from "path";
 import { registerEventHandlers } from "./eventsHandler";
 import contextMenu from "electron-context-menu";
 
-require("update-electron-app")();
+// require("update-electron-app")();
 
 contextMenu();
+
+const server = "http://artdom.opole.pl";
+const appURL = `${server}/app/${process.platform}/${app.getVersion()}`;
+// Mac folder: darwin;
+
+console.log("appURL", appURL);
+
+if (app.isPackaged) {
+  setInterval(() => {
+    autoUpdater.checkForUpdates();
+  }, 60000);
+
+  autoUpdater.on("update-downloaded", (_event, releaseNotes, releaseName) => {
+    const dialogOpts = {
+      type: "info",
+      buttons: ["Restart", "Later"],
+      title: "Application Update",
+      message: process.platform === "win32" ? releaseNotes : releaseName,
+      detail:
+        "A new version has been downloaded. Restart the application to apply the updates.",
+    };
+
+    dialog.showMessageBox(dialogOpts).then((returnValue) => {
+      if (returnValue.response === 0) autoUpdater.quitAndInstall();
+    });
+  });
+
+  autoUpdater.on("error", (message) => {
+    console.error("There was a problem updating the application");
+    console.error(message);
+  });
+}
 
 // Disable GPU Acceleration for Windows 7
 if (release().startsWith("6.1")) app.disableHardwareAcceleration();
