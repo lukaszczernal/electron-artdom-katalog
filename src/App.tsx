@@ -151,7 +151,7 @@ const App: React.FC = () => {
                 <Thumbnail
                   onClick={() => setSelectedPageKey(page.svg.file)}
                   disabled={page.status !== "enable"}
-                  src={`file:///${sourcePath}/png/${page.svg.file}.png?${updateCount}`}
+                  src={`safe-file-protocol://${sourcePath}/png/${page.svg.file}.png?cache=${updateCount}`}
                 />
               </li>
             ))}
@@ -202,7 +202,9 @@ const App: React.FC = () => {
         padding="xl"
         size="xl"
       >
-        {selectedPage && <PageDetails page={selectedPage} imageUpdate={updateCount} />}
+        {selectedPage && (
+          <PageDetails page={selectedPage} imageUpdate={updateCount} />
+        )}
       </Drawer>
     </>
   );

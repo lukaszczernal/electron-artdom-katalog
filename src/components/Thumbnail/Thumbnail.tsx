@@ -33,8 +33,13 @@ const useStyles = createStyles((theme) => ({
 
 const noop = () => {};
 
-const Thumbnail: React.FC<Props> = ({ src, disabled, onClick = noop }) => {
+const Thumbnail: React.FC<Props> = ({
+  src,
+  disabled,
+  onClick = noop,
+}) => {
   const { classes } = useStyles();
+
   return (
     <a onClick={onClick}>
       <img
