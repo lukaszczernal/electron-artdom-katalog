@@ -29,13 +29,13 @@ import { join } from "path";
 import { registerEventHandlers } from "./eventsHandler";
 import contextMenu from "electron-context-menu";
 
-// require("update-electron-app")();
-
 contextMenu();
 
 const server = "http://artdom.opole.pl";
 const appURL = `${server}/app/${process.platform}/${app.getVersion()}`;
 // Mac folder: darwin;
+// Win folder: win32;
+// Example: http://artdom.opole.pl/app/win32/2.0.1;
 
 console.log("appURL", appURL);
 
