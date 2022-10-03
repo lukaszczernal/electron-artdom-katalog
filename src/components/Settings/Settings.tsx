@@ -3,14 +3,17 @@ import { useState } from "react";
 import {
   ActionIcon,
   Affix,
+  Button,
+  Divider,
   FileButton,
   Modal,
+  Stack,
   TextInput,
   Tooltip,
   useMantineTheme,
 } from "@mantine/core";
 import { IconFileDatabase, IconSettings } from "@tabler/icons";
-import { useSourcePath } from "@/services";
+import { useSourcePath, useUpdateCheck } from "@/services";
 import { SOURCE_FILE_NAME } from "@/constants";
 
 const isWindows = os.platform() === "win32";
@@ -19,6 +22,7 @@ const Settings: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const theme = useMantineTheme();
   const { sourcePath, setSourcePath } = useSourcePath();
+  const { checkUpdates, feedURL } = useUpdateCheck();
 
   const openSettingsModal = () => {
     setModalVisible(true);
@@ -67,26 +71,35 @@ const Settings: React.FC = () => {
         title="Ustawienia"
         size="xl"
       >
-        <TextInput
-          label="Ścieka do pliku z danymi"
-          placeholder="Źródło danych"
-          radius="xl"
-          defaultValue={sourcePath}
-          rightSection={
-            <FileButton onChange={(file) => handleSourceSelection(file?.path)}>
-              {(props) => (
-                <ActionIcon
-                  radius="xl"
-                  variant="filled"
-                  color={theme.primaryColor}
-                  {...props}
-                >
-                  <IconFileDatabase size={18} />
-                </ActionIcon>
-              )}
-            </FileButton>
-          }
-        />
+        <Stack spacing="xl">
+          <TextInput
+            label="Ścieka do pliku z danymi"
+            placeholder="Źródło danych"
+            radius="xl"
+            defaultValue={sourcePath}
+            rightSection={
+              <FileButton
+                onChange={(file) => handleSourceSelection(file?.path)}
+              >
+                {(props) => (
+                  <ActionIcon
+                    radius="xl"
+                    variant="filled"
+                    color={theme.primaryColor}
+                    {...props}
+                  >
+                    <IconFileDatabase size={18} />
+                  </ActionIcon>
+                )}
+              </FileButton>
+            }
+          />
+
+          <Divider />
+
+          <Button onClick={() => checkUpdates()}>Sprawdź aktualizację</Button>
+          <TextInput value={feedURL} disabled />
+        </Stack>
       </Modal>
     </>
   );

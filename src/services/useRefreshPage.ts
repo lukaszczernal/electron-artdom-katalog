@@ -2,7 +2,7 @@ import { ipcRenderer as nodeEventBus, IpcRendererEvent } from "electron";
 import { useEffect, useState } from "react";
 import { BROWSER_EVENTS as EVENTS } from "../events";
 
-export const usePages = () => {
+export const useRefreshPage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const refreshPage = (filename: string) => {
@@ -22,4 +22,4 @@ export const usePages = () => {
   return { refreshPage, isLoading };
 };
 
-export default usePages;
+export default useRefreshPage;

@@ -1,4 +1,5 @@
 import {
+  autoUpdater,
   BrowserWindow,
   ipcMain as browserEventBus,
   IpcMainEvent,
@@ -90,6 +91,11 @@ const registerEventHandlers = (_: BrowserWindow) => {
     generatePDF()
       .then(() => event.reply(EVENTS.PDF_GENERATE_SUCCESS))
       .catch(() => event.reply(EVENTS.PDF_GENERATE_FAIL));
+  });
+
+  browserEventBus.on(EVENTS.APP_CHECK_UPDATES, (event: IpcMainEvent) => {
+    autoUpdater.checkForUpdates();
+    event.reply(EVENTS.APP_CHECK_UPDATES_SUCCESS, autoUpdater.getFeedURL());
   });
 
   // browser.webContents.on("did-finish-load", () => {

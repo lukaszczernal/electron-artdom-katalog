@@ -2,7 +2,7 @@ import { ipcRenderer as nodeEventBus, IpcRendererEvent } from "electron";
 import { useEffect, useState } from "react";
 import { BROWSER_EVENTS as EVENTS } from "../events";
 import { Page } from "../models";
-import useRefreshPage from './useRefreshPage';
+import useRefreshPage from "./useRefreshPage";
 
 export const usePages = () => {
   const [data, setData] = useState<Page[]>([]);
@@ -22,7 +22,7 @@ export const usePages = () => {
 
   const removePage = (filename: string) => {
     nodeEventBus.send(EVENTS.PAGE_DELETE, filename);
-  }
+  };
 
   useEffect(() => {
     const callback = (_: IpcRendererEvent, pages: Page[]) => setData(pages);
