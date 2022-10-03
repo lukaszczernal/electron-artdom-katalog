@@ -17,6 +17,7 @@ import { Thumbnail } from "../Thumbnail";
 interface Prosp {
   page: Page;
   imageUpdate: any; // TODO need better image refresh method
+  sourcePath: string; // TODO this should be accessible via global context
 }
 
 const useStyles = createStyles(() => ({
@@ -41,7 +42,7 @@ const keywordInitialValues = {
   keyword: "",
 };
 
-const PageDetails: React.FC<Prosp> = ({ page, imageUpdate }) => {
+const PageDetails: React.FC<Prosp> = ({ page, imageUpdate, sourcePath }) => {
   const { classes } = useStyles();
   const { refreshPage, editPage, removePage } = usePages();
   const { updatePage } = useUpdatePage();
@@ -75,7 +76,7 @@ const PageDetails: React.FC<Prosp> = ({ page, imageUpdate }) => {
       <div className={classes.page}>
         <Thumbnail
           disabled={page.status !== "enable"}
-          src={`png/${page?.svg.file}.png?=${imageUpdate}`}
+          src={`safe-file-protocol://${sourcePath}/png/${page?.svg.file}.png?cache=${imageUpdate}`}
         />
       </div>
       <div className={classes.keywords}>

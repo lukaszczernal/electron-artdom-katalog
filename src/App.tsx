@@ -203,7 +203,7 @@ const App: React.FC = () => {
         size="xl"
       >
         {selectedPage && (
-          <PageDetails page={selectedPage} imageUpdate={updateCount} />
+          <PageDetails page={selectedPage} imageUpdate={updateCount} sourcePath={sourcePath} />
         )}
       </Drawer>
     </>
