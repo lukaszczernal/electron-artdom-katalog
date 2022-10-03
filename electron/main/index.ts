@@ -31,16 +31,15 @@ import contextMenu from "electron-context-menu";
 
 contextMenu();
 
-const server = "http://artdom.opole.pl";
-const appURL = `${server}/app/${process.platform}/${app.getVersion()}`;
-// Mac folder: darwin;
-// Win folder: win32;
-// Example: http://artdom.opole.pl/app/win32/2.0.1;
+const server = "https://electron-artdom-katalog-hazel.vercel.app";
+const appURL = `${server}/update/${process.platform}/${app.getVersion()}`;
 
 if (app.isPackaged) {
+  autoUpdater.setFeedURL({ url: appURL });
+
   setInterval(() => {
     autoUpdater.checkForUpdates();
-  }, 60000);
+  }, 30000);
 
   autoUpdater.on("update-downloaded", (_event, releaseNotes, releaseName) => {
     const dialogOpts = {
