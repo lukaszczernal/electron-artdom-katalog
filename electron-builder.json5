@@ -3,7 +3,7 @@
  */
 {
   appId: "ArtdomProductCatalog",
-  productName: "Artdom-Product-Catalog",
+  productName: "ArtdomProductCatalog",
   copyright: "Copyright © 2022 ${author}",
   asar: true,
   directories: {

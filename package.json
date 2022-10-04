@@ -1,9 +1,9 @@
 {
   "name": "electron-vite-react",
-  "productName": "Electron",
+  "productName": "ArtdomProductCatalog",
   "private": true,
-  "version": "2.0.6",
-  "description": "Vite React Electron boilerplate.",
+  "version": "2.0.7",
+  "description": "Artdom Product Catalog - Desktop application.",
   "author": "Łukasz Czernal",
   "license": "MIT",
   "main": "dist/electron/main/index.js",
