@@ -49,6 +49,7 @@
     "electron-context-menu": "^3.5.0",
     "inkscape": "^3.1.1",
     "jimp": "^0.16.2",
+    "node-fetch": "^3.2.10",
     "pdfkit": "^0.13.0",
     "react-sortablejs": "^6.1.4",
     "rxjs": "^7.5.6",

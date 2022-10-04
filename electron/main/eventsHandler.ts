@@ -4,6 +4,7 @@ import {
   ipcMain as browserEventBus,
   IpcMainEvent,
 } from "electron";
+import fetch from "node-fetch";
 import { BROWSER_EVENTS as EVENTS } from "../../src/events";
 import { FileInfo, Page } from "../../src/models";
 import { setDirectories } from "./services/directories";
@@ -98,21 +99,34 @@ const registerEventHandlers = (browser: BrowserWindow) => {
     event.reply(EVENTS.APP_CHECK_UPDATES_SUCCESS, autoUpdater.getFeedURL());
   });
 
-  autoUpdater.on('checking-for-update', () => {
+  autoUpdater.on("checking-for-update", () => {
     browser.webContents.send(EVENTS.APP_CHECK_UPDATES_LOADING);
-  })
+  });
 
-  autoUpdater.on('update-available', () => {
+  autoUpdater.on("update-available", () => {
     browser.webContents.send(EVENTS.APP_CHECK_UPDATES_AVAILABLE);
-  })
+  });
 
-  autoUpdater.on('update-downloaded', () => {
+  autoUpdater.on("update-downloaded", () => {
     browser.webContents.send(EVENTS.APP_CHECK_UPDATES_DOWNLOADED);
-  })
+  });
 
-  autoUpdater.on('update-not-available', () => {
+  autoUpdater.on("update-not-available", () => {
     browser.webContents.send(EVENTS.APP_CHECK_UPDATES_NOT_AVAILABLE);
-  })
+  });
+
+  browserEventBus.on(EVENTS.APP_CHECK_HAZEL, (event: IpcMainEvent) => {
+    const feedURL = autoUpdater.getFeedURL();
+    if (!feedURL) {
+      event.reply(EVENTS.APP_CHECK_HAZEL_FAIL, 'No feedURL provided.');
+      return;
+    }
+
+    fetch(feedURL)
+      .then((res) => res.json())
+      .then((res) => event.reply(EVENTS.APP_CHECK_HAZEL_SUCCESS, res))
+      .catch((err) => event.reply(EVENTS.APP_CHECK_HAZEL_FAIL, err));
+  });
 
   // browser.webContents.on("did-finish-load", () => {
   //   browser.webContents.send("smthngForBrowser", "weird");

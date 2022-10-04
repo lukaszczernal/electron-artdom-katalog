@@ -1,9 +1,11 @@
 import os from "os";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ActionIcon,
   Affix,
+  Anchor,
   Button,
+  Code,
   Divider,
   FileButton,
   Modal,
@@ -15,16 +17,18 @@ import {
 import { IconFileDatabase, IconSettings } from "@tabler/icons";
 import { useSourcePath, useUpdateCheck } from "@/services";
 import { SOURCE_FILE_NAME } from "@/constants";
-import { HazelResponse } from "@/models";
 
 const isWindows = os.platform() === "win32";
 
 const Settings: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [downloadLink, setDownloadLink] = useState<any>();
   const theme = useMantineTheme();
   const { sourcePath, setSourcePath } = useSourcePath();
-  const { checkUpdates, feedURL, updateLog } = useUpdateCheck();
+  const { feedURL, checkHazel, hazelResponse, hazelError } = useUpdateCheck();
+
+  const downloadLink = useMemo(() => {
+    return hazelResponse?.url;
+  }, [hazelResponse]);
 
   const openSettingsModal = () => {
     setModalVisible(true);
@@ -51,14 +55,6 @@ const Settings: React.FC = () => {
 
     setSourcePath(pathParts.join("/"));
   };
-
-  const checkHazel = () => {
-    // if (!feedURL) return;
-    const hazelURL =
-      "https://electron-artdom-katalog-hazel.vercel.app/update/win32/2.0.5";
-    fetch(hazelURL).then((res: Response) => setDownloadLink(res)).catch((err) => setDownloadLink(err));
-  };
-  // }, [feedURL]);
 
   return (
     <>
@@ -107,28 +103,33 @@ const Settings: React.FC = () => {
 
           <Divider />
 
-          <Button onClick={() => checkUpdates()}>Sprawdź aktualizację</Button>
-          <TextInput value={feedURL} disabled />
-          <Button onClick={() => checkHazel()}>Hazel check</Button>
+          <Button onClick={() => checkHazel()}>Sprawdź aktualizację</Button>
+          {feedURL && <Code>{feedURL}</Code>}
 
           {downloadLink && (
-            <>
+            <section>
               <Divider />
-              <p>Dostępna nowa wersja</p>
-              <p>{JSON.stringify(downloadLink)}</p>
-              <a href={downloadLink}>Pobierz</a>
-            </>
+              <p>Dostępna nowa wersja: </p>
+              <Anchor href={downloadLink}>Pobierz</Anchor>
+            </section>
           )}
 
-          <Divider />
+          {hazelError && (
+            <section>
+              <p>Problem z aktualizacją:</p>
+              <Code>{JSON.stringify(hazelError)}</Code>
+            </section>
+          )}
+
+          {/* <Divider />
 
           <h5>Update Log:</h5>
 
           <ul>
-            {updateLog.map((log) => (
-              <li>{log}</li>
+            {updateLog.map((log, index) => (
+              <li key={index}>{log}</li>
             ))}
-          </ul>
+          </ul> */}
         </Stack>
       </Modal>
     </>

@@ -1,3 +1,4 @@
+import { HazelResponse } from '@/models';
 import { ipcRenderer as nodeEventBus, IpcRendererEvent } from "electron";
 import { useEffect, useState } from "react";
 import { BROWSER_EVENTS as EVENTS } from "../events";
@@ -5,9 +6,16 @@ import { BROWSER_EVENTS as EVENTS } from "../events";
 export const useUpdateCheck = () => {
   const [feedURL, setFeedURL] = useState<string>("");
   const [updateLog, setUpdateLog] = useState<string[]>([]);
+  const [hazelResponse, setHazelResponse] = useState<HazelResponse>();
+  const [hazelError, setHazelError] = useState<any>();
 
-  const checkUpdates = () => {
+  // const checkUpdates = () => {
+  //   nodeEventBus.send(EVENTS.APP_CHECK_UPDATES);
+  // };
+
+  const checkHazel = () => {
     nodeEventBus.send(EVENTS.APP_CHECK_UPDATES);
+    nodeEventBus.send(EVENTS.APP_CHECK_HAZEL);
   };
 
   const writeLog = (msg: string) => {
@@ -72,7 +80,23 @@ export const useUpdateCheck = () => {
     };
   }, []);
 
-  return { checkUpdates, feedURL, updateLog };
+  useEffect(() => {
+    const callback = (_: IpcRendererEvent, response: HazelResponse) => setHazelResponse(response);
+    nodeEventBus.on(EVENTS.APP_CHECK_HAZEL_SUCCESS, callback);
+    return () => {
+      nodeEventBus.removeListener(EVENTS.APP_CHECK_HAZEL_SUCCESS, callback);
+    };
+  }, []);
+
+  useEffect(() => {
+    const callback = (_: IpcRendererEvent, error: any) => setHazelError(error);
+    nodeEventBus.on(EVENTS.APP_CHECK_HAZEL_FAIL, callback);
+    return () => {
+      nodeEventBus.removeListener(EVENTS.APP_CHECK_HAZEL_FAIL, callback);
+    };
+  }, []);
+
+  return { checkHazel, feedURL, updateLog, hazelResponse, hazelError };
 };
 
 export default useUpdateCheck;

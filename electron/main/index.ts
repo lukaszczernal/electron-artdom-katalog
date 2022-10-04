@@ -31,15 +31,15 @@ import contextMenu from "electron-context-menu";
 
 contextMenu();
 
-const server = "https://electron-artdom-katalog-hazel.vercel.app";
+const server = "https://electron-artdom-katalog-hazel.vercel.app"; // TODO move to env variables
 const appURL = `${server}/update/${process.platform}/${app.getVersion()}`;
 
 if (app.isPackaged) {
   autoUpdater.setFeedURL({ url: appURL });
 
-  setInterval(() => {
-    autoUpdater.checkForUpdates();
-  }, 30000);
+  // setInterval(() => {
+  //   autoUpdater.checkForUpdates();
+  // }, 30000);
 
   autoUpdater.on("update-downloaded", (_event, releaseNotes, releaseName) => {
     const dialogOpts = {
