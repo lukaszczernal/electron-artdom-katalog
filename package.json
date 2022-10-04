@@ -12,7 +12,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc --build --dry && vite build && electron-builder -mw"
+    "build": "tsc --build --dry && vite build && electron-builder -w"
   },
   "engines": {
     "node": "^14.18.0 || >=16.0.0"

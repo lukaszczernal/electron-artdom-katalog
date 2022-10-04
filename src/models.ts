@@ -15,3 +15,10 @@ export interface FileInfo {
 }
 
 export type EventError = string | null;
+
+export interface HazelResponse {
+  name: string;
+  notes: string;
+  pub_date: string;
+  url: string;
+}

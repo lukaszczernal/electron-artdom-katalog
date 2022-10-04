@@ -1,5 +1,5 @@
 import os from "os";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActionIcon,
   Affix,
@@ -15,14 +15,16 @@ import {
 import { IconFileDatabase, IconSettings } from "@tabler/icons";
 import { useSourcePath, useUpdateCheck } from "@/services";
 import { SOURCE_FILE_NAME } from "@/constants";
+import { HazelResponse } from "@/models";
 
 const isWindows = os.platform() === "win32";
 
 const Settings: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [downloadLink, setDownloadLink] = useState<any>();
   const theme = useMantineTheme();
   const { sourcePath, setSourcePath } = useSourcePath();
-  const { checkUpdates, feedURL } = useUpdateCheck();
+  const { checkUpdates, feedURL, updateLog } = useUpdateCheck();
 
   const openSettingsModal = () => {
     setModalVisible(true);
@@ -49,6 +51,14 @@ const Settings: React.FC = () => {
 
     setSourcePath(pathParts.join("/"));
   };
+
+  const checkHazel = () => {
+    // if (!feedURL) return;
+    const hazelURL =
+      "https://electron-artdom-katalog-hazel.vercel.app/update/win32/2.0.5";
+    fetch(hazelURL).then((res: Response) => setDownloadLink(res)).catch((err) => setDownloadLink(err));
+  };
+  // }, [feedURL]);
 
   return (
     <>
@@ -99,6 +109,26 @@ const Settings: React.FC = () => {
 
           <Button onClick={() => checkUpdates()}>Sprawdź aktualizację</Button>
           <TextInput value={feedURL} disabled />
+          <Button onClick={() => checkHazel()}>Hazel check</Button>
+
+          {downloadLink && (
+            <>
+              <Divider />
+              <p>Dostępna nowa wersja</p>
+              <p>{JSON.stringify(downloadLink)}</p>
+              <a href={downloadLink}>Pobierz</a>
+            </>
+          )}
+
+          <Divider />
+
+          <h5>Update Log:</h5>
+
+          <ul>
+            {updateLog.map((log) => (
+              <li>{log}</li>
+            ))}
+          </ul>
         </Stack>
       </Modal>
     </>

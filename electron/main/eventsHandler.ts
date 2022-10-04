@@ -19,7 +19,7 @@ import {
   removePage,
 } from "./services/pages";
 
-const registerEventHandlers = (_: BrowserWindow) => {
+const registerEventHandlers = (browser: BrowserWindow) => {
   browserEventBus.on(
     EVENTS.ENV_REGISTER,
     (event: IpcMainEvent, sourcePath: string) => {
@@ -97,6 +97,22 @@ const registerEventHandlers = (_: BrowserWindow) => {
     autoUpdater.checkForUpdates();
     event.reply(EVENTS.APP_CHECK_UPDATES_SUCCESS, autoUpdater.getFeedURL());
   });
+
+  autoUpdater.on('checking-for-update', () => {
+    browser.webContents.send(EVENTS.APP_CHECK_UPDATES_LOADING);
+  })
+
+  autoUpdater.on('update-available', () => {
+    browser.webContents.send(EVENTS.APP_CHECK_UPDATES_AVAILABLE);
+  })
+
+  autoUpdater.on('update-downloaded', () => {
+    browser.webContents.send(EVENTS.APP_CHECK_UPDATES_DOWNLOADED);
+  })
+
+  autoUpdater.on('update-not-available', () => {
+    browser.webContents.send(EVENTS.APP_CHECK_UPDATES_NOT_AVAILABLE);
+  })
 
   // browser.webContents.on("did-finish-load", () => {
   //   browser.webContents.send("smthngForBrowser", "weird");
