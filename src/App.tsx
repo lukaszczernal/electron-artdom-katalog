@@ -136,7 +136,7 @@ const App: React.FC = () => {
       <div className={styles.app}>
         <Center>
           <header className={styles.app__header}>
-            Katalog Produktów {updateCount}
+            Katalog Produktów
           </header>
         </Center>
         <ul className={styles.app__list}>
