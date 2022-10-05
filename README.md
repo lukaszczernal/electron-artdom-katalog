@@ -3,4 +3,4 @@
 
 ## Prerequisites
 
-📦 'inkscpae' CLI installed
+📦 'inkscape' CLI installed - version 0.48.4
