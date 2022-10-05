@@ -3,12 +3,12 @@ import { ipcRenderer as nodeEventBus, IpcRendererEvent } from "electron";
 import { BROWSER_EVENTS as EVENTS } from "../events";
 import useUpdatePage from './useUpdatePage';
 import { pageMetadata } from './utils';
-import usePages from './usePages';
+import useRefreshPage from './useRefreshPage';
 
 const useUploadPage = () => {
   const [isUploading, setIsUploading] = useState(false);
   const { updatePage } = useUpdatePage();
-  const { refreshPage } = usePages();
+  const { refreshPage } = useRefreshPage();
 
   const uploadPage = (file: File) => {
     setIsUploading(true);

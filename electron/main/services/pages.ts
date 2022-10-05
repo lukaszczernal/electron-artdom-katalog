@@ -148,7 +148,7 @@ const generatePDF = () => {
       const jpgPath = `public/jpg/${page.svg.file}.jpg`; // TODO this should be env const
       const promise = new Promise((resolve, reject) => {
         Jimp.read(pngPath, (err, buffer) => {
-          if (err) {
+          if (err || !buffer) {
             reject(`File could not be converted: ${pngPath}`);
           }
           buffer.quality(55).write(jpgPath, (error) => {
