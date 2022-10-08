@@ -144,8 +144,8 @@ const generatePDF = () => {
   // 3. Generate missing jpg's
   const imageConvertion = Promise.all(
     pagesToUpdate.map((page) => {
-      const pngPath = `public/png/${page.svg.file}.png`; // TODO this should be env const
-      const jpgPath = `public/jpg/${page.svg.file}.jpg`; // TODO this should be env const
+      const pngPath = `${getPath().PNG_STORAGE_PATH}/${page.svg.file}.png`;
+      const jpgPath = `${getPath().JPG_STORAGE_PATH}/${page.svg.file}.jpg`;
       const promise = new Promise((resolve, reject) => {
         Jimp.read(pngPath, (err, buffer) => {
           if (err || !buffer) {
@@ -156,7 +156,7 @@ const generatePDF = () => {
               reject(`${jpgPath} file could not be created`);
             }
           });
-          return resolve(`${jpgPath} generated`);
+          resolve(`${jpgPath} generated`);
         });
       });
       return promise;
@@ -170,12 +170,13 @@ const generatePDF = () => {
     const promise = new Promise((resolve) => {
       const pdf = new PDFkit({ size: [631.36, 841.89] }); //CUSTOM VALUES TO FILL OUT IPAD'S 4:3 SCREEN
       pages.forEach((page) => {
-        const jpgPath = `public/jpg/${page.svg.file}.jpg`; // TODO this should be env const
+        const jpgPath = `${getPath().JPG_STORAGE_PATH}/${page.svg.file}.jpg`;
         pdf.addPage();
         pdf.image(jpgPath, 20, 0, { fit: [595, 841] });
       });
       pdf.end();
-      pdf.pipe(fs.createWriteStream("public/pdf/katalog.pdf")); // TOOD change to env constant
+      const pdfPath = `${getPath().PDF_STORAGE_PATH}/katalog.pdf`;
+      pdf.pipe(fs.createWriteStream(pdfPath));
 
       // TODO add error handling for writing stream
       return resolve("Catalog generated successfully");

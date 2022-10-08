@@ -8,6 +8,7 @@ const getPath = () => ({
   SVG_STORAGE_PATH:SOURCE_PATH ? `${SOURCE_PATH}/svg` : null,
   PNG_STORAGE_PATH: SOURCE_PATH ?`${SOURCE_PATH}/png` : null,
   JPG_STORAGE_PATH: SOURCE_PATH ?`${SOURCE_PATH}/jpg` : null,
+  PDF_STORAGE_PATH: SOURCE_PATH ?`${SOURCE_PATH}/pdf` : null,
 });
 
 const registerSourcePath = (sourcePath?: string) => {

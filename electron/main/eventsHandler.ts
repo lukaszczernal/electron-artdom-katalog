@@ -91,7 +91,7 @@ const registerEventHandlers = (browser: BrowserWindow) => {
   browserEventBus.on(EVENTS.PDF_GENERATE, (event: IpcMainEvent) => {
     generatePDF()
       .then(() => event.reply(EVENTS.PDF_GENERATE_SUCCESS))
-      .catch(() => event.reply(EVENTS.PDF_GENERATE_FAIL));
+      .catch((error) => event.reply(EVENTS.PDF_GENERATE_FAIL, error));
   });
 
   browserEventBus.on(EVENTS.APP_CHECK_UPDATES, (event: IpcMainEvent) => {
@@ -118,7 +118,7 @@ const registerEventHandlers = (browser: BrowserWindow) => {
   browserEventBus.on(EVENTS.APP_CHECK_HAZEL, (event: IpcMainEvent) => {
     const feedURL = autoUpdater.getFeedURL();
     if (!feedURL) {
-      event.reply(EVENTS.APP_CHECK_HAZEL_FAIL, 'No feedURL provided.');
+      event.reply(EVENTS.APP_CHECK_HAZEL_FAIL, "No feedURL provided.");
       return;
     }
 
