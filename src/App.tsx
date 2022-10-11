@@ -88,6 +88,7 @@ const App: React.FC = () => {
       message: "Trwa generowanie",
       disallowClose: true,
       loading: true,
+      autoClose: false,
     });
   };
 
@@ -97,6 +98,7 @@ const App: React.FC = () => {
           id: "catalog-generate",
           title: "Katalog nie został wynegerowany",
           message: <>{error}</>,
+          autoClose: true,
         })
       : updateNotification({
           id: "catalog-generate",
@@ -104,6 +106,7 @@ const App: React.FC = () => {
           color: "teal",
           title: "Katalog",
           message: "Wynegerowany pomyślnie.",
+          autoClose: true,
         });
   };
 
@@ -113,9 +116,10 @@ const App: React.FC = () => {
       onCatalogGenerateStart
     );
 
-    const onGenerateCatalogFinishSub = onGenerateCatalogFinish.subscribe(
-      onCatalogGenerateFinish
-    );
+    const onGenerateCatalogFinishSub = onGenerateCatalogFinish.subscribe({
+      next: onCatalogGenerateFinish,
+      error: onCatalogGenerateFinish,
+    });
 
     const sortedPageListSub = pageListStream.subscribe(setPageList);
 
@@ -135,9 +139,7 @@ const App: React.FC = () => {
     <>
       <div className={styles.app}>
         <Center>
-          <header className={styles.app__header}>
-            Katalog Produktów
-          </header>
+          <header className={styles.app__header}>Katalog Produktów</header>
         </Center>
         <ul className={styles.app__list}>
           <ReactSortable
@@ -203,7 +205,11 @@ const App: React.FC = () => {
         size="xl"
       >
         {selectedPage && (
-          <PageDetails page={selectedPage} imageUpdate={updateCount} sourcePath={sourcePath} />
+          <PageDetails
+            page={selectedPage}
+            imageUpdate={updateCount}
+            sourcePath={sourcePath}
+          />
         )}
       </Drawer>
     </>

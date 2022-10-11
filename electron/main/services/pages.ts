@@ -131,7 +131,7 @@ const uploadPage = (
   });
 };
 
-const generatePDF = () => {
+const generatePDF = async () => {
   const pages = readPages().filter((page) => page.status === "enable");
 
   // 1. Check for which svg we need to generate jpg because its not created
@@ -142,22 +142,20 @@ const generatePDF = () => {
   // 2. TODO Check for which svg we need to generate jpg because it was updated
 
   // 3. Generate missing jpg's
-  const imageConvertion = Promise.all(
+  await Promise.allSettled(
     pagesToUpdate.map((page) => {
       const pngPath = `${getPath().PNG_STORAGE_PATH}/${page.svg.file}.png`;
       const jpgPath = `${getPath().JPG_STORAGE_PATH}/${page.svg.file}.jpg`;
-      const promise = new Promise((resolve, reject) => {
-        Jimp.read(pngPath, (err, buffer) => {
-          if (err || !buffer) {
-            reject(`File could not be converted: ${pngPath}`);
-          }
-          buffer.quality(55).write(jpgPath, (error) => {
+      const promise = new Promise(async (resolve, reject) => {
+        const pngSource = Jimp.read(pngPath);
+        pngSource.then((source) =>
+          source.quality(55).write(jpgPath, (error) => {
             if (error) {
               reject(`${jpgPath} file could not be created`);
             }
-          });
-          resolve(`${jpgPath} generated`);
-        });
+            resolve(`${jpgPath} generated`);
+          })
+        );
       });
       return promise;
     })
@@ -166,24 +164,22 @@ const generatePDF = () => {
   // 3.5 Generate new pdf file name with timestamp
 
   // 4. Generate PDF
-  return imageConvertion.then(() => {
-    const promise = new Promise((resolve) => {
-      const pdf = new PDFkit({ size: [631.36, 841.89] }); //CUSTOM VALUES TO FILL OUT IPAD'S 4:3 SCREEN
-      pages.forEach((page) => {
-        const jpgPath = `${getPath().JPG_STORAGE_PATH}/${page.svg.file}.jpg`;
-        pdf.addPage();
-        pdf.image(jpgPath, 20, 0, { fit: [595, 841] });
-      });
-      pdf.end();
-      const pdfPath = `${getPath().PDF_STORAGE_PATH}/katalog.pdf`;
-      pdf.pipe(fs.createWriteStream(pdfPath));
-
-      // TODO add error handling for writing stream
-      return resolve("Catalog generated successfully");
+  const promise = new Promise((resolve) => {
+    const pdf = new PDFkit({ size: [631.36, 841.89] }); //CUSTOM VALUES TO FILL OUT IPAD'S 4:3 SCREEN
+    pages.forEach((page) => {
+      const jpgPath = `${getPath().JPG_STORAGE_PATH}/${page.svg.file}.jpg`;
+      pdf.addPage();
+      pdf.image(jpgPath, 20, 0, { fit: [595, 841] });
     });
+    pdf.end();
+    const pdfPath = `${getPath().PDF_STORAGE_PATH}/katalog.pdf`;
+    pdf.pipe(fs.createWriteStream(pdfPath));
 
-    return promise;
+    // TODO add error handling for writing stream
+    return resolve("Catalog generated successfully");
   });
+
+  return promise;
 
   // 5. TODO Remove old PDF's
 };

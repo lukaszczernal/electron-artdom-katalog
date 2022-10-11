@@ -29,7 +29,7 @@ export const useGenerateCatalog = () => {
   useEffect(() => {
     const callback = (_: IpcRendererEvent, error: EventError) => {
       setIsLoading(false);
-      onFinish.next(error);
+      onFinish.error(error);
     };
     nodeEventBus.on(EVENTS.PDF_GENERATE_FAIL, callback);
     return () => {
