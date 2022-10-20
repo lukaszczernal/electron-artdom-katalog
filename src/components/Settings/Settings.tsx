@@ -59,7 +59,7 @@ const Settings: React.FC = () => {
   return (
     <>
       <Tooltip label="Ustawienia" position="right" withArrow>
-        <Affix position={{ bottom: 40, left: 40 }}>
+        <Affix position={{ bottom: 40, left: 16 }}>
           <ActionIcon
             size="xl"
             radius="xl"

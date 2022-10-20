@@ -4,9 +4,11 @@ import {
   Center,
   Drawer,
   FileButton,
+  TextInput,
   Tooltip,
+  useMantineTheme,
 } from "@mantine/core";
-import { IconCheck, IconFileExport, IconFilePlus } from "@tabler/icons";
+import { IconCheck, IconFileExport, IconFilePlus, IconX } from "@tabler/icons";
 import { EventError, Page } from "./models";
 import { useEffect, useMemo, useState } from "react";
 import { ReactSortable } from "react-sortablejs";
@@ -19,9 +21,10 @@ import {
   useSourcePath,
   useUploadPage,
 } from "./services";
-import { Subject, withLatestFrom } from "rxjs";
+import { BehaviorSubject, map, Subject, switchMap, withLatestFrom } from "rxjs";
 import { Settings } from "./components/Settings";
 import { showNotification, updateNotification } from "@mantine/notifications";
+import { useForm } from "@mantine/form";
 
 const App: React.FC = () => {
   // TODO wrap in separate hook
@@ -36,13 +39,21 @@ const App: React.FC = () => {
   //   }
   // })
 
+  const theme = useMantineTheme();
   const [selectedPageKey, setSelectedPageKey] = useState<string | null>(null);
   const [updateCount, setUpdateCount] = useState(0);
   const [pageList, setPageList] = useState<Page[]>([]);
 
-  const pageListStream = useMemo(() => new Subject<Page[]>(), []);
+  const searchPhraseStream = useMemo(() => new BehaviorSubject<string>(""), []);
+  const pageStream = useMemo(() => new BehaviorSubject<Page[]>([]), []);
 
   const onSortEndStream = useMemo(() => new Subject(), []);
+
+  const [searchMode, setSearchMode] = useState(true);
+
+  const form = useForm({
+    initialValues: { searchPhrase: "" },
+  });
 
   const { sourcePath, regiserPath } = useSourcePath();
   const { data: pages, savePages } = usePages();
@@ -68,11 +79,11 @@ const App: React.FC = () => {
       ...page,
       id: page.svg.file,
     }));
-    setPageList(sortedList);
+    pageStream.next(sortedList);
   }, [pages]);
 
   const setSorted = (pages: Page[]) => {
-    pageListStream.next(pages);
+    pageStream.next(pages);
   };
 
   const onSortEnd = () => {
@@ -121,17 +132,37 @@ const App: React.FC = () => {
       error: onCatalogGenerateFinish,
     });
 
-    const sortedPageListSub = pageListStream.subscribe(setPageList);
+    const searchModeSub = searchPhraseStream
+      .pipe(map((phrase) => phrase.length > 0))
+      .subscribe((isDisabled) => setSearchMode(isDisabled));
+
+    const pageSub = pageStream
+      .pipe(
+        switchMap((pages) =>
+          searchPhraseStream.pipe(
+            map((phrase) => phrase.trim()),
+            map((phrase) =>
+              pages
+                .filter((page) =>
+                  page.keywords?.find((keyword) => keyword.match(phrase))
+                )
+                .map((page) => ({ ...page, filtered: true }))
+            )
+          )
+        )
+      )
+      .subscribe(setPageList);
 
     const sortEventSub = onSortEndStream
-      .pipe(withLatestFrom(pageListStream))
+      .pipe(withLatestFrom(pageStream))
       .subscribe(([_, pages]) => savePages(pages));
 
     return () => {
       onGenerateCatalogFinishSub.unsubscribe();
       onGenerateCatalogStartSub.unsubscribe();
-      sortedPageListSub.unsubscribe();
+      searchModeSub.unsubscribe();
       sortEventSub.unsubscribe();
+      pageSub.unsubscribe();
     };
   }, []);
 
@@ -139,10 +170,11 @@ const App: React.FC = () => {
     <>
       <div className={styles.app}>
         <Center>
-          <header className={styles.app__header}>Katalog Produktów</header>
+          <header className={styles.app__header}>Katalog Produktów </header>
         </Center>
         <ul className={styles.app__list}>
           <ReactSortable
+            disabled={searchMode}
             list={pageList}
             setList={setSorted}
             onEnd={onSortEnd}
@@ -161,8 +193,31 @@ const App: React.FC = () => {
         </ul>
       </div>
 
+      <Affix position={{ top: 10, right: 16 }}>
+        <TextInput
+          placeholder="Szukaj..."
+          radius="xl"
+          value={searchPhraseStream.value}
+          onChange={(event) =>
+            searchPhraseStream.next(event.currentTarget.value)
+          }
+          rightSection={
+            searchMode && (
+              <ActionIcon
+                radius="xl"
+                variant="filled"
+                color={theme.primaryColor}
+                onClick={() => searchPhraseStream.next("")}
+              >
+                <IconX size={18} />
+              </ActionIcon>
+            )
+          }
+        />
+      </Affix>
+
       <Tooltip label="Generuj PDF" position="left" withArrow>
-        <Affix position={{ bottom: 100, right: 40 }}>
+        <Affix position={{ bottom: 100, right: 16 }}>
           <ActionIcon
             loading={isGeneratingCatalog}
             color="blue"
@@ -177,7 +232,7 @@ const App: React.FC = () => {
       </Tooltip>
 
       <Tooltip label="Dodaj nową stronę" position="left" withArrow>
-        <Affix position={{ bottom: 40, right: 40 }}>
+        <Affix position={{ bottom: 40, right: 16 }}>
           <FileButton onChange={uploadPage} accept="image/svg">
             {(props) => (
               <ActionIcon

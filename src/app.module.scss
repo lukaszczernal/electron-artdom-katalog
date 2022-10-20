@@ -4,15 +4,15 @@
 
 .app__list {
   list-style: none;
+  padding: 0;
 }
 
 .app__listDraggable {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
-  gap: 0.5rem;
+  gap: 1.4rem;
 }
 
 .app__page {
   display: block;
-  margin: 0  1rem 1rem 0;
 }
