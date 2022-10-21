@@ -144,9 +144,11 @@ const App: React.FC = () => {
             map((phrase) =>
               pages
                 .filter((page) =>
-                  page.keywords?.find((keyword) => keyword.match(phrase))
+                  phrase.length > 0
+                    ? page.keywords?.find((keyword) => keyword.match(phrase))
+                    : true
                 )
-                .map((page) => ({ ...page, filtered: true }))
+                .map((page) => ({ ...page }))
             )
           )
         )
