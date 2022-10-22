@@ -58,7 +58,8 @@ const PageDetails: React.FC<Prosp> = ({ page, imageUpdate, sourcePath }) => {
   });
 
   const addKeyword = (values: typeof keywordInitialValues) => {
-    const keywords = (page.keywords || []).concat(values.keyword);
+    const newKeys = values.keyword.toLowerCase().split(" ");
+    const keywords = (page.keywords || []).concat(newKeys);
     updatePage({ ...page, keywords });
     form.reset();
   };

@@ -145,7 +145,7 @@ const App: React.FC = () => {
               pages
                 .filter((page) =>
                   phrase.length > 0
-                    ? page.keywords?.find((keyword) => keyword.match(phrase))
+                    ? page.keywords?.find((keyword) => keyword.match(phrase.toLowerCase()))
                     : true
                 )
                 .map((page) => ({ ...page }))
