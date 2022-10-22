@@ -24,7 +24,6 @@ import {
 import { BehaviorSubject, map, Subject, switchMap, withLatestFrom } from "rxjs";
 import { Settings } from "./components/Settings";
 import { showNotification, updateNotification } from "@mantine/notifications";
-import { useForm } from "@mantine/form";
 
 const App: React.FC = () => {
   // TODO wrap in separate hook
@@ -50,10 +49,6 @@ const App: React.FC = () => {
   const onSortEndStream = useMemo(() => new Subject(), []);
 
   const [searchMode, setSearchMode] = useState(true);
-
-  const form = useForm({
-    initialValues: { searchPhrase: "" },
-  });
 
   const { sourcePath, regiserPath } = useSourcePath();
   const { data: pages, savePages } = usePages();
@@ -172,7 +167,7 @@ const App: React.FC = () => {
     <>
       <div className={styles.app}>
         <Center>
-          <header className={styles.app__header}>Katalog Produktów </header>
+          <header className={styles.app__header}>Katalog Produktów</header>
         </Center>
         <ul className={styles.app__list}>
           <ReactSortable
