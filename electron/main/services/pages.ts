@@ -52,7 +52,7 @@ const refreshPage = (filename: string) => {
   const pngPath = `${getPath().PNG_STORAGE_PATH}/${filename}.png`;
   const svgPath = `${getPath().SVG_STORAGE_PATH}/${filename}`;
 
-  return svgConverter(svgPath, pngPath, { width: 400 });
+  return svgConverter(svgPath, pngPath);
 };
 
 const editPage = (filename: string, successCallback: () => void) => {
