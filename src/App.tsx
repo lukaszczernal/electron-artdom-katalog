@@ -136,13 +136,20 @@ const App: React.FC = () => {
         switchMap((pages) =>
           searchPhraseStream.pipe(
             map((phrase) => phrase.trim()),
-            map((phrase) =>
+            map((phrase) => (phrase.length > 0 ? phrase.split(" ") : [])),
+            map((phrases) =>
               pages
-                .filter((page) =>
-                  phrase.length > 0
-                    ? page.keywords?.find((keyword) => keyword.match(phrase.toLowerCase()))
-                    : true
-                )
+                .filter((page) => {
+                  const keywords =
+                    (phrases.length > 0 && page.keywords?.join(" ")) || "";
+
+                  return phrases.length > 0
+                    ? phrases.every(
+                        (phrase) =>
+                          keywords.match(phrase.toLowerCase()) !== null
+                      )
+                    : true;
+                })
                 .map((page) => ({ ...page }))
             )
           )
