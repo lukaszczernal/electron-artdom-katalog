@@ -143,10 +143,14 @@ const App: React.FC = () => {
                   const keywords =
                     (phrases.length > 0 && page.keywords?.join(" ")) || "";
 
+                  const filename = page.svg.file.toLowerCase();
+
                   return phrases.length > 0
                     ? phrases.every(
                         (phrase) =>
-                          keywords.match(phrase.toLowerCase()) !== null
+                          `${keywords} ${filename}`.match(
+                            phrase.toLowerCase()
+                          ) !== null
                       )
                     : true;
                 })
