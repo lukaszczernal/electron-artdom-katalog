@@ -21,6 +21,7 @@ interface Prosp {
   page: Page;
   imageUpdate: any; // TODO need better image refresh method
   sourcePath: string; // TODO this should be accessible via global context
+  onPageClick: (page: Page) => void;
 }
 
 const useStyles = createStyles(() => ({
@@ -45,7 +46,12 @@ const keywordInitialValues = {
   keyword: "",
 };
 
-const PageDetails: React.FC<Prosp> = ({ page, imageUpdate, sourcePath }) => {
+const PageDetails: React.FC<Prosp> = ({
+  page,
+  imageUpdate,
+  sourcePath,
+  onPageClick,
+}) => {
   const { classes } = useStyles();
   const [toDelete, setToDelete] = useState<string | null>(null);
   const { editPage, removePage } = usePages();
@@ -88,6 +94,7 @@ const PageDetails: React.FC<Prosp> = ({ page, imageUpdate, sourcePath }) => {
         <div className={classes.page}>
           <Thumbnail
             isLoading={isLoading}
+            onClick={() => onPageClick(page)}
             disabled={page.status !== "enable"}
             src={`safe-file-protocol://${sourcePath}/png/${page?.svg.file}.png?cache=${imageUpdate}`}
           />

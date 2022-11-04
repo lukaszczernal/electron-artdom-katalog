@@ -24,6 +24,7 @@ import {
 import { BehaviorSubject, map, Subject, switchMap, withLatestFrom } from "rxjs";
 import { Settings } from "./components/Settings";
 import { showNotification, updateNotification } from "@mantine/notifications";
+import { PagePreview } from "./components/PagePreview";
 
 const App: React.FC = () => {
   // TODO wrap in separate hook
@@ -42,6 +43,7 @@ const App: React.FC = () => {
   const [selectedPageKey, setSelectedPageKey] = useState<string | null>(null);
   const [updateCount, setUpdateCount] = useState(0);
   const [pageList, setPageList] = useState<Page[]>([]);
+  const [pagePreview, setPagePreview] = useState<Page | null>();
 
   const searchPhraseStream = useMemo(() => new BehaviorSubject<string>(""), []);
   const pageStream = useMemo(() => new BehaviorSubject<Page[]>([]), []);
@@ -114,6 +116,11 @@ const App: React.FC = () => {
           message: "Wynegerowany pomyślnie.",
           autoClose: true,
         });
+  };
+
+  const onPagePreview = (page: Page) => {
+    setSelectedPageKey(null);
+    setPagePreview(page);
   };
 
   useEffect(() => {
@@ -272,9 +279,12 @@ const App: React.FC = () => {
             page={selectedPage}
             imageUpdate={updateCount}
             sourcePath={sourcePath}
+            onPageClick={onPagePreview}
           />
         )}
       </Drawer>
+
+      {pagePreview && <PagePreview selectedPage={pagePreview} pages={pageList} sourcePath={sourcePath} onClickOutside={() => setPagePreview(null)} />}
     </>
   );
 };
