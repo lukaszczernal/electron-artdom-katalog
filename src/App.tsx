@@ -1,6 +1,7 @@
 import {
   ActionIcon,
   Affix,
+  Button,
   Center,
   Drawer,
   FileButton,
@@ -25,6 +26,7 @@ import { BehaviorSubject, map, Subject, switchMap, withLatestFrom } from "rxjs";
 import { Settings } from "./components/Settings";
 import { showNotification, updateNotification } from "@mantine/notifications";
 import { PagePreview } from "./components/PagePreview";
+import { ThumbnailAction } from "./components/ThumbnailAction";
 
 const App: React.FC = () => {
   // TODO wrap in separate hook
@@ -197,11 +199,23 @@ const App: React.FC = () => {
           >
             {pageList.map((page) => (
               <li key={page.svg.file} className={styles.app__page}>
-                <Thumbnail
-                  onClick={() => setSelectedPageKey(page.svg.file)}
-                  disabled={page.status !== "enable"}
-                  src={`safe-file-protocol://${sourcePath}/png/${page.svg.file}.png?cache=${updateCount}`}
-                />
+                <ThumbnailAction
+                  onClick={() => onPagePreview(page)}
+                  actions={
+                    <Button
+                      size="xs"
+                      variant="light"
+                      onClick={() => setSelectedPageKey(page.svg.file)}
+                    >
+                      Szczegóły
+                    </Button>
+                  }
+                >
+                  <Thumbnail
+                    disabled={page.status !== "enable"}
+                    src={`safe-file-protocol://${sourcePath}/png/${page.svg.file}.png?cache=${updateCount}`}
+                  />
+                </ThumbnailAction>
               </li>
             ))}
           </ReactSortable>
@@ -279,12 +293,18 @@ const App: React.FC = () => {
             page={selectedPage}
             imageUpdate={updateCount}
             sourcePath={sourcePath}
-            onPageClick={onPagePreview}
           />
         )}
       </Drawer>
 
-      {pagePreview && <PagePreview selectedPage={pagePreview} pages={pageList} sourcePath={sourcePath} onClickOutside={() => setPagePreview(null)} />}
+      {pagePreview && (
+        <PagePreview
+          selectedPage={pagePreview}
+          pages={pageList}
+          sourcePath={sourcePath}
+          onClickOutside={() => setPagePreview(null)}
+        />
+      )}
     </>
   );
 };
