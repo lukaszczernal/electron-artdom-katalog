@@ -1,11 +1,11 @@
 import fs from "fs";
 import { spawn } from "child_process";
 import PDFkit from "pdfkit";
-import Jimp from "jimp";
 import { FileInfo, Page } from "../../../src/models";
 import svgConverter from "./svgConverter";
 import { findNewFilename, removeFileAsync } from "./utils";
 import { getPath } from "./env";
+import pngConverter from "./pngConverter";
 
 const readPages = (): Page[] => {
   if (getPath().PAGE_STORAGE_PATH === null) {
@@ -49,10 +49,26 @@ const savePages = (pages: Page[]): Promise<any> => {
 };
 
 const refreshPage = (filename: string) => {
-  const pngPath = `${getPath().PNG_STORAGE_PATH}/${filename}.png`;
-  const svgPath = `${getPath().SVG_STORAGE_PATH}/${filename}`;
+  const promise = new Promise<string>((resolve) => {
+    const pngPath = `${getPath().PNG_STORAGE_PATH}/${filename}.png`;
+    const svgPath = `${getPath().SVG_STORAGE_PATH}/${filename}`;
+    const jpgPath = `${getPath().JPG_STORAGE_PATH}/${filename}.jpg`;
 
-  return svgConverter(svgPath, pngPath);
+    return svgConverter(svgPath, pngPath).on("finish", () =>
+      pngConverter(pngPath, jpgPath).then(() => resolve(filename))
+    );
+  });
+  return promise;
+};
+
+const refreshAllPages = async (pages: Page[]) => {
+  let i = 0;
+  while (i < pages.length - 1) {
+    await refreshPage(pages[i].svg.file);
+    i++;
+  }
+
+  return Promise.resolve();
 };
 
 const editPage = (filename: string, successCallback: () => void) => {
@@ -146,18 +162,7 @@ const generatePDF = async () => {
     pagesToUpdate.map((page) => {
       const pngPath = `${getPath().PNG_STORAGE_PATH}/${page.svg.file}.png`;
       const jpgPath = `${getPath().JPG_STORAGE_PATH}/${page.svg.file}.jpg`;
-      const promise = new Promise(async (resolve, reject) => {
-        const pngSource = Jimp.read(pngPath);
-        pngSource.then((source) =>
-          source.quality(55).write(jpgPath, (error) => {
-            if (error) {
-              reject(`${jpgPath} file could not be created`);
-            }
-            resolve(`${jpgPath} generated`);
-          })
-        );
-      });
-      return promise;
+      return pngConverter(pngPath, jpgPath);
     })
   );
 
@@ -200,6 +205,7 @@ const removePage = (filename: string) =>
 export {
   readPages,
   refreshPage,
+  refreshAllPages,
   editPage,
   updatePage,
   uploadPage,

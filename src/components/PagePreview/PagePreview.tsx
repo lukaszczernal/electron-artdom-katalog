@@ -49,7 +49,7 @@ const PagePreview: React.FC<Props> = ({
           return (
             <SwiperSlide key={page.svg.file} className={classes.slide}>
               <Thumbnail
-                src={`safe-file-protocol://${sourcePath}/png/${page.svg.file}.png`}
+                src={`safe-file-protocol://${sourcePath}/jpg/${page.svg.file}.jpg`}
               />
             </SwiperSlide>
           );

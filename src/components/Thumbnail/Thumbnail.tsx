@@ -10,7 +10,7 @@ const useStyles = createStyles((theme) => ({
   thumbnail: {
     boxShadow: "5px 5px 20px rgba(40, 40, 40, 0.2)",
     transition: "box-shadow 300ms ease-out, transform 300ms ease-out",
-    height: "100%",
+    maxHeight: "100%",
     maxWidth: "100%",
     border: `1px solid ${theme.colors.gray[3]}`,
   },

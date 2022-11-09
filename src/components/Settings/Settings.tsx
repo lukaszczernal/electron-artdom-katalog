@@ -5,6 +5,7 @@ import {
   Affix,
   Anchor,
   Button,
+  Center,
   Code,
   Divider,
   FileButton,
@@ -15,7 +16,12 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { IconFileDatabase, IconSettings } from "@tabler/icons";
-import { useSourcePath, useUpdateCheck } from "@/services";
+import {
+  usePages,
+  useRefreshPage,
+  useSourcePath,
+  useUpdateCheck,
+} from "@/services";
 import { SOURCE_FILE_NAME } from "@/constants";
 
 const isWindows = os.platform() === "win32";
@@ -25,6 +31,8 @@ const Settings: React.FC = () => {
   const theme = useMantineTheme();
   const { sourcePath, setSourcePath } = useSourcePath();
   const { feedURL, checkHazel, hazelResponse, hazelError } = useUpdateCheck();
+  const { data: pages } = usePages();
+  const { refreshAll, isAllLoading } = useRefreshPage();
 
   const downloadLink = useMemo(() => {
     return hazelResponse?.url;
@@ -56,6 +64,10 @@ const Settings: React.FC = () => {
     setSourcePath(pathParts.join("/"));
   };
 
+  const refreshPreviews = () => {
+    refreshAll(pages);
+  };
+
   return (
     <>
       <Tooltip label="Ustawienia" position="right" withArrow>
@@ -79,7 +91,7 @@ const Settings: React.FC = () => {
       >
         <Stack spacing="xl">
           <TextInput
-            label="Ścieka do pliku z danymi"
+            label="Ścieka do pliku z danymi (pages-array.json)"
             placeholder="Źródło danych"
             radius="xl"
             defaultValue={sourcePath}
@@ -103,7 +115,17 @@ const Settings: React.FC = () => {
 
           <Divider />
 
-          <Button onClick={() => checkHazel()}>Sprawdź aktualizację</Button>
+          <Center>
+            <Button onClick={refreshPreviews} loading={isAllLoading}>
+              Odśwież podgląd stron
+            </Button>
+          </Center>
+
+          <Divider />
+
+          <Center>
+            <Button onClick={() => checkHazel()}>Sprawdź aktualizację</Button>
+          </Center>
           {feedURL && <Code>{feedURL}</Code>}
 
           {downloadLink && (

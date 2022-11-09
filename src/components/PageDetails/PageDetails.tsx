@@ -90,7 +90,7 @@ const PageDetails: React.FC<Prosp> = ({ page, imageUpdate, sourcePath }) => {
           <Thumbnail
             isLoading={isLoading}
             disabled={page.status !== "enable"}
-            src={`safe-file-protocol://${sourcePath}/png/${page?.svg.file}.png?cache=${imageUpdate}`}
+            src={`safe-file-protocol://${sourcePath}/jpg/${page?.svg.file}.jpg?cache=${imageUpdate}`}
           />
         </div>
         <div className={classes.keywords}>

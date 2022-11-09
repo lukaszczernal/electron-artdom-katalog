@@ -12,6 +12,7 @@ import { registerSourcePath } from "./services/env";
 import {
   readPages,
   refreshPage,
+  refreshAllPages,
   editPage,
   updatePage,
   uploadPage,
@@ -38,8 +39,17 @@ const registerEventHandlers = (browser: BrowserWindow) => {
   browserEventBus.on(
     EVENTS.PAGE_REFRESH,
     (event: IpcMainEvent, filename: string) => {
-      refreshPage(filename).on("finish", () =>
-        event.reply(EVENTS.PAGE_REFRESH_SUCCESS, filename)
+      refreshPage(filename).then((file) =>
+        event.reply(EVENTS.PAGE_REFRESH_SUCCESS, file)
+      );
+    }
+  );
+
+  browserEventBus.on(
+    EVENTS.PAGE_REFRESH_ALL,
+    (event: IpcMainEvent, pages: Page[]) => {
+      refreshAllPages(pages).then(() =>
+        event.reply(EVENTS.PAGE_REFRESH_ALL_SUCCESS)
       );
     }
   );
