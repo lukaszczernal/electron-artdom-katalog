@@ -53,9 +53,12 @@ const refreshPage = (filename: string) => {
     const pngPath = `${getPath().PNG_STORAGE_PATH}/${filename}.png`;
     const svgPath = `${getPath().SVG_STORAGE_PATH}/${filename}`;
     const jpgPath = `${getPath().JPG_STORAGE_PATH}/${filename}.jpg`;
+    const thumbPath = `${getPath().JPG_STORAGE_PATH}/thumb/${filename}.jpg`;
 
     return svgConverter(svgPath, pngPath).on("finish", () =>
-      pngConverter(pngPath, jpgPath).then(() => resolve(filename))
+      pngConverter(pngPath, jpgPath)
+        .then(() => pngConverter(pngPath, thumbPath, { thumbnail: true }))
+        .then(() => resolve(filename))
     );
   });
   return promise;

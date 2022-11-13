@@ -213,7 +213,7 @@ const App: React.FC = () => {
                 >
                   <Thumbnail
                     disabled={page.status !== "enable"}
-                    src={`safe-file-protocol://${sourcePath}/jpg/${page.svg.file}.jpg?cache=${updateCount}`}
+                    src={`safe-file-protocol://${sourcePath}/jpg/thumb/${page.svg.file}.jpg?cache=${updateCount}`}
                   />
                 </ThumbnailAction>
               </li>
