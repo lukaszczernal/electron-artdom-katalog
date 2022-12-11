@@ -1,12 +1,19 @@
 import { ItemInterface } from "react-sortablejs";
 
+export enum PageStatus {
+  enable = "enable",
+  disable = "disable",
+}
+
 export interface Page extends ItemInterface {
+  id: string,
   svg: {
     file: string;
   };
-  status: "enable" | "disable";
+  status: PageStatus;
   refresh?: boolean;
   keywords?: string[];
+  version?: number;
 }
 
 export interface FileInfo {

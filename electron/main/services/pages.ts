@@ -118,7 +118,10 @@ const updatePage = (
         pages.push(page);
       } else {
         // Update existing page
-        pages[pageIndex] = page;
+        pages[pageIndex] = {
+          ...page,
+          version: page.version ? page.version + 1 : 1,
+        };
       }
 
       savePages(pages).then(successCallback).catch(failCallback);

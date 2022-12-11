@@ -33,6 +33,7 @@ const Thumbnail: React.FC<Props> = ({ src, disabled, isLoading = false }) => {
     <>
       <LoadingOverlay visible={isLoading} overlayBlur={2} />
       <img
+        loading="lazy"
         className={`${classes.thumbnail} ${disabled ? classes.disabled : ""}`}
         src={src}
       />

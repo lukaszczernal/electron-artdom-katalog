@@ -1,12 +1,15 @@
-import { createStyles } from "@mantine/core";
+import { Page } from "@/models";
+import { Button, createStyles } from "@mantine/core";
+import { useCallback } from 'react';
 
 interface Props {
-  onClick?: () => void;
+  page?: Page;
+  mainAction: (pageId: string) => void;
+  secondaryAction: (page: Page) => void;
   children: React.ReactElement;
-  actions?: React.ReactElement;
 }
 
-const useStyles = createStyles((theme, _params, getRef) => ({
+const useStyles = createStyles((theme, _params, _getRef) => ({
   wrapper: {
     // ref: getRef("link"),
     position: "relative",
@@ -31,7 +34,7 @@ const useStyles = createStyles((theme, _params, getRef) => ({
     bottom: "1rem",
     left: 0,
     top: 0,
-    rigth: 0,
+    right: 0,
     cursor: "pointer",
   },
   actions: {
@@ -44,21 +47,28 @@ const useStyles = createStyles((theme, _params, getRef) => ({
   },
 }));
 
-const noop = () => {};
-
 const ThumbnailAction: React.FC<Props> = ({
-  actions,
-  onClick = noop,
+  mainAction,
+  secondaryAction,
   children,
+  page,
 }) => {
   const { classes } = useStyles();
 
+  // TODO move callbacks outside?
+  const onMainAction = useCallback(() => page && mainAction(page.id), [page]);
+  const onSecondaryAction = useCallback(() => page && secondaryAction(page), [page]);
+
   return (
     <div className={classes.wrapper}>
-      <a className={classes.link} onClick={onClick}>
+      <a className={classes.link} onClick={onMainAction}>
         {children}
       </a>
-      {actions && <span className={classes.actions}>{actions}</span>}
+      <span className={classes.actions}>
+        <Button size="xs" variant="light" onClick={onSecondaryAction}>
+          Szczegóły
+        </Button>
+      </span>
     </div>
   );
 };

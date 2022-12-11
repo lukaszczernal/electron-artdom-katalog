@@ -1,7 +1,6 @@
 import {
   ActionIcon,
   Affix,
-  Button,
   Center,
   Drawer,
   FileButton,
@@ -10,52 +9,33 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { IconCheck, IconFileExport, IconFilePlus, IconX } from "@tabler/icons";
-import { EventError, Page } from "./models";
-import { useEffect, useMemo, useState } from "react";
-import { ReactSortable } from "react-sortablejs";
-import styles from "./app.module.scss";
-import { PageDetails } from "./components/PageDetails";
-import { Thumbnail } from "./components/Thumbnail";
-import {
-  useGenerateCatalog,
-  usePages,
-  useSourcePath,
-  useUploadPage,
-} from "./services";
-import { BehaviorSubject, map, Subject, switchMap, withLatestFrom } from "rxjs";
+import { EventError } from "./models";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useGenerateCatalog, useUploadPage } from "./services";
+import { ReplaySubject } from "rxjs";
 import { Settings } from "./components/Settings";
 import { showNotification, updateNotification } from "@mantine/notifications";
+
+import styles from "./app.module.scss";
+import { PageList } from "./components/PageList";
+import { PagesContext } from "./services/context/pagesContext";
+import { SourcePathContext } from "./services/context/sourcePathContext";
+import { PageDetails } from "./components/PageDetails";
 import { PagePreview } from "./components/PagePreview";
-import { ThumbnailAction } from "./components/ThumbnailAction";
 
 const App: React.FC = () => {
-  // TODO wrap in separate hook
-  // useEffect(() => {
-  //   //@ts-ignore
-  //   const eventSub: Subscription = window.electron?.events.subscribe((r) => {
-  //     console.log('subscribed callback', r)
-  //   })
-
-  //   return () => {
-  //     eventSub?.unsubscribe?.();
-  //   }
-  // })
-
   const theme = useMantineTheme();
-  const [selectedPageKey, setSelectedPageKey] = useState<string | null>(null);
-  const [updateCount, setUpdateCount] = useState(0);
-  const [pageList, setPageList] = useState<Page[]>([]);
-  const [pagePreview, setPagePreview] = useState<Page | null>();
+  const [pagePreview, setPagePreview] = useState<string | null>();
 
-  const searchPhraseStream = useMemo(() => new BehaviorSubject<string>(""), []);
-  const pageStream = useMemo(() => new BehaviorSubject<Page[]>([]), []);
+  const searchPhraseStream = useMemo(() => new ReplaySubject<string>(), []);
 
-  const onSortEndStream = useMemo(() => new Subject(), []);
+  const [searchMode, setSearchMode] = useState(false);
 
-  const [searchMode, setSearchMode] = useState(true);
+  const { sourcePath, regiserPath } = useContext(SourcePathContext);
+  const { pageIds, fetchPages, searchPages } = useContext(PagesContext);
 
-  const { sourcePath, regiserPath } = useSourcePath();
-  const { data: pages, savePages } = usePages();
+  const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
+
   const { uploadPage } = useUploadPage();
   const {
     generate,
@@ -63,31 +43,6 @@ const App: React.FC = () => {
     onFinish: onGenerateCatalogFinish,
     onStart: onGenerateCatalogStart,
   } = useGenerateCatalog();
-
-  const selectedPage = useMemo(() => {
-    return pages.find((page) => page.svg.file === selectedPageKey);
-  }, [selectedPageKey, pages]);
-
-  // TODO this refresh method is so lame
-  useEffect(() => {
-    setUpdateCount((prev) => prev + 1);
-  }, [pages]);
-
-  useEffect(() => {
-    const sortedList = pages.map((page) => ({
-      ...page,
-      id: page.svg.file,
-    }));
-    pageStream.next(sortedList);
-  }, [pages]);
-
-  const setSorted = (pages: Page[]) => {
-    pageStream.next(pages);
-  };
-
-  const onSortEnd = () => {
-    onSortEndStream.next(true);
-  };
 
   // TODO move catalog-creation code to separate module
   const onCatalogGenerateStart = () => {
@@ -120,13 +75,19 @@ const App: React.FC = () => {
         });
   };
 
-  const onPagePreview = (page: Page) => {
-    setSelectedPageKey(null);
-    setPagePreview(page);
-  };
+  const onPagePreview = useCallback(setPagePreview, []);
 
   useEffect(() => {
-    regiserPath();
+    if (sourcePath) {
+      fetchPages();
+    }
+  }, [sourcePath, fetchPages]);
+
+  useEffect(() => {
+    regiserPath?.();
+  }, [regiserPath]);
+
+  useEffect(() => {
     const onGenerateCatalogStartSub = onGenerateCatalogStart.subscribe(
       onCatalogGenerateStart
     );
@@ -137,49 +98,16 @@ const App: React.FC = () => {
     });
 
     const searchModeSub = searchPhraseStream
-      .pipe(map((phrase) => phrase.length > 0))
-      .subscribe((isDisabled) => setSearchMode(isDisabled));
-
-    const pageSub = pageStream
-      .pipe(
-        switchMap((pages) =>
-          searchPhraseStream.pipe(
-            map((phrase) => phrase.trim()),
-            map((phrase) => (phrase.length > 0 ? phrase.split(" ") : [])),
-            map((phrases) =>
-              pages
-                .filter((page) => {
-                  const keywords =
-                    (phrases.length > 0 && page.keywords?.join(" ")) || "";
-
-                  const filename = page.svg.file.toLowerCase();
-
-                  return phrases.length > 0
-                    ? phrases.every(
-                        (phrase) =>
-                          `${keywords} ${filename}`.match(
-                            phrase.toLowerCase()
-                          ) !== null
-                      )
-                    : true;
-                })
-                .map((page) => ({ ...page }))
-            )
-          )
-        )
-      )
-      .subscribe(setPageList);
-
-    const sortEventSub = onSortEndStream
-      .pipe(withLatestFrom(pageStream))
-      .subscribe(([_, pages]) => savePages(pages));
+      // TODO delay
+      .subscribe((phrase) => {
+        setSearchMode(phrase.length > 0);
+        searchPages(phrase);
+      });
 
     return () => {
       onGenerateCatalogFinishSub.unsubscribe();
       onGenerateCatalogStartSub.unsubscribe();
       searchModeSub.unsubscribe();
-      sortEventSub.unsubscribe();
-      pageSub.unsubscribe();
     };
   }, []);
 
@@ -189,44 +117,18 @@ const App: React.FC = () => {
         <Center>
           <header className={styles.app__header}>Katalog Produktów</header>
         </Center>
-        <ul className={styles.app__list}>
-          <ReactSortable
-            disabled={searchMode}
-            list={pageList}
-            setList={setSorted}
-            onEnd={onSortEnd}
-            className={styles.app__listDraggable}
-          >
-            {pageList.map((page) => (
-              <li key={page.svg.file} className={styles.app__page}>
-                <ThumbnailAction
-                  onClick={() => onPagePreview(page)}
-                  actions={
-                    <Button
-                      size="xs"
-                      variant="light"
-                      onClick={() => setSelectedPageKey(page.svg.file)}
-                    >
-                      Szczegóły
-                    </Button>
-                  }
-                >
-                  <Thumbnail
-                    disabled={page.status !== "enable"}
-                    src={`safe-file-protocol://${sourcePath}/jpg/thumb/${page.svg.file}.jpg?cache=${updateCount}`}
-                  />
-                </ThumbnailAction>
-              </li>
-            ))}
-          </ReactSortable>
-        </ul>
+        <PageList
+          list={pageIds}
+          sortDisabled={searchMode}
+          onPagePreview={onPagePreview}
+          onPageSelect={setSelectedPageId}
+        />
       </div>
 
       <Affix position={{ top: 10, right: 16 }}>
         <TextInput
           placeholder="Szukaj..."
           radius="xl"
-          value={searchPhraseStream.value}
           onChange={(event) =>
             searchPhraseStream.next(event.currentTarget.value)
           }
@@ -281,27 +183,24 @@ const App: React.FC = () => {
       <Settings />
 
       <Drawer
-        opened={Boolean(selectedPageKey)}
-        onClose={() => setSelectedPageKey(null)}
-        title={selectedPageKey}
+        opened={Boolean(selectedPageId)}
+        onClose={() => setSelectedPageId(null)}
         position="bottom"
         padding="xl"
         size="xl"
       >
-        {selectedPage && (
+        {selectedPageId && (
           <PageDetails
-            page={selectedPage}
-            imageUpdate={updateCount}
-            sourcePath={sourcePath}
+            pageId={selectedPageId}
+            onFinish={() => setSelectedPageId(null)}
           />
         )}
       </Drawer>
 
       {pagePreview && (
         <PagePreview
-          selectedPage={pagePreview}
-          pages={pageList}
-          sourcePath={sourcePath}
+          selectedPageId={pagePreview}
+          list={pageIds}
           onClickOutside={() => setPagePreview(null)}
         />
       )}

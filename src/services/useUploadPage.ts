@@ -10,9 +10,11 @@ const useUploadPage = () => {
   const { updatePage } = useUpdatePage();
   const { refreshPage } = useRefreshPage();
 
-  const uploadPage = (file: File) => {
+  const uploadPage = (file: File | null) => {
     setIsUploading(true);
-    nodeEventBus.send(EVENTS.PAGE_UPLOAD, { path: file.path, name: file.name });
+    if (file) {
+      nodeEventBus.send(EVENTS.PAGE_UPLOAD, { path: file.path, name: file.name });
+    }
   };
 
   useEffect(() => {
@@ -27,7 +29,7 @@ const useUploadPage = () => {
     const callback = (_: IpcRendererEvent, filename: string) => {
       setIsUploading(false);
       const page = pageMetadata(filename);
-      refreshPage(filename);
+      refreshPage(page);
       updatePage(page);
     };
     nodeEventBus.on(EVENTS.PAGE_UPLOAD_SUCCESS, callback);

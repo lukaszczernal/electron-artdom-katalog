@@ -1,5 +1,5 @@
 import os from "os";
-import { useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import {
   ActionIcon,
   Affix,
@@ -16,22 +16,19 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { IconFileDatabase, IconSettings } from "@tabler/icons";
-import {
-  usePages,
-  useRefreshPage,
-  useSourcePath,
-  useUpdateCheck,
-} from "@/services";
+import { useRefreshPage, useUpdateCheck } from "@/services";
 import { SOURCE_FILE_NAME } from "@/constants";
+import { PagesContext } from "@/services/context/pagesContext";
+import { SourcePathContext } from '@/services/context/sourcePathContext';
 
 const isWindows = os.platform() === "win32";
 
 const Settings: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const theme = useMantineTheme();
-  const { sourcePath, setSourcePath } = useSourcePath();
   const { feedURL, checkHazel, hazelResponse, hazelError } = useUpdateCheck();
-  const { data: pages } = usePages();
+  const { sourcePath, setSourcePath } = useContext(SourcePathContext);
+  const { data: pages } = useContext(PagesContext);
   const { refreshAll, isAllLoading } = useRefreshPage();
 
   const downloadLink = useMemo(() => {

@@ -17,7 +17,12 @@ const registerSourcePath = (sourcePath?: string) => {
   }
 };
 
+const getSourcePath = () => {
+  return SOURCE_PATH;
+}
+
 export {
   registerSourcePath,
+  getSourcePath,
   getPath,
 };

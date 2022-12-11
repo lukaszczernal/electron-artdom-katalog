@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { usePages, useRefreshPage, useUpdatePage } from "../../services";
+import { useContext, useEffect, useState } from "react";
+import { BROWSER_EVENTS as EVENTS } from "@/events";
+import { useRefreshPage, useUpdatePage } from "../../services";
 import {
   ActionIcon,
   Button,
@@ -11,16 +12,18 @@ import {
   Title,
   useMantineTheme,
 } from "@mantine/core";
-import { Page } from "../../models";
+import { Page, PageStatus } from "../../models";
 import { Keywords } from "../Keywords";
 import { IconPlus } from "@tabler/icons";
 import { useForm } from "@mantine/form";
 import { Thumbnail } from "../Thumbnail";
+import { PagesContext } from "@/services/context/pagesContext";
+import useEvent from "@/services/useEvent";
+import { SourcePathContext } from "@/services/context/sourcePathContext";
 
 interface Prosp {
-  page: Page;
-  imageUpdate: any; // TODO need better image refresh method
-  sourcePath: string; // TODO this should be accessible via global context
+  pageId: string;
+  onFinish: () => void;
 }
 
 const useStyles = createStyles(() => ({
@@ -46,57 +49,92 @@ const keywordInitialValues = {
   keyword: "",
 };
 
-const PageDetails: React.FC<Prosp> = ({ page, imageUpdate, sourcePath }) => {
+const PageDetails: React.FC<Prosp> = ({ pageId, onFinish }) => {
   const { classes } = useStyles();
   const [toDelete, setToDelete] = useState<string | null>(null);
-  const { editPage, removePage } = usePages();
+  const [localPage, setLocalPage] = useState<Page>();
+  const { pages, editPage, removePage } = useContext(PagesContext);
+  const { sourcePath } = useContext(SourcePathContext);
   const { updatePage } = useUpdatePage();
   const { refreshPage, isLoading } = useRefreshPage();
   const theme = useMantineTheme();
+
+  const page = pages?.[pageId] || null;
+
+  useEffect(() => {
+    if (page) {
+      setLocalPage(page);
+    }
+  }, [page]);
+
+  useEvent<Page>(EVENTS.PAGE_EDIT_SUCCESS, (_, page) => {
+    refreshPage(page);
+  });
+
+  useEvent(EVENTS.PAGE_DELETE_SUCCESS, onFinish);
 
   const form = useForm({
     initialValues: keywordInitialValues,
   });
 
+  const updateKeywords = (keywords: string[]) => {
+    if (!localPage) {
+      return;
+    }
+
+    const updatedPage = { ...localPage, keywords };
+    setLocalPage(updatedPage);
+    updatePage(updatedPage);
+  };
+
   const addKeyword = (values: typeof keywordInitialValues) => {
     const newKeys = values.keyword.toLowerCase().split(" ");
-    const keywords = (page.keywords || []).concat(newKeys);
-    updatePage({ ...page, keywords });
+    const keywords = (localPage?.keywords || []).concat(newKeys);
+    updateKeywords(keywords);
     form.reset();
   };
 
   const removeKeyword = (key: string) => {
-    const keywords = (page.keywords || []).slice();
+    const keywords = (localPage?.keywords || []).slice();
     const keyIndex = keywords.findIndex((item) => item === key);
-
     keywords.splice(keyIndex, 1);
-    updatePage({ ...page, keywords });
+    updateKeywords(keywords);
   };
 
   const togglePage = () => {
-    const status: Page["status"] =
-      page.status === "enable" ? "disable" : "enable";
-    updatePage({ ...page, status });
+    if (!localPage) {
+      return;
+    }
+
+    const updatedPage = {
+      ...localPage,
+      status:
+        localPage?.status === PageStatus.enable
+          ? PageStatus.disable
+          : PageStatus.enable,
+    };
+    setLocalPage(updatedPage);
+    updatePage(updatedPage);
   };
 
   const closeConfirmModal = () => {
     setToDelete(null);
   };
 
-  return (
+  return localPage ? (
     <>
       <div className={classes.overview}>
         <div className={classes.page}>
           <Thumbnail
             isLoading={isLoading}
-            disabled={page.status !== "enable"}
-            src={`safe-file-protocol://${sourcePath}/jpg/${page?.svg.file}.jpg?cache=${imageUpdate}`}
+            disabled={localPage.status !== "enable"}
+            src={`safe-file-protocol://${sourcePath}/jpg/${page?.svg.file}.jpg?cache=${page?.version}`}
           />
         </div>
         <div className={classes.keywords}>
           <Stack>
             <Title order={5}>Słowa Kluczowe</Title>
-            <Keywords keywords={page.keywords} onRemove={removeKeyword} />
+            <Keywords keywords={localPage.keywords} onRemove={removeKeyword} />
             <form onSubmit={form.onSubmit(addKeyword)}>
               <TextInput
                 placeholder="Dodaj słowo kluczowe"
@@ -119,16 +157,15 @@ const PageDetails: React.FC<Prosp> = ({ page, imageUpdate, sourcePath }) => {
         <div className={classes.actions}>
           <Stack spacing="xs">
             <Button onClick={() => togglePage()}>
-              {page?.status === "enable" ? "Ukryj" : "Aktywuj"}
+              {localPage?.status === "enable" ? "Ukryj" : "Aktywuj"}
             </Button>
-            <Button
-              onClick={() => refreshPage(page?.svg.file)}
-              disabled={isLoading}
-            >
+            <Button onClick={() => refreshPage(localPage)} disabled={isLoading}>
               Odśwież
             </Button>
-            <Button onClick={() => editPage(page?.svg.file)}>Edytuj</Button>
-            <Button onClick={() => setToDelete(page?.svg.file)}>Usuń</Button>
+            <Button onClick={() => editPage(localPage)}>Edytuj</Button>
+            <Button onClick={() => setToDelete(localPage?.svg.file)}>
+              Usuń
+            </Button>
           </Stack>
         </div>
       </div>
@@ -148,7 +185,7 @@ const PageDetails: React.FC<Prosp> = ({ page, imageUpdate, sourcePath }) => {
         </Stack>
       </Modal>
     </>
-  );
+  ) : null;
 };
 
 export default PageDetails;

@@ -8,7 +8,7 @@ import fetch from "node-fetch";
 import { BROWSER_EVENTS as EVENTS } from "../../src/events";
 import { FileInfo, Page } from "../../src/models";
 import { setDirectories } from "./services/directories";
-import { registerSourcePath } from "./services/env";
+import { registerSourcePath, getSourcePath } from "./services/env";
 import {
   readPages,
   refreshPage,
@@ -32,18 +32,26 @@ const registerEventHandlers = (browser: BrowserWindow) => {
   );
 
   browserEventBus.on(EVENTS.PAGES_FETCH, (event: IpcMainEvent) => {
+    if (getSourcePath() === null) {
+      browserEventBus.emit(EVENTS.ENV_REGISTER);
+      return;
+    }
+
     const pages = readPages();
     event.reply(EVENTS.PAGES_FETCH_SUCCESS, pages);
   });
 
-  browserEventBus.on(
-    EVENTS.PAGE_REFRESH,
-    (event: IpcMainEvent, filename: string) => {
-      refreshPage(filename).then((file) =>
-        event.reply(EVENTS.PAGE_REFRESH_SUCCESS, file)
-      );
-    }
-  );
+  browserEventBus.on(EVENTS.PAGE_REFRESH, (event: IpcMainEvent, page: Page) => {
+    refreshPage(page.svg.file)
+      .then(() =>
+        updatePage(
+          page,
+          () => event.reply(EVENTS.PAGE_UPDATE_SUCCESS),
+          () => event.reply(EVENTS.PAGE_UPDATE_FAIL)
+        )
+      )
+      .then(() => event.reply(EVENTS.PAGE_REFRESH_SUCCESS));
+  });
 
   browserEventBus.on(
     EVENTS.PAGE_REFRESH_ALL,
@@ -54,12 +62,11 @@ const registerEventHandlers = (browser: BrowserWindow) => {
     }
   );
 
-  browserEventBus.on(
-    EVENTS.PAGE_EDIT,
-    (event: IpcMainEvent, filename: string) => {
-      editPage(filename, () => event.reply(EVENTS.PAGE_EDIT_SUCCESS, filename));
-    }
-  );
+  browserEventBus.on(EVENTS.PAGE_EDIT, (event: IpcMainEvent, page: Page) => {
+    editPage(page.svg.file, () => {
+      event.reply(EVENTS.PAGE_EDIT_SUCCESS, page);
+    });
+  });
 
   browserEventBus.on(
     EVENTS.PAGE_DELETE,

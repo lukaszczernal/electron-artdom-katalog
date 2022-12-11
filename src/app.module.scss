@@ -1,21 +1,5 @@
-.app {
-  padding: 1rem;
-}
-
-.app__list {
-  list-style: none;
-  padding: 0;
-}
-
-.app__listDraggable {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
-  gap: 1.4rem;
-}
-
-.app__page {
-  display: block;
-  position: relative;
-  width: 200px;
-  height: auto;
+.app__header {
+  height: 60px;
+  display: flex;
+  align-items: center;
 }

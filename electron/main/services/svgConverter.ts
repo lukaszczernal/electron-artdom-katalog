@@ -8,23 +8,25 @@ const svgConverter = (svgpath, pngpath) => {
   const svg = fs.createReadStream(svgpath);
   const stream = fs.createWriteStream(pngpath);
 
-  const inkscapeVersionProcess = spawnSync("inkscape", ["--version"], {
-    encoding: "utf8",
-  });
+  // TODO check on windows if works then remove
+  // const inkscapeVersionProcess = spawnSync("inkscape", ["--version"], {
+  //   encoding: "utf8",
+  // });
 
-  const inkscapeVersionOutput = inkscapeVersionProcess.stdout;
-  const [_, version] = inkscapeVersionOutput.split(" ");
-  const [majorVersion] = version.split(".");
+  // const inkscapeVersionOutput = inkscapeVersionProcess.stdout;
+  // const [_, version] = inkscapeVersionOutput.split(" ");
+  // const [majorVersion] = version.split(".");
 
-  const converter =
-    majorVersion === "1"
-      ? new Inkscape([
-          "--export-type=png",
-          `--export-width=${IMAGE_OUTPUT_WIDTH}`,
-          "-b",
-          "#ffffff",
-        ])
-      : new Inkscape(["-e", "-w", `${IMAGE_OUTPUT_WIDTH}`, "-b", "#ffffff"]);
+  // const converter =
+  //   majorVersion === "1"
+  //     ? new Inkscape([
+  //         "--export-type=png",
+  //         `--export-width=${IMAGE_OUTPUT_WIDTH}`,
+  //         "-b",
+  //         "#ffffff",
+  //       ])
+  //     : new Inkscape(["-e", "-w", `${IMAGE_OUTPUT_WIDTH}`, "-b", "#ffffff"]);
+  const converter = new Inkscape(["-e", "-w", `${IMAGE_OUTPUT_WIDTH}`, "-b", "#ffffff"]);
 
   svg.pipe(converter).pipe(stream);
 

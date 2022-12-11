@@ -8,19 +8,18 @@ export const useRefreshPage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isAllLoading, setIsAllLoading] = useState<boolean>(false);
 
-  const refreshPage = (filename: string) => {
+  const refreshPage = (page: Page) => {
     setIsLoading(true);
-    nodeEventBus.send(EVENTS.PAGE_REFRESH, filename);
+    nodeEventBus.send(EVENTS.PAGE_REFRESH, page);
   };
 
   const refreshAll = (pages: Page[]) => {
     setIsAllLoading(true);
     nodeEventBus.send(EVENTS.PAGE_REFRESH_ALL, pages);
-  }
+  };
 
   useEvent(EVENTS.PAGE_REFRESH_SUCCESS, () => setIsLoading(false));
   useEvent(EVENTS.PAGE_REFRESH_ALL_SUCCESS, () => setIsAllLoading(false));
-
 
   return { refreshPage, isLoading, refreshAll, isAllLoading };
 };
