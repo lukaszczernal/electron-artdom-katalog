@@ -56,7 +56,7 @@ const ThumbnailAction: React.FC<Props> = ({
   const { classes } = useStyles();
 
   // TODO move callbacks outside?
-  const onMainAction = useCallback(() => page && mainAction(page.id), [page]);
+  const onMainAction = useCallback(() => page && mainAction(page.svg.file), [page]);
   const onSecondaryAction = useCallback(() => page && secondaryAction(page), [page]);
 
   return (

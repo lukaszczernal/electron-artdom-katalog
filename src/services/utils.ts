@@ -1,9 +1,9 @@
-import { Page } from "@/models";
+import { Page, PageStatus } from "@/models";
 
 export const pageMetadata = (file: string): Page => ({
   svg: {
     file,
   },
-  status: "enable",
+  status: PageStatus.enable,
   id: file,
 });

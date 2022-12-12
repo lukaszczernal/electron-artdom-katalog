@@ -10,7 +10,7 @@ import {
 } from "@mantine/core";
 import { IconCheck, IconFileExport, IconFilePlus, IconX } from "@tabler/icons";
 import { EventError } from "./models";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useGenerateCatalog, useUploadPage } from "./services";
 import { ReplaySubject } from "rxjs";
 import { Settings } from "./components/Settings";
@@ -75,8 +75,6 @@ const App: React.FC = () => {
         });
   };
 
-  const onPagePreview = useCallback(setPagePreview, []);
-
   useEffect(() => {
     if (sourcePath) {
       fetchPages();
@@ -98,7 +96,7 @@ const App: React.FC = () => {
     });
 
     const searchModeSub = searchPhraseStream
-      // TODO delay
+      // TODO debounce
       .subscribe((phrase) => {
         setSearchMode(phrase.length > 0);
         searchPages(phrase);
@@ -120,7 +118,7 @@ const App: React.FC = () => {
         <PageList
           list={pageIds}
           sortDisabled={searchMode}
-          onPagePreview={onPagePreview}
+          onPagePreview={setPagePreview}
           onPageSelect={setSelectedPageId}
         />
       </div>
