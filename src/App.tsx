@@ -9,18 +9,17 @@ import {
   Tooltip,
   useMantineTheme,
 } from "@mantine/core";
-import { IconCheck, IconFileExport, IconFilePlus, IconX } from "@tabler/icons";
-import { EventError } from "./models";
+import { IconFilePlus, IconX } from "@tabler/icons";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { useGenerateCatalog, useUploadPage } from "./services";
+import { useUploadPage } from "./services";
 import { ReplaySubject } from "rxjs";
 import { Settings } from "./components/Settings";
-import { showNotification, updateNotification } from "@mantine/notifications";
 import { PageList } from "./components/PageList";
 import { PagesContext } from "./services/context/pagesContext";
 import { SourcePathContext } from "./services/context/sourcePathContext";
 import { PageDetails } from "./components/PageDetails";
 import { PagePreview } from "./components/PagePreview";
+import { Generate } from "./components/Generate";
 
 const useStyles = createStyles(() => ({
   header: {
@@ -45,43 +44,6 @@ const App: React.FC = () => {
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
 
   const { uploadPage } = useUploadPage();
-  const {
-    generate,
-    isLoading: isGeneratingCatalog,
-    onFinish: onGenerateCatalogFinish,
-    onStart: onGenerateCatalogStart,
-  } = useGenerateCatalog();
-
-  // TODO move catalog-creation code to separate module
-  const onCatalogGenerateStart = () => {
-    showNotification({
-      id: "catalog-generate",
-      color: "teal",
-      title: "Katalog",
-      message: "Trwa generowanie",
-      disallowClose: true,
-      loading: true,
-      autoClose: false,
-    });
-  };
-
-  const onCatalogGenerateFinish = (error: EventError) => {
-    error
-      ? updateNotification({
-          id: "catalog-generate",
-          title: "Katalog nie został wynegerowany",
-          message: <>{error}</>,
-          autoClose: true,
-        })
-      : updateNotification({
-          id: "catalog-generate",
-          icon: <IconCheck />,
-          color: "teal",
-          title: "Katalog",
-          message: "Wynegerowany pomyślnie.",
-          autoClose: true,
-        });
-  };
 
   useEffect(() => {
     if (sourcePath) {
@@ -94,15 +56,6 @@ const App: React.FC = () => {
   }, [regiserPath]);
 
   useEffect(() => {
-    const onGenerateCatalogStartSub = onGenerateCatalogStart.subscribe(
-      onCatalogGenerateStart
-    );
-
-    const onGenerateCatalogFinishSub = onGenerateCatalogFinish.subscribe({
-      next: onCatalogGenerateFinish,
-      error: onCatalogGenerateFinish,
-    });
-
     const searchModeSub = searchPhraseStream
       // TODO debounce
       .subscribe((phrase) => {
@@ -111,8 +64,6 @@ const App: React.FC = () => {
       });
 
     return () => {
-      onGenerateCatalogFinishSub.unsubscribe();
-      onGenerateCatalogStartSub.unsubscribe();
       searchModeSub.unsubscribe();
     };
   }, []);
@@ -153,20 +104,7 @@ const App: React.FC = () => {
         />
       </Affix>
 
-      <Tooltip label="Generuj PDF" position="left" withArrow>
-        <Affix position={{ bottom: 100, right: 16 }}>
-          <ActionIcon
-            loading={isGeneratingCatalog}
-            color="blue"
-            size="xl"
-            radius="xl"
-            variant="filled"
-            onClick={generate}
-          >
-            <IconFileExport size={18} />
-          </ActionIcon>
-        </Affix>
-      </Tooltip>
+      <Generate />
 
       <Tooltip label="Dodaj nową stronę" position="left" withArrow>
         <Affix position={{ bottom: 40, right: 16 }}>
