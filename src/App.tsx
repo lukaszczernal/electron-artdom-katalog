@@ -2,6 +2,7 @@ import {
   ActionIcon,
   Affix,
   Center,
+  createStyles,
   Drawer,
   FileButton,
   TextInput,
@@ -15,16 +16,23 @@ import { useGenerateCatalog, useUploadPage } from "./services";
 import { ReplaySubject } from "rxjs";
 import { Settings } from "./components/Settings";
 import { showNotification, updateNotification } from "@mantine/notifications";
-
-import styles from "./app.module.scss";
 import { PageList } from "./components/PageList";
 import { PagesContext } from "./services/context/pagesContext";
 import { SourcePathContext } from "./services/context/sourcePathContext";
 import { PageDetails } from "./components/PageDetails";
 import { PagePreview } from "./components/PagePreview";
 
+const useStyles = createStyles(() => ({
+  header: {
+    height: "60px",
+    display: "flex",
+    alignItems: "center",
+  },
+}));
+
 const App: React.FC = () => {
   const theme = useMantineTheme();
+  const { classes } = useStyles();
   const [pagePreview, setPagePreview] = useState<string | null>();
 
   const searchPhraseStream = useMemo(() => new ReplaySubject<string>(), []);
@@ -111,9 +119,9 @@ const App: React.FC = () => {
 
   return (
     <>
-      <div className={styles.app}>
+      <div>
         <Center>
-          <header className={styles.app__header}>Katalog Produktów</header>
+          <header className={classes.header}>Katalog Produktów</header>
         </Center>
         <PageList
           list={pageIds}
