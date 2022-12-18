@@ -12,7 +12,7 @@ import {
 import { IconFilePlus, IconX } from "@tabler/icons";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useUploadPage } from "./services";
-import { ReplaySubject } from "rxjs";
+import { debounceTime, ReplaySubject } from "rxjs";
 import { Settings } from "./components/Settings";
 import { PageList } from "./components/PageList";
 import { PagesContext } from "./services/context/pagesContext";
@@ -57,7 +57,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const searchModeSub = searchPhraseStream
-      // TODO debounce
+      .pipe(debounceTime(500))
       .subscribe((phrase) => {
         setSearchMode(phrase.length > 0);
         searchPages(phrase);

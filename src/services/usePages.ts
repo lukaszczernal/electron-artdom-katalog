@@ -1,18 +1,20 @@
 import { ipcRenderer as nodeEventBus } from "electron";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { arrayMoveImmutable as arrayMove } from "array-move";
 import { BROWSER_EVENTS as EVENTS } from "../events";
 import { Page } from "../models";
 import useEvent from "./useEvent";
+import { BehaviorSubject, combineLatest, map } from "rxjs";
 
 interface Pages {
   [k: string]: Page;
 }
 
 export const usePages = () => {
-  const [data, setData] = useState<Page[]>([]);
   const [pageIds, setPageIds] = useState<string[]>([]);
   const [pages, setPages] = useState<Pages>();
+  const data = useMemo(() => new BehaviorSubject<Page[]>([]), []);
+  const searchPhrase = useMemo(() => new BehaviorSubject<string[]>([]), []);
 
   const fetchPages = useCallback(() => {
     console.log("page fetch request");
@@ -33,52 +35,59 @@ export const usePages = () => {
   };
 
   const sortPages = (oldIndex, newIndex) => {
-    if (data) {
-      const sortedPages = arrayMove(data, oldIndex, newIndex);
+    if (data.value) {
+      const sortedPages = arrayMove(data.value, oldIndex, newIndex);
       savePages(sortedPages);
     }
   };
 
-  // TODO fix search
-  // if user remove some search phrase letters new pages does not show up
   const searchPages = (phrase: string) => {
     const trimmed = phrase.trim();
-    const searchPhrases = trimmed.length ? trimmed.split(" ") : [];
-
-    if (searchPhrases.length === 0) {
-      fetchPages();
-      return;
-    }
-
-    setData((prev) =>
-      prev.filter((page) => {
-        const keywords = page.keywords?.join(" ") || "";
-        const filename = page.svg.file.toLowerCase();
-
-        return searchPhrases.some(
-          (phrase) =>
-            `${keywords} ${filename}`.match(phrase.toLowerCase()) !== null
-        );
-      })
-    );
+    const phraseList = trimmed.length ? trimmed.split(" ") : [];
+    searchPhrase.next(phraseList);
   };
 
-  useEffect(() => {
-    setPageIds(data.map((page) => page.svg.file));
+  const setSearchResults = (results: Page[]) => {
+    setPageIds(results.map((page) => page.svg.file));
     setPages(
-      data.reduce((pages, page) => {
+      results.reduce((pages, page) => {
         pages[page.svg.file] = page;
         return pages;
       }, {})
     );
-  }, [data]);
+  };
+
+  useEffect(() => {
+    const searchSub = combineLatest([searchPhrase, data])
+      .pipe(
+        map(([phraseList, pages]) =>
+          phraseList.length === 0
+            ? pages
+            : pages.filter((page) => {
+                const keywords = page.keywords?.join(" ") || "";
+                const filename = page.svg.file.toLowerCase();
+
+                return phraseList.some(
+                  (phrase) =>
+                    `${keywords} ${filename}`.match(phrase.toLowerCase()) !==
+                    null
+                );
+              })
+        )
+      )
+      .subscribe(setSearchResults);
+
+    return () => {
+      searchSub.unsubscribe();
+    };
+  }, []);
 
   useEvent<Page[]>(EVENTS.PAGES_FETCH_SUCCESS, (_, pages) => {
     console.log("fetch success"); // TODO called many times
-    setData(pages);
+    data.next(pages);
   });
   useEvent(EVENTS.PAGE_REFRESH_SUCCESS, () => {
-    setData((data) => [...data]);
+    data.next([...data.value]);
   });
   useEvent(EVENTS.PAGE_UPDATE_SUCCESS, fetchPages);
   useEvent(EVENTS.PAGES_SAVE_SUCCESS, fetchPages);
@@ -87,7 +96,6 @@ export const usePages = () => {
 
   return {
     fetchPages,
-    data,
     pages,
     pageIds,
     editPage,
