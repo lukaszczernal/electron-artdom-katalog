@@ -67,7 +67,7 @@ const refreshPage = (filename: string) => {
 const refreshAllPages = async () => {
   const pages = readPages();
   let i = 0;
-  while (i < pages.length - 1) {
+  while (i < pages.length) {
     await refreshPage(pages[i].svg.file);
     i++;
   }
