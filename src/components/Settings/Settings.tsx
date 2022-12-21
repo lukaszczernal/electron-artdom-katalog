@@ -18,8 +18,7 @@ import {
 import { IconFileDatabase, IconSettings } from "@tabler/icons";
 import { useRefreshPage, useUpdateCheck } from "@/services";
 import { SOURCE_FILE_NAME } from "@/constants";
-import { PagesContext } from "@/services/context/pagesContext";
-import { SourcePathContext } from '@/services/context/sourcePathContext';
+import { SourcePathContext } from "@/services/context/sourcePathContext";
 
 const isWindows = os.platform() === "win32";
 
@@ -28,7 +27,6 @@ const Settings: React.FC = () => {
   const theme = useMantineTheme();
   const { feedURL, checkHazel, hazelResponse, hazelError } = useUpdateCheck();
   const { sourcePath, setSourcePath } = useContext(SourcePathContext);
-  const { data: pages } = useContext(PagesContext);
   const { refreshAll, isAllLoading } = useRefreshPage();
 
   const downloadLink = useMemo(() => {
@@ -59,10 +57,6 @@ const Settings: React.FC = () => {
     }
 
     setSourcePath(pathParts.join("/"));
-  };
-
-  const refreshPreviews = () => {
-    refreshAll(pages);
   };
 
   return (
@@ -113,7 +107,7 @@ const Settings: React.FC = () => {
           <Divider />
 
           <Center>
-            <Button onClick={refreshPreviews} loading={isAllLoading}>
+            <Button onClick={refreshAll} loading={isAllLoading}>
               Odśwież podgląd stron
             </Button>
           </Center>

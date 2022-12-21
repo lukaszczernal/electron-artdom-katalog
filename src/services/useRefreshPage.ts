@@ -13,9 +13,9 @@ export const useRefreshPage = () => {
     nodeEventBus.send(EVENTS.PAGE_REFRESH, page);
   };
 
-  const refreshAll = (pages: Page[]) => {
+  const refreshAll = () => {
     setIsAllLoading(true);
-    nodeEventBus.send(EVENTS.PAGE_REFRESH_ALL, pages);
+    nodeEventBus.send(EVENTS.PAGE_REFRESH_ALL);
   };
 
   useEvent(EVENTS.PAGE_REFRESH_SUCCESS, () => setIsLoading(false));

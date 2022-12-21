@@ -55,8 +55,8 @@ const registerEventHandlers = (browser: BrowserWindow) => {
 
   browserEventBus.on(
     EVENTS.PAGE_REFRESH_ALL,
-    (event: IpcMainEvent, pages: Page[]) => {
-      refreshAllPages(pages).then(() =>
+    (event: IpcMainEvent) => {
+      refreshAllPages().then(() =>
         event.reply(EVENTS.PAGE_REFRESH_ALL_SUCCESS)
       );
     }

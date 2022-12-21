@@ -64,7 +64,8 @@ const refreshPage = (filename: string) => {
   return promise;
 };
 
-const refreshAllPages = async (pages: Page[]) => {
+const refreshAllPages = async () => {
+  const pages = readPages();
   let i = 0;
   while (i < pages.length - 1) {
     await refreshPage(pages[i].svg.file);
