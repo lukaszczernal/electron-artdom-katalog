@@ -5,7 +5,7 @@ import { FileInfo, Page } from "../../../src/models";
 import svgConverter from "./svgConverter";
 import { findNewFilename, removeFileAsync } from "./utils";
 import { getPath } from "./env";
-import pngConverter from "./pngConverter";
+import pngConverter, { ImageSize } from "./pngConverter";
 import { from, lastValueFrom, map, mergeMap } from "rxjs";
 
 const readPages = (): Page[] => {
@@ -55,10 +55,12 @@ const refreshPage = (filename: string) => {
     const svgPath = `${getPath().SVG_STORAGE_PATH}/${filename}`;
     const jpgPath = `${getPath().JPG_STORAGE_PATH}/${filename}.jpg`;
     const thumbPath = `${getPath().JPG_STORAGE_PATH}/thumb/${filename}.jpg`;
+    const clientPath = `${getPath().JPG_STORAGE_PATH}/client/${filename}.jpg`;
 
     return svgConverter(svgPath, pngPath).on("finish", () =>
       pngConverter(pngPath, jpgPath)
-        .then(() => pngConverter(pngPath, thumbPath, { thumbnail: true }))
+        .then(() => pngConverter(pngPath, thumbPath, { size: ImageSize.THUMBNAIL }))
+        .then(() => pngConverter(pngPath, clientPath, { size: ImageSize.CLIENT }))
         .then(() => resolve(filename))
     );
   });
