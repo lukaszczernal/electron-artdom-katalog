@@ -6,6 +6,7 @@ import svgConverter from "./svgConverter";
 import { findNewFilename, removeFileAsync } from "./utils";
 import { getPath } from "./env";
 import pngConverter from "./pngConverter";
+import { from, lastValueFrom, map, mergeMap } from "rxjs";
 
 const readPages = (): Page[] => {
   if (getPath().PAGE_STORAGE_PATH === null) {
@@ -66,13 +67,13 @@ const refreshPage = (filename: string) => {
 
 const refreshAllPages = async () => {
   const pages = readPages();
-  let i = 0;
-  while (i < pages.length) {
-    await refreshPage(pages[i].svg.file);
-    i++;
-  }
+  const concurrency = 4;
+  const refreshStream = from(pages).pipe(
+    map(page => page.svg.file),
+    mergeMap(refreshPage, concurrency)
+  );
 
-  return Promise.resolve();
+  return lastValueFrom(refreshStream)
 };
 
 const editPage = (filename: string, successCallback: () => void) => {
