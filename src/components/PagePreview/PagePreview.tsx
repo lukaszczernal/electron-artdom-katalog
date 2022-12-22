@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { createStyles, Modal } from "@mantine/core";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Keyboard, Navigation } from "swiper";
+import { Keyboard, Navigation, Virtual } from "swiper";
 import { Thumbnail } from "../Thumbnail";
 
 import "swiper/css";
@@ -39,7 +39,8 @@ const PagePreview: React.FC<Props> = ({
   return (
     <Modal fullScreen opened onClose={onClickOutside}>
       <Swiper
-        modules={[Navigation, Keyboard]}
+        modules={[Navigation, Keyboard, Virtual]}
+        virtual
         keyboard
         navigation
         spaceBetween={50}
