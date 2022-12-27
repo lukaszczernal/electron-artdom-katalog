@@ -36,18 +36,26 @@ const useListStyles = createStyles(() => ({
   page: {
     display: "flex",
     position: "relative",
-    width: "220px",
-    // height: "auto",
-    height: "280px",
     padding: "0 1rem 1rem",
     justifyContent: "center",
+    width: "50%",
+    alignContent: "stretch",
+    "@media (min-width: 600px)": {
+      width: "33%",
+    },
+    "@media (min-width: 800px)": {
+      width: "25%",
+    },
+    "@media (min-width: 1000px)": {
+      width: "20%",
+    },
+    "@media (min-width: 1400px)": {
+      width: "16.6%",
+    },
   },
   listDraggable: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(12rem, 1fr))",
-    gap: "0 0.2rem",
-    justifyItems: "center",
-    padding: "0 1rem",
+    flexWrap: "wrap",
+    display: "flex",
   },
 }));
 
