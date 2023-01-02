@@ -19,6 +19,7 @@ import {
   savePages,
   generatePDF,
   removePage,
+  fetchClientData,
 } from "./services/pages";
 
 const registerEventHandlers = (browser: BrowserWindow) => {
@@ -53,14 +54,9 @@ const registerEventHandlers = (browser: BrowserWindow) => {
       .then(() => event.reply(EVENTS.PAGE_REFRESH_SUCCESS));
   });
 
-  browserEventBus.on(
-    EVENTS.PAGE_REFRESH_ALL,
-    (event: IpcMainEvent) => {
-      refreshAllPages().then(() =>
-        event.reply(EVENTS.PAGE_REFRESH_ALL_SUCCESS)
-      );
-    }
-  );
+  browserEventBus.on(EVENTS.PAGE_REFRESH_ALL, (event: IpcMainEvent) => {
+    refreshAllPages().then(() => event.reply(EVENTS.PAGE_REFRESH_ALL_SUCCESS));
+  });
 
   browserEventBus.on(EVENTS.PAGE_EDIT, (event: IpcMainEvent, page: Page) => {
     editPage(page.svg.file, () => {
@@ -114,6 +110,13 @@ const registerEventHandlers = (browser: BrowserWindow) => {
   browserEventBus.on(EVENTS.APP_CHECK_UPDATES, (event: IpcMainEvent) => {
     autoUpdater.checkForUpdates();
     event.reply(EVENTS.APP_CHECK_UPDATES_SUCCESS, autoUpdater.getFeedURL());
+  });
+
+  browserEventBus.on(EVENTS.CLIENT_FETCH_PAGES, (event: IpcMainEvent) => {
+    fetchClientData()
+      .then((res) => res.json())
+      .then((pages) => event.reply(EVENTS.CLIENT_FETCH_PAGES_SUCCESS, pages))
+      .catch((err) => event.reply(EVENTS.CLIENT_FETCH_PAGES_FAIL, err));
   });
 
   autoUpdater.on("checking-for-update", () => {

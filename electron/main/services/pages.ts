@@ -7,6 +7,7 @@ import { findNewFilename, removeFileAsync } from "./utils";
 import { getPath } from "./env";
 import pngConverter, { ImageSize } from "./pngConverter";
 import { from, lastValueFrom, map, mergeMap } from "rxjs";
+import fetch from "node-fetch";
 
 const readPages = (): Page[] => {
   if (getPath().PAGE_STORAGE_PATH === null) {
@@ -59,8 +60,12 @@ const refreshPage = (filename: string) => {
 
     return svgConverter(svgPath, pngPath).on("finish", () =>
       pngConverter(pngPath, jpgPath)
-        .then(() => pngConverter(pngPath, thumbPath, { size: ImageSize.THUMBNAIL }))
-        .then(() => pngConverter(pngPath, clientPath, { size: ImageSize.CLIENT }))
+        .then(() =>
+          pngConverter(pngPath, thumbPath, { size: ImageSize.THUMBNAIL })
+        )
+        .then(() =>
+          pngConverter(pngPath, clientPath, { size: ImageSize.CLIENT })
+        )
         .then(() => resolve(filename))
     );
   });
@@ -71,11 +76,11 @@ const refreshAllPages = async () => {
   const pages = readPages();
   const concurrency = 4;
   const refreshStream = from(pages).pipe(
-    map(page => page.svg.file),
+    map((page) => page.svg.file),
     mergeMap(refreshPage, concurrency)
   );
 
-  return lastValueFrom(refreshStream)
+  return lastValueFrom(refreshStream);
 };
 
 const editPage = (filename: string, successCallback: () => void) => {
@@ -212,6 +217,14 @@ const removePage = (filename: string) =>
     return savePages(pages);
   });
 
+const fetchClientData = () =>
+  fetch("http://artdom.opole.pl/data/pages-array.json", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
 export {
   readPages,
   refreshPage,
@@ -222,4 +235,5 @@ export {
   savePages,
   generatePDF,
   removePage,
+  fetchClientData,
 };

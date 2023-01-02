@@ -1,5 +1,6 @@
+import { useEffect } from "react";
 import { EventError } from "@/models";
-import { useGenerateCatalog, useSwitch } from "@/services";
+import { useCompareCatalog, useGenerateCatalog, useSwitch } from "@/services";
 import {
   ActionIcon,
   Affix,
@@ -11,15 +12,16 @@ import {
 } from "@mantine/core";
 import { showNotification, updateNotification } from "@mantine/notifications";
 import { IconCheck, IconFileExport } from "@tabler/icons";
-import { useEffect } from "react";
 
 const Generate: React.FC = () => {
   const {
-    generate,
+    fetch: generate,
     isLoading: isGeneratingCatalog,
     onFinish: onGenerateCatalogFinish,
-    onStart: onGenerateCatalogStart,
+    onError: onGenerateCatalogFail,
   } = useGenerateCatalog();
+
+  const { compare, updatedPages, newPages, removedPages } = useCompareCatalog();
 
   const {
     state: isSyncModalOpen,
@@ -39,36 +41,38 @@ const Generate: React.FC = () => {
     });
   };
 
-  const onCatalogGenerateFinish = (error: EventError) => {
-    error
-      ? updateNotification({
-          id: "catalog-generate",
-          title: "Katalog nie został wynegerowany",
-          message: <>{error}</>,
-          autoClose: true,
-        })
-      : updateNotification({
-          id: "catalog-generate",
-          icon: <IconCheck />,
-          color: "teal",
-          title: "Katalog",
-          message: "Wynegerowany pomyślnie.",
-          autoClose: true,
-        });
+  const onCatalogGenerateFinish = () => {
+    updateNotification({
+      id: "catalog-generate",
+      icon: <IconCheck />,
+      color: "teal",
+      title: "Katalog",
+      message: "Wynegerowany pomyślnie.",
+      autoClose: true,
+    });
+  };
+
+  const onCatalogGenerateError = (error: EventError) => {
+    updateNotification({
+      id: "catalog-generate",
+      title: "Katalog nie został wynegerowany",
+      message: <>{error}</>,
+      autoClose: true,
+    });
+  };
+
+  const onGenerate = () => {
+    generate();
+    onCatalogGenerateStart();
   };
 
   useEffect(() => {
-    const onGenerateCatalogStartSub = onGenerateCatalogStart.subscribe(
-      onCatalogGenerateStart
-    );
-
     const onGenerateCatalogFinishSub = onGenerateCatalogFinish.subscribe({
       next: onCatalogGenerateFinish,
-      error: onCatalogGenerateFinish,
+      error: onCatalogGenerateError,
     });
 
     return () => {
-      onGenerateCatalogStartSub.unsubscribe();
       onGenerateCatalogFinishSub.unsubscribe();
     };
   }, []);
@@ -97,9 +101,13 @@ const Generate: React.FC = () => {
         size="md"
       >
         <Stack spacing="xl">
+          <Button onClick={compare}>Fetch clients catalog</Button>
+          <span>Updated pages count: {updatedPages?.length}</span>
+          <span>New pages count: {newPages?.length}</span>
+          <span>Removed pages count: {removedPages?.length}</span>
           <Group position="right">
             <Button onClick={closeSyncModal}>Anuluj</Button>
-            <Button onClick={generate}>Synchronizuj</Button>
+            <Button onClick={onGenerate}>Synchronizuj</Button>
           </Group>
         </Stack>
       </Modal>

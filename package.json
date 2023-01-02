@@ -50,6 +50,7 @@
     "electron-context-menu": "^3.5.0",
     "inkscape": "^2.1.0",
     "jimp": "^0.16.2",
+    "lodash-es": "^4.17.21",
     "node-fetch": "^3.2.10",
     "pdfkit": "^0.13.0",
     "react-sortable-hoc": "^2.0.0",
