@@ -101,13 +101,13 @@ const Generate: React.FC = () => {
         size="md"
       >
         <Stack spacing="xl">
-          <Button onClick={compare}>Fetch clients catalog</Button>
-          <span>Updated pages count: {updatedPages?.length}</span>
-          <span>New pages count: {newPages?.length}</span>
-          <span>Removed pages count: {removedPages?.length}</span>
+          {/* <Button onClick={compare}>Fetch clients catalog</Button>
+          <span>Zmienione strony: {updatedPages?.length}</span>
+          <span>Dodane strony: {newPages?.length}</span>
+          <span>Usunięte strony: {removedPages?.length}</span> */}
           <Group position="right">
             <Button onClick={closeSyncModal}>Anuluj</Button>
-            <Button onClick={onGenerate}>Synchronizuj</Button>
+            <Button onClick={onGenerate}>Generuj</Button>
           </Group>
         </Stack>
       </Modal>
