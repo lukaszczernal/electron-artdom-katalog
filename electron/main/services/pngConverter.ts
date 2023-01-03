@@ -19,7 +19,7 @@ const pngConverter = (pngPath: string, jpgPath: string, options?: Options) => {
           source.resize(200, 283);
           break;
         case ImageSize.CLIENT:
-          source.quality(75);
+          source.quality(55);
           source.resize(800, 1132);
           break;
         default:
