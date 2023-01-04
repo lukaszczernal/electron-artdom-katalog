@@ -72,8 +72,10 @@ const refreshPage = (filename: string) => {
   return promise;
 };
 
-const refreshAllPages = async () => {
-  const pages = readPages();
+const refreshAllPages = async (pages: Page[]) => {
+  if (pages.length === 0) {
+    return Promise.resolve();
+  }
   const concurrency = 4;
   const refreshStream = from(pages).pipe(
     map((page) => page.svg.file),
@@ -166,20 +168,26 @@ const generatePDF = async () => {
   const pages = readPages().filter((page) => page.status === "enable");
 
   // 1. Check for which svg we need to generate jpg because its not created
-  const pagesToUpdate = pages.filter(
-    (page) => fs.existsSync(`public/jpg/${page.svg.file}.jpg`) === false
-  );
+  const pagesToUpdate = pages.filter((page) => {
+    const jpgPath = `${getPath().JPG_STORAGE_PATH}/${page.svg.file}.jpg`;
+    const pngPath = `${getPath().PNG_STORAGE_PATH}/${page.svg.file}.png`;
+    const existsJpg = fs.existsSync(jpgPath);
+    const existsPng = fs.existsSync(pngPath);
+
+    if (!existsJpg || !existsPng) {
+      return true;
+    }
+
+    const isEmptyJpg = fs.statSync(jpgPath)?.size === 0;
+    const isEmptyPng = fs.statSync(pngPath)?.size === 0;
+
+    return isEmptyJpg || isEmptyPng;
+  });
 
   // 2. TODO Check for which svg we need to generate jpg because it was updated
 
   // 3. Generate missing jpg's
-  await Promise.allSettled(
-    pagesToUpdate.map((page) => {
-      const pngPath = `${getPath().PNG_STORAGE_PATH}/${page.svg.file}.png`;
-      const jpgPath = `${getPath().JPG_STORAGE_PATH}/${page.svg.file}.jpg`;
-      return pngConverter(pngPath, jpgPath);
-    })
-  );
+  await refreshAllPages(pagesToUpdate);
 
   // 3.5 Generate new pdf file name with timestamp
 

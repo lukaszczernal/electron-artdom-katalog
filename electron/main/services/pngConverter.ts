@@ -23,7 +23,7 @@ const pngConverter = (pngPath: string, jpgPath: string, options?: Options) => {
           source.resize(800, 1132);
           break;
         default:
-          source.quality(55);
+          source.quality(45);
       }
 
       return source.write(jpgPath, (error) => {
