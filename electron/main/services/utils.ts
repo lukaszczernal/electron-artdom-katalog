@@ -1,4 +1,7 @@
 import fs from "fs";
+import imagemin from "imagemin";
+import imageminJpegtran from "imagemin-jpegtran";
+import imageminPngquant from "imagemin-pngquant";
 import { Page } from "../../../src/models";
 
 const nextFilename = (filename: string) => {
@@ -43,3 +46,14 @@ export const removeFileAsync = (path: string) => {
 
   return promise;
 };
+
+export const optimizeImage = (srcPath: string, destFolder: string) =>
+  imagemin([srcPath], {
+    destination: destFolder,
+    plugins: [
+      imageminJpegtran(),
+      imageminPngquant({
+        quality: [0.4, 0.6],
+      }),
+    ],
+  });

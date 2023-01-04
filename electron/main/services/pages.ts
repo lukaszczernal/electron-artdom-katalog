@@ -3,7 +3,7 @@ import { spawn } from "child_process";
 import PDFkit from "pdfkit";
 import { FileInfo, Page } from "../../../src/models";
 import svgConverter from "./svgConverter";
-import { findNewFilename, removeFileAsync } from "./utils";
+import { findNewFilename, optimizeImage, removeFileAsync } from "./utils";
 import { getPath } from "./env";
 import pngConverter, { ImageSize } from "./pngConverter";
 import { from, lastValueFrom, map, mergeMap } from "rxjs";
@@ -60,12 +60,11 @@ const refreshPage = (filename: string) => {
 
     return svgConverter(svgPath, pngPath).on("finish", () =>
       pngConverter(pngPath, jpgPath)
-        .then(() =>
-          pngConverter(pngPath, thumbPath, { size: ImageSize.THUMBNAIL })
-        )
-        .then(() =>
-          pngConverter(pngPath, clientPath, { size: ImageSize.CLIENT })
-        )
+        .then(() => {
+          pngConverter(pngPath, thumbPath, { size: ImageSize.THUMBNAIL });
+          pngConverter(pngPath, clientPath, { size: ImageSize.CLIENT });
+        })
+        .then(() => optimizeImage(jpgPath, getPath().JPG_STORAGE_PATH))
         .then(() => resolve(filename))
     );
   });
