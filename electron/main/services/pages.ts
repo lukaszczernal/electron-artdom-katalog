@@ -60,10 +60,12 @@ const refreshPage = (filename: string) => {
 
     return svgConverter(svgPath, pngPath).on("finish", () =>
       pngConverter(pngPath, jpgPath)
-        .then(() => {
-          pngConverter(pngPath, thumbPath, { size: ImageSize.THUMBNAIL });
-          pngConverter(pngPath, clientPath, { size: ImageSize.CLIENT });
-        })
+        .then(() =>
+          pngConverter(pngPath, thumbPath, { size: ImageSize.THUMBNAIL })
+        )
+        .then(() =>
+          pngConverter(pngPath, clientPath, { size: ImageSize.CLIENT })
+        )
         .then(() => optimizeImage(jpgPath, getPath().JPG_STORAGE_PATH))
         .then(() => resolve(filename))
     );
