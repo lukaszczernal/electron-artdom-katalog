@@ -2,7 +2,7 @@
   "name": "electron-vite-react",
   "productName": "ArtdomProductCatalog",
   "private": true,
-  "version": "2.5.8",
+  "version": "2.5.9",
   "description": "Artdom Product Catalog - Desktop application.",
   "author": "Łukasz Czernal",
   "license": "MIT",
