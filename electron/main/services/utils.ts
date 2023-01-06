@@ -1,7 +1,7 @@
 import fs from "fs";
 import imagemin from "imagemin";
-import imageminJpegtran from "imagemin-jpegtran";
-import imageminPngquant from "imagemin-pngquant";
+import imageminJpegtran from "./imagemin-jpegtran";
+import imageminPngquant from "./imagemin-pngquant";
 import { Page } from "../../../src/models";
 
 const nextFilename = (filename: string) => {
@@ -51,7 +51,7 @@ export const optimizeImage = (srcPath: string, destFolder: string) =>
   imagemin([srcPath], {
     destination: destFolder,
     plugins: [
-      imageminJpegtran(),
+      imageminJpegtran({}),
       imageminPngquant({
         quality: [0.4, 0.6],
       }),
