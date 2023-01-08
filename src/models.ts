@@ -29,3 +29,8 @@ export interface HazelResponse {
   pub_date: string;
   url: string;
 }
+
+export type EnvInfo = {
+  sourcePath: string,
+  resourcePath: string,
+}

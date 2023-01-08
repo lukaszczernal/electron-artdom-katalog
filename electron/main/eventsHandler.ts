@@ -6,7 +6,7 @@ import {
 } from "electron";
 import fetch from "node-fetch";
 import { BROWSER_EVENTS as EVENTS } from "../../src/events";
-import { FileInfo, Page } from "../../src/models";
+import { EnvInfo, FileInfo, Page } from "../../src/models";
 import { setDirectories } from "./services/directories";
 import { registerSourcePath, getSourcePath } from "./services/env";
 import {
@@ -28,7 +28,10 @@ const registerEventHandlers = (browser: BrowserWindow) => {
     (event: IpcMainEvent, sourcePath: string) => {
       registerSourcePath(sourcePath);
       setDirectories();
-      event.reply(EVENTS.ENV_REGISTER_SUCCESS, sourcePath);
+      event.reply(EVENTS.ENV_REGISTER_SUCCESS, {
+        sourcePath,
+        resourcePath: process.resourcesPath,
+      } as EnvInfo);
     }
   );
 
@@ -51,12 +54,15 @@ const registerEventHandlers = (browser: BrowserWindow) => {
           () => event.reply(EVENTS.PAGE_UPDATE_FAIL)
         )
       )
-      .then(() => event.reply(EVENTS.PAGE_REFRESH_SUCCESS));
+      .then(() => event.reply(EVENTS.PAGE_REFRESH_SUCCESS))
+      .catch((error) => event.reply(EVENTS.PAGE_REFRESH_FAIL, error));
   });
 
   browserEventBus.on(EVENTS.PAGE_REFRESH_ALL, (event: IpcMainEvent) => {
     const pages = readPages();
-    refreshAllPages(pages).then(() => event.reply(EVENTS.PAGE_REFRESH_ALL_SUCCESS));
+    refreshAllPages(pages).then(() =>
+      event.reply(EVENTS.PAGE_REFRESH_ALL_SUCCESS)
+    );
   });
 
   browserEventBus.on(EVENTS.PAGE_EDIT, (event: IpcMainEvent, page: Page) => {

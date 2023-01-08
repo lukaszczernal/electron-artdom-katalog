@@ -1,8 +1,8 @@
-import Jimp from "jimp";
+import sharp from "sharp";
 
 export enum ImageSize {
-  THUMBNAIL = 'thumbnail',
-  CLIENT = 'client',
+  THUMBNAIL = "thumbnail",
+  CLIENT = "client",
 }
 
 interface Options {
@@ -10,31 +10,23 @@ interface Options {
 }
 
 const pngConverter = (pngPath: string, jpgPath: string, options?: Options) => {
-  const promise = new Promise(async (resolve, reject) => {
-    const pngSource = Jimp.read(pngPath);
-    pngSource.then((source) => {
-      switch(options?.size) {
-        case ImageSize.THUMBNAIL:
-          source.quality(75);
-          source.resize(200, 283);
-          break;
-        case ImageSize.CLIENT:
-          source.quality(55);
-          source.resize(800, 1132);
-          break;
-        default:
-          source.quality(45);
-      }
+  const pngSource = sharp(pngPath);
 
-      return source.write(jpgPath, (error) => {
-        if (error) {
-          reject(`${jpgPath} file could not be created`);
-        }
-        resolve(`${jpgPath} generated`);
-      });
-    });
-  });
-  return promise;
+  switch (options?.size) {
+    case ImageSize.THUMBNAIL:
+      pngSource.resize(200, 283).jpeg({ quality: 75 });
+      break;
+    case ImageSize.CLIENT:
+      pngSource.resize(800, 1132).jpeg({ quality: 55 });
+      break;
+    default:
+      pngSource.jpeg({ quality: 45 });
+  }
+
+  return pngSource
+    .toFile(jpgPath)
+    .then(() => `${jpgPath} generated`)
+    .catch(() => `${jpgPath} file could not be created`);
 };
 
 export default pngConverter;

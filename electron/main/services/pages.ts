@@ -3,7 +3,7 @@ import { spawn } from "child_process";
 import PDFkit from "pdfkit";
 import { FileInfo, Page } from "../../../src/models";
 import svgConverter from "./svgConverter";
-import { findNewFilename, optimizeImage, removeFileAsync } from "./utils";
+import { findNewFilename, removeFileAsync } from "./utils";
 import { getPath } from "./env";
 import pngConverter, { ImageSize } from "./pngConverter";
 import { from, lastValueFrom, map, mergeMap } from "rxjs";
@@ -51,7 +51,7 @@ const savePages = (pages: Page[]): Promise<any> => {
 };
 
 const refreshPage = (filename: string) => {
-  const promise = new Promise<string>((resolve) => {
+  const promise = new Promise<string>((resolve, reject) => {
     const pngPath = `${getPath().PNG_STORAGE_PATH}/${filename}.png`;
     const svgPath = `${getPath().SVG_STORAGE_PATH}/${filename}`;
     const jpgPath = `${getPath().JPG_STORAGE_PATH}/${filename}.jpg`;
@@ -66,8 +66,8 @@ const refreshPage = (filename: string) => {
         .then(() =>
           pngConverter(pngPath, clientPath, { size: ImageSize.CLIENT })
         )
-        .then(() => optimizeImage(jpgPath, getPath().JPG_STORAGE_PATH))
         .then(() => resolve(filename))
+        .catch(reject)
     );
   });
   return promise;

@@ -5,6 +5,7 @@ import { BROWSER_EVENTS as EVENTS } from "../events";
 import useEvent from "./useEvent";
 
 export const useRefreshPage = () => {
+  const [error, setError] = useState();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isAllLoading, setIsAllLoading] = useState<boolean>(false);
 
@@ -19,9 +20,13 @@ export const useRefreshPage = () => {
   };
 
   useEvent(EVENTS.PAGE_REFRESH_SUCCESS, () => setIsLoading(false));
+  useEvent(EVENTS.PAGE_REFRESH_FAIL, (_, error: any) => {
+    setError(error);
+    setIsLoading(false);
+  });
   useEvent(EVENTS.PAGE_REFRESH_ALL_SUCCESS, () => setIsAllLoading(false));
 
-  return { refreshPage, isLoading, refreshAll, isAllLoading };
+  return { refreshPage, isLoading, refreshAll, isAllLoading, error };
 };
 
 export default useRefreshPage;
