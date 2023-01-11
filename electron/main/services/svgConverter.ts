@@ -1,36 +1,36 @@
-import { spawnSync } from "child_process";
 import Inkscape from "inkscape";
 import fs from "fs";
+import { removeFileAsync } from "./utils";
 
 const IMAGE_OUTPUT_WIDTH = 2000;
 
 const svgConverter = (svgpath, pngpath) => {
   const svg = fs.createReadStream(svgpath);
-  const stream = fs.createWriteStream(pngpath);
+  const stream = fs.createWriteStream(`${pngpath}`);
 
-  // TODO check on windows if works then remove
-  // const inkscapeVersionProcess = spawnSync("inkscape", ["--version"], {
-  //   encoding: "utf8",
-  // });
+  const promise = new Promise<string>((resolve, reject) => {
+    stream.on("finish", () => {
+      resolve("SVG file converted to PNG file.");
+    });
 
-  // const inkscapeVersionOutput = inkscapeVersionProcess.stdout;
-  // const [_, version] = inkscapeVersionOutput.split(" ");
-  // const [majorVersion] = version.split(".");
+    stream.on("error", () => {
+      reject("SVG file failed to convert to PNG.");
+    });
 
-  // const converter =
-  //   majorVersion === "1"
-  //     ? new Inkscape([
-  //         "--export-type=png",
-  //         `--export-width=${IMAGE_OUTPUT_WIDTH}`,
-  //         "-b",
-  //         "#ffffff",
-  //       ])
-  //     : new Inkscape(["-e", "-w", `${IMAGE_OUTPUT_WIDTH}`, "-b", "#ffffff"]);
-  const converter = new Inkscape(["-e", "-w", `${IMAGE_OUTPUT_WIDTH}`, "-b", "#ffffff"]);
+    removeFileAsync(pngpath).then(() => {
+      const converter = new Inkscape([
+        "-e",
+        "-w",
+        `${IMAGE_OUTPUT_WIDTH}`,
+        "-b",
+        "#ffffff",
+      ]);
 
-  svg.pipe(converter).pipe(stream);
+      svg.pipe(converter).pipe(stream);
+    });
+  });
 
-  return stream;
+  return promise;
 };
 
 export default svgConverter;
