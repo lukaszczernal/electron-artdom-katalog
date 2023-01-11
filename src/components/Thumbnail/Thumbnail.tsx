@@ -24,20 +24,23 @@ const useStyles = createStyles((theme) => ({
       transform: "none",
     },
   },
+  thumbnailWrapper: {
+    background: "rgba(0,0,0,0.1)",
+  },
 }));
 
 const Thumbnail: React.FC<Props> = ({ src, disabled, isLoading = false }) => {
   const { classes } = useStyles();
 
   return (
-    <>
+    <div className={classes.thumbnailWrapper}>
       <LoadingOverlay visible={isLoading} overlayBlur={2} />
       <img
         loading="lazy"
         className={`${classes.thumbnail} ${disabled ? classes.disabled : ""}`}
         src={src}
       />
-    </>
+    </div>
   );
 };
 
