@@ -5,6 +5,11 @@ export enum PageStatus {
   disable = "disable",
 }
 
+export enum UploadType {
+  IMAGE = 'IMAGE',
+  DATA = 'DATA',
+}
+
 export interface Page extends ItemInterface {
   id: string,
   svg: {

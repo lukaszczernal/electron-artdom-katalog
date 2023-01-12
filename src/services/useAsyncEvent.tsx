@@ -16,12 +16,11 @@ const useAsyncEvent = <T extends any, E = any>(
   failEvent: BROWSER_EVENTS
 ) => {
   const onFinish = useMemo(() => new Subject<T>(), []);
-  const onError = useMemo(() => new Subject<E>(), []);
   const [asyncState, setAsyncState] = useState<AsyncState<T, E>>({
     isLoading: false,
   });
 
-  const fetch = () => nodeEventBus.send(triggerEvent);
+  const fetch = (payload?: T) => nodeEventBus.send(triggerEvent, payload);
 
   const onFinishCallback = (_: IpcRendererEvent, data: T) => {
     setAsyncState({
@@ -44,7 +43,7 @@ const useAsyncEvent = <T extends any, E = any>(
   useEvent(successEvent, onFinishCallback);
   useEvent(failEvent, onErrorCallback);
 
-  return { fetch, onFinish, onError, ...asyncState };
+  return { fetch, onFinish, ...asyncState };
 };
 
 export default useAsyncEvent;

@@ -1,4 +1,5 @@
 import fs from "fs";
+import { Response } from "node-fetch";
 import { Page } from "../../../src/models";
 
 const nextFilename = (filename: string) => {
@@ -44,3 +45,9 @@ export const removeFileAsync = (path: string) => {
   return promise;
 };
 
+export const handleResponse = (res: Response) => {
+  if (res.status >= 400) {
+    throw res.statusText;
+  }
+  return res.json();
+};

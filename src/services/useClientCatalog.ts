@@ -2,7 +2,7 @@ import { BROWSER_EVENTS as EVENTS } from "../events";
 import { EventError, Page } from "../models";
 import useAsyncEvent from "./useAsyncEvent";
 
-export const useGenerateCatalog = () => {
+export const useClientCatalog = () => {
   return useAsyncEvent<Page[], EventError>(
     EVENTS.CLIENT_FETCH_PAGES,
     EVENTS.CLIENT_FETCH_PAGES_SUCCESS,
@@ -10,4 +10,4 @@ export const useGenerateCatalog = () => {
   );
 };
 
-export default useGenerateCatalog;
+export default useClientCatalog;

@@ -1,13 +1,14 @@
 import fs from "fs";
 import { spawn } from "child_process";
 import PDFkit from "pdfkit";
-import { FileInfo, Page } from "../../../src/models";
+import { FileInfo, Page, UploadType } from "../../../src/models";
 import svgConverter from "./svgConverter";
-import { findNewFilename, removeFileAsync } from "./utils";
+import { findNewFilename, handleResponse, removeFileAsync } from "./utils";
 import { getPath } from "./env";
 import pngConverter, { ImageSize } from "./pngConverter";
 import { from, lastValueFrom, map, mergeMap } from "rxjs";
 import fetch from "node-fetch";
+import FormData from "form-data";
 
 const readPages = (): Page[] => {
   if (getPath().PAGE_STORAGE_PATH === null) {
@@ -58,17 +59,14 @@ const refreshPage = (filename: string) => {
     const thumbPath = `${getPath().JPG_STORAGE_PATH}/thumb/${filename}.jpg`;
     const clientPath = `${getPath().JPG_STORAGE_PATH}/client/${filename}.jpg`;
 
-    return svgConverter(svgPath, pngPath).on("finish", () =>
-      pngConverter(pngPath, jpgPath)
-        .then(() =>
-          pngConverter(pngPath, thumbPath, { size: ImageSize.THUMBNAIL })
-        )
-        .then(() =>
-          pngConverter(pngPath, clientPath, { size: ImageSize.CLIENT })
-        )
-        .then(() => resolve(filename))
-        .catch(reject)
-    );
+    return svgConverter(svgPath, pngPath)
+      .then(() => pngConverter(pngPath, jpgPath))
+      .then(() =>
+        pngConverter(pngPath, thumbPath, { size: ImageSize.THUMBNAIL })
+      )
+      .then(() => pngConverter(pngPath, clientPath, { size: ImageSize.CLIENT }))
+      .then(() => resolve(filename))
+      .catch(reject);
   });
   return promise;
 };
@@ -77,6 +75,7 @@ const refreshAllPages = async (pages: Page[]) => {
   if (pages.length === 0) {
     return Promise.resolve();
   }
+
   const concurrency = 4;
   const refreshStream = from(pages).pipe(
     map((page) => page.svg.file),
@@ -227,12 +226,49 @@ const removePage = (filename: string) =>
   });
 
 const fetchClientData = () =>
-  fetch("http://artdom.opole.pl/data/pages-array.json", {
+  // fetch("http://artdom.opole.pl/data/pages-array.json", {
+  fetch("http://localhost:80/data/pages-array.json", {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
     },
   });
+
+const uploadClientPage = (pageId: string) => {
+  const page = readPages().find((page) => page.svg.file === pageId);
+  if (!page) {
+    return Promise.reject(`No page found for id: ${pageId}`);
+  }
+
+  const imagePath = `${getPath().CLIENT_JPG_STORAGE_PATH}/${pageId}.jpg`;
+
+  // TODO read file async
+  let readStream = fs.readFileSync(imagePath);
+
+  const formData = new FormData();
+  formData.append("uploadType", UploadType.DATA);
+  formData.append("upfile", readStream, {
+    contentType: "image/jpeg",
+    filename: `${pageId}.jpg`,
+  });
+
+  return fetch("http://localhost:80/upload.php", {
+    method: "POST",
+    body: formData,
+  }).then(handleResponse);
+};
+
+const removeClientPage = (pageId: string) => {
+  const page = readPages().find((page) => page.svg.file === pageId);
+  if (!page) {
+    return Promise.reject(`No page found for id: ${pageId}`);
+  }
+
+  return fetch("http://localhost:80/upload.php", {
+    method: "DELETE",
+    body: pageId,
+  }).then(handleResponse);
+};
 
 export {
   readPages,
@@ -245,4 +281,6 @@ export {
   generatePDF,
   removePage,
   fetchClientData,
+  uploadClientPage,
+  removeClientPage,
 };
