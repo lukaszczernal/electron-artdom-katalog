@@ -10,6 +10,7 @@ interface Options {
 }
 
 const pngConverter = (pngPath: string, jpgPath: string, options?: Options) => {
+  sharp.cache(false);
   const pngSource = sharp(pngPath);
 
   switch (options?.size) {
@@ -26,7 +27,9 @@ const pngConverter = (pngPath: string, jpgPath: string, options?: Options) => {
   return pngSource
     .toFile(jpgPath)
     .then(() => `${jpgPath} generated`)
-    .catch(() => `${jpgPath} file could not be created`);
+    .catch(() => {
+      throw `${jpgPath} file could not be created`;
+    });
 };
 
 export default pngConverter;
