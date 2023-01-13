@@ -39,6 +39,7 @@ const useListStyles = createStyles(() => ({
     padding: "0 1rem 1rem",
     justifyContent: "center",
     width: "50%",
+    height: "300px",
     alignContent: "stretch",
     "@media (min-width: 600px)": {
       width: "33%",
