@@ -11,11 +11,10 @@ interface Props {
 
 const useStyles = createStyles((theme, _params, _getRef) => ({
   wrapper: {
-    // ref: getRef("link"),
     position: "relative",
     display: "flex",
     justifyContent: "center",
-    height: "100%",
+    height: "fit-content;",
     padding: "1px",
     borderRadius: "2px",
 
