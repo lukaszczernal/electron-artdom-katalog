@@ -10,6 +10,9 @@ import { from, lastValueFrom, map, mergeMap } from "rxjs";
 import fetch from "node-fetch";
 import FormData from "form-data";
 
+// TODO move to env variables
+const HOST = "http://localhost:80"; // http://artdom.opole.pl
+
 const readPages = (): Page[] => {
   if (getPath().PAGE_STORAGE_PATH === null) {
     return []; // TODO add error handling or empty state
@@ -226,8 +229,7 @@ const removePage = (filename: string) =>
   });
 
 const fetchClientData = () =>
-  // fetch("http://artdom.opole.pl/data/pages-array.json", {
-  fetch("http://localhost:80/data/pages-array.json", {
+  fetch(`${HOST}/data/pages-array.json`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -246,13 +248,13 @@ const uploadClientPage = (pageId: string) => {
   let readStream = fs.readFileSync(imagePath);
 
   const formData = new FormData();
-  formData.append("uploadType", UploadType.DATA);
+  formData.append("uploadType", UploadType.IMAGE);
   formData.append("upfile", readStream, {
     contentType: "image/jpeg",
     filename: `${pageId}.jpg`,
   });
 
-  return fetch("http://localhost:80/upload.php", {
+  return fetch(`${HOST}/upload.php`, {
     method: "POST",
     body: formData,
   }).then(handleResponse);
@@ -264,9 +266,8 @@ const removeClientPage = (pageId: string) => {
     return Promise.reject(`No page found for id: ${pageId}`);
   }
 
-  return fetch("http://localhost:80/upload.php", {
+  return fetch(`${HOST}/remove.php?pageId=${pageId}`, {
     method: "DELETE",
-    body: pageId,
   }).then(handleResponse);
 };
 

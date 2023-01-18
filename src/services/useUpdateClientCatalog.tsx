@@ -2,8 +2,8 @@ import useAsyncEvent from "./useAsyncEvent";
 import { EventError } from "@/models";
 import { BROWSER_EVENTS } from "@/events";
 
-const useUpdateCatalog = () => {
-  const { fetch: uploadPage, error: uploadPageError, onFinish: onUploadFinish } = useAsyncEvent<
+const useUpdateClientCatalog = () => {
+  const { fetch: uploadPage, error: uploadPageError, data: uploadResponse, onFinish: onUploadFinish } = useAsyncEvent<
     string,
     EventError
   >(
@@ -12,7 +12,7 @@ const useUpdateCatalog = () => {
     BROWSER_EVENTS.CLIENT_UPLOAD_PAGES_FAIL
   );
 
-  const { fetch: removePage, error: removePageError } = useAsyncEvent<
+  const { fetch: removePage, error: removePageError, data: removeResponse, onFinish: onRemoveFinish } = useAsyncEvent<
     string,
     EventError
   >(
@@ -35,7 +35,10 @@ const useUpdateCatalog = () => {
     uploadPageError,
     removePageError,
     onUploadFinish,
+    onRemoveFinish,
+    uploadResponse,
+    removeResponse,
   };
 };
 
-export default useUpdateCatalog;
+export default useUpdateClientCatalog;

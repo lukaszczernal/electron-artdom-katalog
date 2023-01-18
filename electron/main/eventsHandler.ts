@@ -20,6 +20,8 @@ import {
   generatePDF,
   removePage,
   fetchClientData,
+  uploadClientPage,
+  removeClientPage,
 } from "./services/pages";
 
 const registerEventHandlers = (browser: BrowserWindow) => {
@@ -125,6 +127,34 @@ const registerEventHandlers = (browser: BrowserWindow) => {
       .then((pages) => event.reply(EVENTS.CLIENT_FETCH_PAGES_SUCCESS, pages))
       .catch((err) => event.reply(EVENTS.CLIENT_FETCH_PAGES_FAIL, err));
   });
+
+  browserEventBus.on(
+    EVENTS.CLIENT_UPLOAD_PAGES,
+    (event: IpcMainEvent, pageId?: string) => {
+      if (!pageId) {
+        event.reply(EVENTS.CLIENT_UPLOAD_PAGES_FAIL, "No page id provided.");
+        return;
+      }
+
+      uploadClientPage(pageId)
+        .then((res) => event.reply(EVENTS.CLIENT_UPLOAD_PAGES_SUCCESS, res))
+        .catch((err) => event.reply(EVENTS.CLIENT_UPLOAD_PAGES_FAIL, err));
+    }
+  );
+
+  browserEventBus.on(
+    EVENTS.CLIENT_REMOVE_PAGES,
+    (event: IpcMainEvent, pageId?: string) => {
+      if (!pageId) {
+        event.reply(EVENTS.CLIENT_REMOVE_PAGES_FAIL, "No page id provided.");
+        return;
+      }
+
+      removeClientPage(pageId)
+        .then((res) => event.reply(EVENTS.CLIENT_REMOVE_PAGES_SUCCESS, res))
+        .catch((err) => event.reply(EVENTS.CLIENT_REMOVE_PAGES_FAIL, err));
+    }
+  );
 
   autoUpdater.on("checking-for-update", () => {
     browser.webContents.send(EVENTS.APP_CHECK_UPDATES_LOADING);
