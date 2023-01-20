@@ -7,6 +7,7 @@ import {
 import fetch from "node-fetch";
 import { BROWSER_EVENTS as EVENTS } from "../../src/events";
 import { EnvInfo, FileInfo, Page } from "../../src/models";
+import { EventPayload } from "../../src/models/redux";
 import { setDirectories } from "./services/directories";
 import { registerSourcePath, getSourcePath } from "./services/env";
 import {
@@ -23,6 +24,12 @@ import {
   uploadClientPage,
   removeClientPage,
 } from "./services/pages";
+
+const reply = (event: Electron.IpcMainEvent, type: EVENTS) => (payload: any) =>
+  event.reply(EVENTS.EVENTS_CHANNEL, {
+    type,
+    payload,
+  } as EventPayload);
 
 const registerEventHandlers = (browser: BrowserWindow) => {
   browserEventBus.on(
@@ -121,11 +128,11 @@ const registerEventHandlers = (browser: BrowserWindow) => {
     event.reply(EVENTS.APP_CHECK_UPDATES_SUCCESS, autoUpdater.getFeedURL());
   });
 
-  browserEventBus.on(EVENTS.CLIENT_FETCH_PAGES, (event: IpcMainEvent) => {
+  browserEventBus.on(EVENTS.CLIENT_PAGES_FETCH, (event: IpcMainEvent) => {
     fetchClientData()
       .then((res) => res.json())
-      .then((pages) => event.reply(EVENTS.CLIENT_FETCH_PAGES_SUCCESS, pages))
-      .catch((err) => event.reply(EVENTS.CLIENT_FETCH_PAGES_FAIL, err));
+      .then(reply(event, EVENTS.CLIENT_PAGES_SUCCESS))
+      .catch(reply(event, EVENTS.CLIENT_PAGES_FAIL));
   });
 
   browserEventBus.on(
