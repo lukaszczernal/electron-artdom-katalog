@@ -155,7 +155,7 @@ const Generate: React.FC = () => {
       >
         <Stack spacing="xl">
           <CatalogStats />
-          <Button onClick={compare}>Analizuj zmiany</Button>
+          {/* <Button onClick={compare}>Analizuj zmiany</Button> */}
           {/* {uploadPageError && <span>Upload error: {uploadPageError}</span>}
           {removePageError && <span>Remove error: {removePageError}</span>} */}
 
