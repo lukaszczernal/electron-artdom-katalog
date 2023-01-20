@@ -15,7 +15,6 @@ const createAsyncSliceConfig = <RESPONSE, REQUEST = void>(
   initialState: getInitialState<RESPONSE>(),
   reducers: {
     FETCH: (state, action: PayloadAction<REQUEST>) => {
-      console.log('action', action);
       nodeEventBus.send(action.type, action.payload);
       return { ...state, isLoading: true };
     },
