@@ -24,6 +24,7 @@ import {
   uploadClientPage,
   removeClientPage,
 } from "./services/pages";
+import { reduxEvent } from "./utils";
 
 const reply = (event: Electron.IpcMainEvent, type: EVENTS) => (payload: any) =>
   event.reply(EVENTS.EVENTS_CHANNEL, {
@@ -131,9 +132,15 @@ const registerEventHandlers = (browser: BrowserWindow) => {
   browserEventBus.on(EVENTS.CLIENT_PAGES_FETCH, (event: IpcMainEvent) => {
     fetchClientData()
       .then((res) => res.json())
-      .then(reply(event, EVENTS.CLIENT_PAGES_SUCCESS))
-      .catch(reply(event, EVENTS.CLIENT_PAGES_FAIL));
+      .then((res) =>
+        event.reply(...reduxEvent(EVENTS.CLIENT_PAGES_SUCCESS, res))
+      )
+      .catch((err) =>
+        event.reply(...reduxEvent(EVENTS.CLIENT_PAGES_FAIL, err))
+      );
   });
+
+  reduxEvent;
 
   browserEventBus.on(
     EVENTS.CLIENT_UPLOAD_PAGES,
@@ -193,7 +200,7 @@ const registerEventHandlers = (browser: BrowserWindow) => {
   });
 
   browserEventBus.on(EVENTS.APP_DOWNLOAD, (_, url) => {
-    browser.webContents.downloadURL(url)
+    browser.webContents.downloadURL(url);
   });
 
   // browser.webContents.on("did-finish-load", () => {

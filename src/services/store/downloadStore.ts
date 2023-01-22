@@ -1,36 +1,12 @@
-import { ipcRenderer as nodeEventBus } from "electron";
 import { BROWSER_EVENTS } from "@/events";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AsyncState } from "@/models/redux";
+import { getDefaultReducers, getDefaultState } from "./utils";
 
-const getInitialState = <DATA>(): AsyncState<DATA> => ({
-  isLoading: false,
-});
-
-const createAsyncSliceConfig = <RESPONSE, REQUEST = void>(
-  name: BROWSER_EVENTS
-) => ({
-  name,
-  initialState: getInitialState<RESPONSE>(),
+export const downloadStore = createSlice({
+  name: BROWSER_EVENTS.APP_DOWNLOAD,
+  initialState: getDefaultState(),
   reducers: {
-    FETCH: (state, action: PayloadAction<REQUEST>) => {
-      nodeEventBus.send(action.type, action.payload);
-      return { ...state, isLoading: true };
-    },
-    SUCCESS: (_state, action: PayloadAction<RESPONSE>) => {
-      return {
-        data: action.payload,
-        isLoading: false,
-      };
-    },
-    FAIL: (state, { payload: error }: PayloadAction<string>) => {
-      return {
-        ...state,
-        isLoading: false,
-        error,
-      };
-    },
-    // TODO add download status typings
+    ...getDefaultReducers(),
     STATUS: (state, { payload: data }: PayloadAction<string>) => {
       return { ...state, data };
     },
@@ -39,7 +15,3 @@ const createAsyncSliceConfig = <RESPONSE, REQUEST = void>(
     },
   },
 });
-
-export const downloadStore = createSlice(
-  createAsyncSliceConfig(BROWSER_EVENTS.APP_DOWNLOAD)
-);
