@@ -28,6 +28,8 @@ import { release } from "os";
 import { join } from "path";
 import { registerEventHandlers } from "./eventsHandler";
 import contextMenu from "electron-context-menu";
+import { BROWSER_EVENTS } from "../../src/events";
+import { reduxEvent } from "./utils";
 
 contextMenu();
 
@@ -106,6 +108,45 @@ async function createWindow() {
   // win.webContents.on('did-finish-load', () => {
   //   win?.webContents.send('main-process-message', new Date().toLocaleString())
   // })
+
+  win.webContents.session.on("will-download", (_event, item, webContents) => {
+    item.on("updated", (_event, state) => {
+      if (state === "interrupted") {
+        webContents.send(
+          ...reduxEvent(BROWSER_EVENTS.APP_DOWNLOAD_STATUS, state)
+        );
+      } else if (state === "progressing") {
+        if (item.isPaused()) {
+          webContents.send(
+            ...reduxEvent(BROWSER_EVENTS.APP_DOWNLOAD_STATUS, "paused")
+          );
+        } else {
+          const progress =
+            Math.round((item.getReceivedBytes() / item.getTotalBytes()) * 100) /
+            100;
+          webContents.send(
+            ...reduxEvent(BROWSER_EVENTS.APP_DOWNLOAD_STATUS, state)
+          );
+          webContents.send(
+            ...reduxEvent(BROWSER_EVENTS.APP_DOWNLOAD_PROGRESS, progress)
+          );
+        }
+      }
+    });
+    item.once("done", (_event, state) => {
+      if (state === "completed") {
+        webContents.send(
+          ...reduxEvent(BROWSER_EVENTS.APP_DOWNLOAD_STATUS, state)
+        );
+        webContents.send(...reduxEvent(BROWSER_EVENTS.APP_DOWNLOAD_SUCCESS));
+      } else {
+        webContents.send(
+          ...reduxEvent(BROWSER_EVENTS.APP_DOWNLOAD_STATUS, state)
+        );
+        webContents.send(...reduxEvent(BROWSER_EVENTS.APP_DOWNLOAD_FAIL));
+      }
+    });
+  });
 
   registerEventHandlers(win);
 

@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { clientPagesStore } from "@/services/store/clientPagesStore";
+import { downloadStore } from './services/store/downloadStore';
 
 const store = configureStore({
   reducer: {
     clientPages: clientPagesStore.reducer,
+    download: downloadStore.reducer,
   },
 });
 

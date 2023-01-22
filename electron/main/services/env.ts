@@ -10,6 +10,7 @@ const getPath = () => ({
   JPG_STORAGE_PATH: SOURCE_PATH ?`${SOURCE_PATH}/jpg` : null,
   PDF_STORAGE_PATH: SOURCE_PATH ?`${SOURCE_PATH}/pdf` : null,
   CLIENT_JPG_STORAGE_PATH: SOURCE_PATH ?`${SOURCE_PATH}/jpg/client` : null,
+  THUMB_STORAGE_PATH: SOURCE_PATH ?`${SOURCE_PATH}/jpg/thumb` : null,
 });
 
 const registerSourcePath = (sourcePath?: string) => {

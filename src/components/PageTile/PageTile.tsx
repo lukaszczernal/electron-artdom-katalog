@@ -15,18 +15,19 @@ const PageTile: React.FC<Props> = ({ pageId, onSelect, onPreview }) => {
   const { sourcePath } = useContext(SourcePathContext);
 
   const page = pages?.[pageId];
+  const isDisabled = page?.status !== "enable";
+  const imageSrc = `safe-file-protocol://${sourcePath}/jpg/thumb/${page?.svg.file}.jpg?cache=${page?.version}`;
+
+  const selectPage = () => onSelect(pageId);
 
   return (
     <>
       <ThumbnailAction
         page={page}
         mainAction={onPreview}
-        secondaryAction={() => onSelect(pageId)}
+        secondaryAction={selectPage}
       >
-        <Thumbnail
-          disabled={page?.status !== "enable"}
-          src={`safe-file-protocol://${sourcePath}/jpg/thumb/${page?.svg.file}.jpg?cache=${page?.version}`}
-        />
+        <Thumbnail disabled={isDisabled} src={imageSrc} />
       </ThumbnailAction>
     </>
   );

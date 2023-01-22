@@ -192,6 +192,10 @@ const registerEventHandlers = (browser: BrowserWindow) => {
       .catch((err) => event.reply(EVENTS.APP_CHECK_HAZEL_FAIL, err));
   });
 
+  browserEventBus.on(EVENTS.APP_DOWNLOAD, (_, url) => {
+    browser.webContents.downloadURL(url)
+  });
+
   // browser.webContents.on("did-finish-load", () => {
   //   browser.webContents.send("smthngForBrowser", "weird");
   //   browser?.webContents.send(

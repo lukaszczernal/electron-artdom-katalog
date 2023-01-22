@@ -1,3 +1,4 @@
+import { ipcRenderer as nodeEventBus } from "electron";
 import { useContext, useEffect, useState } from "react";
 import { BROWSER_EVENTS as EVENTS } from "@/events";
 import { useRefreshPage, useUpdatePage } from "../../services";
@@ -60,11 +61,12 @@ const PageDetails: React.FC<Prosp> = ({ pageId, onFinish }) => {
   const theme = useMantineTheme();
 
   const page = pages?.[pageId] || null;
+  const isPageActive = localPage?.status === "enable";
+  const togglePageLabel = isPageActive ? "Ukryj" : "Aktywuj";
+  const thumbnailSrc = `safe-file-protocol://${sourcePath}/jpg/client/${page?.svg.file}.jpg?cache=${page?.version}`;
 
   useEffect(() => {
-    if (page) {
-      setLocalPage(page);
-    }
+    page && setLocalPage(page);
   }, [page]);
 
   useEvent<Page>(EVENTS.PAGE_EDIT_SUCCESS, (_, page) => {
@@ -121,14 +123,21 @@ const PageDetails: React.FC<Prosp> = ({ pageId, onFinish }) => {
     setToDelete(null);
   };
 
+  const requestPageDelete = () =>
+    setToDelete(localPage ? localPage.svg.file : null);
+
+  const downloadPage = () => {
+    nodeEventBus.send(EVENTS.APP_DOWNLOAD, thumbnailSrc);
+  }
+
   return localPage ? (
     <>
       <div className={classes.overview}>
         <div className={classes.page}>
           <Thumbnail
             isLoading={isLoading}
-            disabled={localPage.status !== "enable"}
-            src={`safe-file-protocol://${sourcePath}/jpg/${page?.svg.file}.jpg?cache=${page?.version}`}
+            disabled={!isPageActive}
+            src={thumbnailSrc}
           />
         </div>
         <div className={classes.keywords}>
@@ -156,16 +165,13 @@ const PageDetails: React.FC<Prosp> = ({ pageId, onFinish }) => {
         </div>
         <div className={classes.actions}>
           <Stack spacing="xs">
-            <Button onClick={() => togglePage()}>
-              {localPage?.status === "enable" ? "Ukryj" : "Aktywuj"}
-            </Button>
+            <Button onClick={togglePage}>{togglePageLabel}</Button>
             <Button onClick={() => refreshPage(localPage)} disabled={isLoading}>
               Odśwież
             </Button>
             <Button onClick={() => editPage(localPage)}>Edytuj</Button>
-            <Button onClick={() => setToDelete(localPage?.svg.file)}>
-              Usuń
-            </Button>
+            <Button onClick={downloadPage}>Pobierz</Button>
+            <Button onClick={requestPageDelete}>Usuń</Button>
           </Stack>
         </div>
       </div>

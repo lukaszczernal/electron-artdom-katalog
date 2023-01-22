@@ -59,8 +59,8 @@ const refreshPage = (filename: string) => {
     const pngPath = `${getPath().PNG_STORAGE_PATH}/${filename}.png`;
     const svgPath = `${getPath().SVG_STORAGE_PATH}/${filename}`;
     const jpgPath = `${getPath().JPG_STORAGE_PATH}/${filename}.jpg`;
-    const thumbPath = `${getPath().JPG_STORAGE_PATH}/thumb/${filename}.jpg`;
-    const clientPath = `${getPath().JPG_STORAGE_PATH}/client/${filename}.jpg`;
+    const thumbPath = `${getPath().THUMB_STORAGE_PATH}/${filename}.jpg`;
+    const clientPath = `${getPath().CLIENT_JPG_STORAGE_PATH}/${filename}.jpg`;
 
     return svgConverter(svgPath, pngPath)
       .then(() => pngConverter(pngPath, jpgPath))
@@ -217,6 +217,8 @@ const generatePDF = async () => {
 
 const removePageImages = (filename: string) =>
   removeFileAsync(`${getPath().JPG_STORAGE_PATH}/${filename}.jpg`)
+    .then(() => removeFileAsync(`${getPath().CLIENT_JPG_STORAGE_PATH}/${filename}.jpg`))
+    .then(() => removeFileAsync(`${getPath().THUMB_STORAGE_PATH}/${filename}.jpg`))
     .then(() =>
       removeFileAsync(`${getPath().PNG_STORAGE_PATH}/${filename}.png`)
     )
