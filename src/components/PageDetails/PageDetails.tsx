@@ -21,6 +21,7 @@ import { Thumbnail } from "../Thumbnail";
 import { PagesContext } from "@/services/context/pagesContext";
 import useEvent from "@/services/useEvent";
 import { SourcePathContext } from "@/services/context/sourcePathContext";
+import useDownloadPage from "@/services/useDownloadPage";
 
 interface Prosp {
   pageId: string;
@@ -57,7 +58,12 @@ const PageDetails: React.FC<Prosp> = ({ pageId, onFinish }) => {
   const { pages, editPage, removePage } = useContext(PagesContext);
   const { sourcePath } = useContext(SourcePathContext);
   const { updatePage } = useUpdatePage();
-  const { refreshPage, isLoading } = useRefreshPage();
+  const { refreshPage, isLoading: isRefreshing } = useRefreshPage();
+  const {
+    fetch: downloadPage,
+    isLoading: isDownloading,
+    progress,
+  } = useDownloadPage();
   const theme = useMantineTheme();
 
   const page = pages?.[pageId] || null;
@@ -126,16 +132,20 @@ const PageDetails: React.FC<Prosp> = ({ pageId, onFinish }) => {
   const requestPageDelete = () =>
     setToDelete(localPage ? localPage.svg.file : null);
 
-  const downloadPage = () => {
-    nodeEventBus.send(EVENTS.APP_DOWNLOAD, thumbnailSrc);
-  }
+  const onDownloadPage = () => {
+    downloadPage(thumbnailSrc);
+  };
+
+  const onRefreshPage = () => {
+    localPage && refreshPage(localPage);
+  };
 
   return localPage ? (
     <>
       <div className={classes.overview}>
         <div className={classes.page}>
           <Thumbnail
-            isLoading={isLoading}
+            isLoading={isRefreshing}
             disabled={!isPageActive}
             src={thumbnailSrc}
           />
@@ -166,11 +176,13 @@ const PageDetails: React.FC<Prosp> = ({ pageId, onFinish }) => {
         <div className={classes.actions}>
           <Stack spacing="xs">
             <Button onClick={togglePage}>{togglePageLabel}</Button>
-            <Button onClick={() => refreshPage(localPage)} disabled={isLoading}>
+            <Button onClick={onRefreshPage} disabled={isRefreshing}>
               Odśwież
             </Button>
             <Button onClick={() => editPage(localPage)}>Edytuj</Button>
-            <Button onClick={downloadPage}>Pobierz</Button>
+            <Button onClick={onDownloadPage} disabled={isDownloading}>
+              Pobierz
+            </Button>
             <Button onClick={requestPageDelete}>Usuń</Button>
           </Stack>
         </div>

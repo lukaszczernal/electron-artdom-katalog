@@ -14,7 +14,8 @@
     "dev": "vite",
     "prebuild": "npm uninstall sharp --force && npm install --platform=win32 --arch=ia32 sharp --force",
     "build": "tsc --build --dry && vite build && electron-builder -w",
-    "start": "npm uninstall sharp --force && npm install --platform=win32 --arch=x64 sharp --force && npm run dev"
+    "startWin": "npm uninstall sharp --force && npm install --platform=win32 --arch=x64 sharp --force && npm run dev",
+    "start": "npm uninstall sharp --force && npm install --platform=darwin --arch=x64 sharp --force && npm run dev"
   },
   "engines": {
     "node": "^14.18.0 || >=16.0.0"

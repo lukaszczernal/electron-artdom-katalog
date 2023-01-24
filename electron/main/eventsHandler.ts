@@ -199,7 +199,7 @@ const registerEventHandlers = (browser: BrowserWindow) => {
       .catch((err) => event.reply(EVENTS.APP_CHECK_HAZEL_FAIL, err));
   });
 
-  browserEventBus.on(EVENTS.APP_DOWNLOAD, (_, url) => {
+  browserEventBus.on(EVENTS.APP_DOWNLOAD_FETCH, (_, url) => {
     browser.webContents.downloadURL(url);
   });
 
