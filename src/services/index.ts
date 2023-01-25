@@ -5,7 +5,6 @@ export { default as useRefreshPage } from "./useRefreshPage";
 export { default as useUpdateCheck } from "./useUpdateCheck";
 export { default as useClientCatalog } from "./useClientCatalog";
 export { default as useCompareCatalog } from "./useCompareCatalog";
-export { default as useUpdateCatalog } from "./useUpdateClientCatalog";
 export { default as useClientFileUpload } from "./useClientFileUpload";
 export { default as useClientFileRemove } from "./useClientFileRemove";
 export { default as useSwitch } from "./useSwitch";
