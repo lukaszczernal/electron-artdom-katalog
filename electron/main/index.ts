@@ -134,15 +134,12 @@ async function createWindow() {
       }
     });
     item.once("done", (_event, state) => {
+      webContents.send(
+        ...reduxEvent(BROWSER_EVENTS.APP_DOWNLOAD_STATUS, state)
+      );
       if (state === "completed") {
-        webContents.send(
-          ...reduxEvent(BROWSER_EVENTS.APP_DOWNLOAD_STATUS, state)
-        );
         webContents.send(...reduxEvent(BROWSER_EVENTS.APP_DOWNLOAD_SUCCESS));
       } else {
-        webContents.send(
-          ...reduxEvent(BROWSER_EVENTS.APP_DOWNLOAD_STATUS, state)
-        );
         webContents.send(...reduxEvent(BROWSER_EVENTS.APP_DOWNLOAD_FAIL));
       }
     });

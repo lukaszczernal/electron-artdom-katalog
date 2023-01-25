@@ -7,7 +7,6 @@ import {
 import fetch from "node-fetch";
 import { BROWSER_EVENTS as EVENTS } from "../../src/events";
 import { EnvInfo, FileInfo, Page } from "../../src/models";
-import { EventPayload } from "../../src/models/redux";
 import { setDirectories } from "./services/directories";
 import { registerSourcePath, getSourcePath } from "./services/env";
 import {
@@ -25,12 +24,6 @@ import {
   removeClientPage,
 } from "./services/pages";
 import { reduxEvent } from "./utils";
-
-const reply = (event: Electron.IpcMainEvent, type: EVENTS) => (payload: any) =>
-  event.reply(EVENTS.EVENTS_CHANNEL, {
-    type,
-    payload,
-  } as EventPayload);
 
 const registerEventHandlers = (browser: BrowserWindow) => {
   browserEventBus.on(
@@ -98,16 +91,13 @@ const registerEventHandlers = (browser: BrowserWindow) => {
     );
   });
 
-  browserEventBus.on(
-    EVENTS.PAGE_UPLOAD,
-    (event: IpcMainEvent, file: FileInfo) => {
-      uploadPage(
-        file,
-        (filename: string) => event.reply(EVENTS.PAGE_UPLOAD_SUCCESS, filename),
-        () => event.reply(EVENTS.PAGE_UPLOAD_FAIL, file)
-      );
-    }
-  );
+  browserEventBus.on(EVENTS.PAGE_ADD, (event: IpcMainEvent, file: FileInfo) => {
+    uploadPage(
+      file,
+      (filename: string) => event.reply(EVENTS.PAGE_ADD_SUCCESS, filename),
+      () => event.reply(EVENTS.PAGE_ADD_FAIL, file)
+    );
+  });
 
   browserEventBus.on(
     EVENTS.PAGES_SAVE,
@@ -129,44 +119,50 @@ const registerEventHandlers = (browser: BrowserWindow) => {
     event.reply(EVENTS.APP_CHECK_UPDATES_SUCCESS, autoUpdater.getFeedURL());
   });
 
-  browserEventBus.on(EVENTS.CLIENT_PAGES_FETCH, (event: IpcMainEvent) => {
+  browserEventBus.on(EVENTS.CLIENT_CATALOG_TRIGGER, (event: IpcMainEvent) => {
     fetchClientData()
       .then((res) => res.json())
-      .then((res) =>
-        event.reply(...reduxEvent(EVENTS.CLIENT_PAGES_SUCCESS, res))
+      .then((res: Page[]) =>
+        event.reply(...reduxEvent(EVENTS.CLIENT_CATALOG_SUCCESS, res))
       )
       .catch((err) =>
-        event.reply(...reduxEvent(EVENTS.CLIENT_PAGES_FAIL, err))
+        event.reply(...reduxEvent(EVENTS.CLIENT_CATALOG_FAIL, err))
       );
   });
 
-  reduxEvent;
-
   browserEventBus.on(
-    EVENTS.CLIENT_UPLOAD_PAGES,
+    EVENTS.CLIENT_FILE_UPLOAD_TRIGGER,
     (event: IpcMainEvent, pageId?: string) => {
       if (!pageId) {
-        event.reply(EVENTS.CLIENT_UPLOAD_PAGES_FAIL, "No page id provided.");
+        event.reply(...reduxEvent(EVENTS.CLIENT_FILE_UPLOAD_FAIL, pageId));
         return;
       }
 
       uploadClientPage(pageId)
-        .then((res) => event.reply(EVENTS.CLIENT_UPLOAD_PAGES_SUCCESS, res))
-        .catch((err) => event.reply(EVENTS.CLIENT_UPLOAD_PAGES_FAIL, err));
+        .then(() =>
+          event.reply(...reduxEvent(EVENTS.CLIENT_FILE_UPLOAD_SUCCESS, pageId))
+        )
+        .catch(() =>
+          event.reply(...reduxEvent(EVENTS.CLIENT_FILE_UPLOAD_FAIL, pageId))
+        );
     }
   );
 
   browserEventBus.on(
-    EVENTS.CLIENT_REMOVE_PAGES,
+    EVENTS.CLIENT_FILE_REMOVE_TRIGGER,
     (event: IpcMainEvent, pageId?: string) => {
       if (!pageId) {
-        event.reply(EVENTS.CLIENT_REMOVE_PAGES_FAIL, "No page id provided.");
+        event.reply(...reduxEvent(EVENTS.CLIENT_FILE_REMOVE_FAIL, pageId));
         return;
       }
 
       removeClientPage(pageId)
-        .then((res) => event.reply(EVENTS.CLIENT_REMOVE_PAGES_SUCCESS, res))
-        .catch((err) => event.reply(EVENTS.CLIENT_REMOVE_PAGES_FAIL, err));
+        .then(() =>
+          event.reply(...reduxEvent(EVENTS.CLIENT_FILE_REMOVE_SUCCESS, pageId))
+        )
+        .catch(() =>
+          event.reply(...reduxEvent(EVENTS.CLIENT_FILE_REMOVE_FAIL, pageId))
+        );
     }
   );
 
@@ -199,7 +195,7 @@ const registerEventHandlers = (browser: BrowserWindow) => {
       .catch((err) => event.reply(EVENTS.APP_CHECK_HAZEL_FAIL, err));
   });
 
-  browserEventBus.on(EVENTS.APP_DOWNLOAD_FETCH, (_, url) => {
+  browserEventBus.on(EVENTS.APP_DOWNLOAD_TRIGGER, (_, url) => {
     browser.webContents.downloadURL(url);
   });
 

@@ -11,7 +11,7 @@ import {
 } from "@mantine/core";
 import { IconFilePlus, IconX } from "@tabler/icons";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { useUploadPage } from "./services";
+import { useAddPage } from "./services";
 import { debounceTime, ReplaySubject } from "rxjs";
 import { Settings } from "./components/Settings";
 import { PageList } from "./components/PageList";
@@ -43,7 +43,7 @@ const App: React.FC = () => {
 
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
 
-  const { uploadPage } = useUploadPage();
+  const { addPage } = useAddPage();
 
   useEffect(() => {
     if (sourcePath) {
@@ -108,7 +108,7 @@ const App: React.FC = () => {
 
       <Tooltip label="Dodaj nową stronę" position="left" withArrow>
         <Affix position={{ bottom: 40, right: 16 }}>
-          <FileButton onChange={uploadPage} accept="image/svg">
+          <FileButton onChange={addPage} accept="image/svg">
             {(props) => (
               <ActionIcon
                 color="blue"

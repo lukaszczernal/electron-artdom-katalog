@@ -1,10 +1,10 @@
 import { useEffect } from "react";
-import { EventError } from "@/models";
 import {
+  useClientFileRemove,
+  useClientFileUpload,
   useCompareCatalog,
   useGenerateCatalog,
   useSwitch,
-  useUpdateCatalog,
 } from "@/services";
 import {
   ActionIcon,
@@ -15,37 +15,15 @@ import {
   Stack,
   Tooltip,
 } from "@mantine/core";
-import { showNotification, updateNotification } from "@mantine/notifications";
-import { IconCheck, IconFileExport } from "@tabler/icons";
+import { IconFileExport } from "@tabler/icons";
 import { CatalogStats } from "../CatalogStats";
-
-const FileList: React.FC<{
-  action: (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void;
-  altAction: (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void;
-  list: string[];
-  children?: React.ReactElement;
-}> = ({ action, altAction, list, children }) => {
-  return (
-    <>
-      {children}
-      <ul>
-        {list.map((pageId) => (
-          <li key={pageId}>
-            <Group>
-              <span>{pageId}</span>
-              <a href="" data-pageid={pageId} onClick={action}>
-                Add
-              </a>
-              <a href="" data-pageid={pageId} onClick={altAction}>
-                Remove
-              </a>
-            </Group>
-          </li>
-        ))}
-      </ul>
-    </>
-  );
-};
+import {
+  catalogGenerateErrorNotification,
+  catalogGenerateFinishNotification,
+  catalogGenerateStartNotification,
+} from "./notifications";
+import { FileList } from "./components/FileList";
+import { AsyncSection } from "@/components/AsyncSection";
 
 const Generate: React.FC = () => {
   const {
@@ -54,10 +32,19 @@ const Generate: React.FC = () => {
     onFinish: onGenerateCatalogFinish,
   } = useGenerateCatalog();
 
-  const { compare, updatedPages, newPages, removedPages } = useCompareCatalog();
+  // TOOD this is triggered on application startup - should only be triggered when modal is open
+  const {
+    compare,
+    isLoading: isLoadingClientCatalog,
+    error: clientCatalogError,
+    totalChanges,
+    updatedPages,
+    newPages,
+    removedPages,
+  } = useCompareCatalog();
 
-  const { upload, uploadPageError, remove, removePageError, onRemoveFinish, removeResponse } =
-    useUpdateCatalog();
+  const { upload } = useClientFileUpload();
+  const { removeFile } = useClientFileRemove();
 
   const {
     state: isSyncModalOpen,
@@ -65,53 +52,21 @@ const Generate: React.FC = () => {
     setOff: closeSyncModal,
   } = useSwitch();
 
-  const onCatalogGenerateStart = () => {
-    showNotification({
-      id: "catalog-generate",
-      color: "teal",
-      title: "Katalog",
-      message: "Trwa generowanie",
-      disallowClose: true,
-      loading: true,
-      autoClose: false,
-    });
-  };
-
-  const onCatalogGenerateFinish = () => {
-    updateNotification({
-      id: "catalog-generate",
-      icon: <IconCheck />,
-      color: "teal",
-      title: "Katalog",
-      message: "Wynegerowany pomyślnie.",
-      autoClose: true,
-    });
-  };
-
-  const onCatalogGenerateError = (error: EventError) => {
-    updateNotification({
-      id: "catalog-generate",
-      title: "Katalog nie został wynegerowany",
-      message: <>{error}</>,
-      autoClose: true,
-    });
-  };
-
   const onGenerate = () => {
     generate();
-    onCatalogGenerateStart();
+    catalogGenerateStartNotification();
   };
 
   const onUpload = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     e.preventDefault();
     const pageId = e.currentTarget.dataset.pageid;
-    upload(pageId);
+    pageId && upload(pageId);
   };
 
   const onRemove = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     e.preventDefault();
     const pageId = e.currentTarget.dataset.pageid;
-    remove(pageId);
+    pageId && removeFile(pageId);
   };
 
   useEffect(() => {
@@ -120,8 +75,8 @@ const Generate: React.FC = () => {
     // );
 
     const onGenerateCatalogFinishSub = onGenerateCatalogFinish.subscribe({
-      next: onCatalogGenerateFinish,
-      error: onCatalogGenerateError,
+      next: catalogGenerateFinishNotification,
+      error: catalogGenerateErrorNotification,
     });
 
     return () => {
@@ -129,6 +84,10 @@ const Generate: React.FC = () => {
       // onRemoveFinishSub.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    isSyncModalOpen && compare();
+  }, [isSyncModalOpen]);
 
   return (
     <>
@@ -150,38 +109,46 @@ const Generate: React.FC = () => {
       <Modal
         opened={isSyncModalOpen}
         onClose={closeSyncModal}
-        title="Synchronizacja z katalogiem klientów"
+        title="Lista zmian"
         size="md"
       >
-        <Stack spacing="xl">
-          <CatalogStats />
-          {/* <Button onClick={compare}>Analizuj zmiany</Button> */}
-          {/* {uploadPageError && <span>Upload error: {uploadPageError}</span>}
+        <AsyncSection
+          isLoading={isLoadingClientCatalog}
+          error={clientCatalogError}
+        >
+          <Stack spacing="xl">
+            <span>Liczba zmian: {totalChanges}</span>
+            {/* <CatalogStats /> */}
+            {/* <Button onClick={compare}>Analizuj zmiany</Button> */}
+            {/* {uploadPageError && <span>Upload error: {uploadPageError}</span>}
           {removePageError && <span>Remove error: {removePageError}</span>} */}
 
-          <FileList list={updatedPages} action={onUpload} altAction={onRemove}>
-            {updatedPages.length > 0 ? (
-              <span>Zmienione strony: {updatedPages?.length}</span>
-            ) : undefined}
-          </FileList>
+            <span>Zaktualizowane strony: {updatedPages?.length}</span>
+            <FileList
+              list={updatedPages}
+              action={onUpload}
+              altAction={onRemove}
+            />
 
-          <FileList list={newPages} action={onUpload} altAction={onRemove}>
-            {newPages.length > 0 ? (
-              <span>Dodane strony: {newPages?.length}</span>
-            ) : undefined}
-          </FileList>
+            <span>Dodane strony: {newPages?.length}</span>
+            <FileList list={newPages} action={onUpload} altAction={onRemove} />
 
-          <FileList list={removedPages} action={onUpload} altAction={onRemove}>
-            {removedPages.length > 0 ? (
-              <span>Usunięte strony: {removedPages?.length}</span>
-            ) : undefined}
-          </FileList>
+            <span>Usunięte strony: {removedPages?.length}</span>
+            <FileList
+              list={removedPages}
+              action={onUpload}
+              altAction={onRemove}
+            />
 
-          <Group position="right">
-            <Button onClick={closeSyncModal}>Anuluj</Button>
-            <Button onClick={onGenerate}>Generuj</Button>
-          </Group>
-        </Stack>
+            <span>Generowane pliku PDF</span>
+            <span>Synchronizacja katalogu klientów</span>
+
+            <Group position="right">
+              <Button onClick={closeSyncModal}>Anuluj</Button>
+              <Button onClick={onGenerate}>Generuj</Button>
+            </Group>
+          </Stack>
+        </AsyncSection>
       </Modal>
     </>
   );

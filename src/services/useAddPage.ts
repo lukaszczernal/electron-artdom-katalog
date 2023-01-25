@@ -1,27 +1,27 @@
 import { useEffect, useState } from "react";
 import { ipcRenderer as nodeEventBus, IpcRendererEvent } from "electron";
 import { BROWSER_EVENTS as EVENTS } from "../events";
-import useUpdatePage from './useUpdatePage';
-import { pageMetadata } from './utils';
-import useRefreshPage from './useRefreshPage';
+import useUpdatePage from "./useUpdatePage";
+import { pageMetadata } from "./utils";
+import useRefreshPage from "./useRefreshPage";
 
-const useUploadPage = () => {
+const useAddPage = () => {
   const [isUploading, setIsUploading] = useState(false);
   const { updatePage } = useUpdatePage();
   const { refreshPage } = useRefreshPage();
 
-  const uploadPage = (file: File | null) => {
+  const addPage = (file: File | null) => {
     setIsUploading(true);
     if (file) {
-      nodeEventBus.send(EVENTS.PAGE_UPLOAD, { path: file.path, name: file.name });
+      nodeEventBus.send(EVENTS.PAGE_ADD, { path: file.path, name: file.name });
     }
   };
 
   useEffect(() => {
     const callback = (_: IpcRendererEvent) => setIsUploading(false);
-    nodeEventBus.on(EVENTS.PAGE_UPLOAD_FAIL, callback);
+    nodeEventBus.on(EVENTS.PAGE_ADD_FAIL, callback);
     return () => {
-      nodeEventBus.removeListener(EVENTS.PAGE_UPLOAD_FAIL, callback);
+      nodeEventBus.removeListener(EVENTS.PAGE_ADD_FAIL, callback);
     };
   }, []);
 
@@ -32,13 +32,13 @@ const useUploadPage = () => {
       refreshPage(page);
       updatePage(page);
     };
-    nodeEventBus.on(EVENTS.PAGE_UPLOAD_SUCCESS, callback);
+    nodeEventBus.on(EVENTS.PAGE_ADD_SUCCESS, callback);
     return () => {
-      nodeEventBus.removeListener(EVENTS.PAGE_UPLOAD_SUCCESS, callback);
+      nodeEventBus.removeListener(EVENTS.PAGE_ADD_SUCCESS, callback);
     };
   }, []);
 
-  return { isUploading, uploadPage };
+  return { isUploading, addPage };
 };
 
-export default useUploadPage;
+export default useAddPage;

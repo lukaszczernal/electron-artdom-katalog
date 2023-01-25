@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { PagesContext } from "./context/pagesContext";
 import { difference } from "lodash-es";
 import useClientCatalog from "./useClientCatalog";
@@ -9,7 +9,17 @@ const useCompareCatalog = () => {
   const [removedPages, setRemovedPages] = useState<string[]>([]);
   const [newPages, setNewPages] = useState<string[]>([]);
 
-  const { fetch: fetchClientData, data: clientData } = useClientCatalog();
+  const {
+    fetch: fetchClientData,
+    isLoading,
+    error,
+    data: clientData,
+  } = useClientCatalog();
+
+  const totalChanges = useMemo(
+    () => updatedPages.length + removedPages.length + newPages.length,
+    [updatedPages, removedPages, newPages]
+  );
 
   const compare = () => {
     fetchClientData();
@@ -39,6 +49,9 @@ const useCompareCatalog = () => {
 
   return {
     compare,
+    isLoading,
+    error,
+    totalChanges,
     updatedPages,
     removedPages,
     newPages,

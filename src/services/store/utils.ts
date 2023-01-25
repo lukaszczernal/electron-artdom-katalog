@@ -3,7 +3,7 @@ import { PayloadAction } from "@reduxjs/toolkit";
 import { AsyncState } from "@/models/redux";
 
 export const getDefaultReducers = <RESPONSE, REQUEST = void>() => ({
-  FETCH: (state, action: PayloadAction<REQUEST>) => {
+  TRIGGER: (state, action: PayloadAction<REQUEST>) => {
     nodeEventBus.send(action.type, action.payload);
     return { ...state, isLoading: true };
   },

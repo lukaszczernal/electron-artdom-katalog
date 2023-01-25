@@ -1,17 +1,18 @@
 import { useAppDispatch, useAppSelector } from "./redux";
-import { clientPagesStore } from "./store/clientPagesStore";
+import { clientCatalogStore } from "./store/clientCatalogStore";
 import { RootState } from "@/store";
 
-export const useClientCatalog = () => {
+const useClientCatalog = () => {
   const dispatch = useAppDispatch();
-  const data = useAppSelector((state: RootState) => state.clientPages.data);
+  const data = useAppSelector((state: RootState) => state.clientCatalog.data);
   const isLoading = useAppSelector(
-    (state: RootState) => state.clientPages.isLoading
+    (state: RootState) => state.clientCatalog.isLoading
   );
-  const error = useAppSelector((state: RootState) => state.clientPages.error);
+
+  const error = useAppSelector((state: RootState) => state.clientCatalog.error);
 
   const fetch = () => {
-    dispatch(clientPagesStore.actions.FETCH());
+    dispatch(clientCatalogStore.actions.TRIGGER());
   };
 
   return {

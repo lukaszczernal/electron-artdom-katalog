@@ -1,10 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { clientPagesStore } from "@/services/store/clientPagesStore";
-import { downloadStore } from './services/store/downloadStore';
+import { clientCatalogStore } from "@/services/store/clientCatalogStore";
+import { downloadStore } from "./services/store/downloadStore";
+import { clientFileRemoveStore } from "./services/store/clientFileRemoveStore";
+import { clientFileUploadStore } from "./services/store/clientFileUploadStore";
 
 const store = configureStore({
   reducer: {
-    clientPages: clientPagesStore.reducer,
+    clientCatalog: clientCatalogStore.reducer,
+    clientFileRemove: clientFileRemoveStore.reducer,
+    clientFileUpload: clientFileUploadStore.reducer,
     download: downloadStore.reducer,
   },
 });
