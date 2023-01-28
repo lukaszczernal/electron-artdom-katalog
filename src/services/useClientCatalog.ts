@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "./redux";
-import { clientCatalogStore } from "./store/clientCatalogStore";
 import { RootState } from "@/store";
+import { ACTIONS } from './store/actions';
 
 const useClientCatalog = () => {
   const dispatch = useAppDispatch();
@@ -12,7 +12,7 @@ const useClientCatalog = () => {
   const error = useAppSelector((state: RootState) => state.clientCatalog.error);
 
   const fetch = () => {
-    dispatch(clientCatalogStore.actions.TRIGGER());
+    dispatch(ACTIONS.CLIENT_CATALOG());
   };
 
   return {

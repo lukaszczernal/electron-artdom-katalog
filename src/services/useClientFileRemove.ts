@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "./redux";
-import { clientFileRemoveStore } from "./store/clientFileRemoveStore";
 import { RootState } from "@/store";
+import { ACTIONS } from "./store/actions";
 
 const useClientFileRemove = () => {
   const dispatch = useAppDispatch();
@@ -10,12 +10,12 @@ const useClientFileRemove = () => {
   );
 
   const removeFile = (srcPath: string) => {
-    dispatch(clientFileRemoveStore.actions.TRIGGER(srcPath));
+    dispatch(ACTIONS.CLIENT_FILE_REMOVE(srcPath));
   };
 
   return {
     removeFile,
-    removeFileStatus
+    removeFileStatus,
   };
 };
 

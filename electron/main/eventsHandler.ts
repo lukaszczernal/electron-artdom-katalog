@@ -7,6 +7,7 @@ import {
 import fetch from "node-fetch";
 import { BROWSER_EVENTS as EVENTS } from "../../src/events";
 import { EnvInfo, FileInfo, Page } from "../../src/models";
+import { ACTIONS } from "../../src/services/store/actions";
 import { setDirectories } from "./services/directories";
 import { registerSourcePath, getSourcePath } from "./services/env";
 import {
@@ -119,49 +120,49 @@ const registerEventHandlers = (browser: BrowserWindow) => {
     event.reply(EVENTS.APP_CHECK_UPDATES_SUCCESS, autoUpdater.getFeedURL());
   });
 
-  browserEventBus.on(EVENTS.CLIENT_CATALOG_TRIGGER, (event: IpcMainEvent) => {
+  browserEventBus.on(EVENTS.CLIENT_CATALOG, (event: IpcMainEvent) => {
     fetchClientData()
       .then((res) => res.json())
       .then((res: Page[]) =>
-        event.reply(...reduxEvent(EVENTS.CLIENT_CATALOG_SUCCESS, res))
+        event.reply(...reduxEvent(ACTIONS.CLIENT_CATALOG_SUCCESS(res)))
       )
       .catch((err) =>
-        event.reply(...reduxEvent(EVENTS.CLIENT_CATALOG_FAIL, err))
+        event.reply(...reduxEvent(ACTIONS.CLIENT_CATALOG_FAIL(err)))
       );
   });
 
   browserEventBus.on(
-    EVENTS.CLIENT_FILE_UPLOAD_TRIGGER,
+    EVENTS.CLIENT_FILE_UPLOAD,
     (event: IpcMainEvent, pageId?: string) => {
       if (!pageId) {
-        event.reply(...reduxEvent(EVENTS.CLIENT_FILE_UPLOAD_FAIL, pageId));
+        event.reply(...reduxEvent(ACTIONS.CLIENT_CATALOG_FAIL(pageId)));
         return;
       }
 
       uploadClientPage(pageId)
         .then(() =>
-          event.reply(...reduxEvent(EVENTS.CLIENT_FILE_UPLOAD_SUCCESS, pageId))
+          event.reply(...reduxEvent(ACTIONS.CLIENT_FILE_UPLOAD_SUCCESS(pageId)))
         )
         .catch(() =>
-          event.reply(...reduxEvent(EVENTS.CLIENT_FILE_UPLOAD_FAIL, pageId))
+          event.reply(...reduxEvent(ACTIONS.CLIENT_FILE_UPLOAD_FAIL(pageId)))
         );
     }
   );
 
   browserEventBus.on(
-    EVENTS.CLIENT_FILE_REMOVE_TRIGGER,
+    EVENTS.CLIENT_FILE_REMOVE,
     (event: IpcMainEvent, pageId?: string) => {
       if (!pageId) {
-        event.reply(...reduxEvent(EVENTS.CLIENT_FILE_REMOVE_FAIL, pageId));
+        event.reply(...reduxEvent(ACTIONS.CLIENT_FILE_REMOVE_FAIL(pageId)));
         return;
       }
 
       removeClientPage(pageId)
         .then(() =>
-          event.reply(...reduxEvent(EVENTS.CLIENT_FILE_REMOVE_SUCCESS, pageId))
+          event.reply(...reduxEvent(ACTIONS.CLIENT_FILE_REMOVE_SUCCESS(pageId)))
         )
         .catch(() =>
-          event.reply(...reduxEvent(EVENTS.CLIENT_FILE_REMOVE_FAIL, pageId))
+          event.reply(...reduxEvent(ACTIONS.CLIENT_FILE_REMOVE_FAIL(pageId)))
         );
     }
   );
@@ -195,7 +196,7 @@ const registerEventHandlers = (browser: BrowserWindow) => {
       .catch((err) => event.reply(EVENTS.APP_CHECK_HAZEL_FAIL, err));
   });
 
-  browserEventBus.on(EVENTS.APP_DOWNLOAD_TRIGGER, (_, url) => {
+  browserEventBus.on(EVENTS.APP_DOWNLOAD, (_, url) => {
     browser.webContents.downloadURL(url);
   });
 

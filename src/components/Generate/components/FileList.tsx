@@ -1,24 +1,37 @@
 import { useClientFileRemove, useClientFileUpload } from "@/services";
-import { Group } from "@mantine/core";
+import { Stack } from "@mantine/core";
 
-export const FileList: React.FC<{
-  action: (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void;
-  altAction: (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void;
+interface Props {
   list: string[];
-}> = ({ action, altAction, list }) => {
-  const { uploadFileStatus } = useClientFileUpload();
-  const { removeFileStatus } = useClientFileRemove();
+}
+
+export const FileList: React.FC<Props> = ({ list }) => {
+  const { upload, uploadFileStatus } = useClientFileUpload();
+  const { removeFile, removeFileStatus } = useClientFileRemove();
+
+  const onUpload = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    e.preventDefault();
+    const pageId = e.currentTarget.dataset.pageid;
+    pageId && upload(pageId);
+  };
+
+  const onRemove = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    e.preventDefault();
+    const pageId = e.currentTarget.dataset.pageid;
+    pageId && removeFile(pageId);
+  };
 
   return (
     <ul>
+      <li>Upload</li>
       {list.map((pageId) => (
         <li key={pageId}>
-          <Group>
+          <Stack spacing="xs">
             <span>{pageId}</span>
-            <a href="" data-pageid={pageId} onClick={action}>
+            <a href="" data-pageid={pageId} onClick={onUpload}>
               Add
             </a>
-            <a href="" data-pageid={pageId} onClick={altAction}>
+            <a href="" data-pageid={pageId} onClick={onRemove}>
               Remove
             </a>
             <span>Upload status: {uploadFileStatus[pageId]}</span>
@@ -28,7 +41,7 @@ export const FileList: React.FC<{
                 <Loader size="xs" />
               </span>
             )} */}
-          </Group>
+          </Stack>
         </li>
       ))}
     </ul>

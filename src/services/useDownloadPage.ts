@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "./redux";
-import { downloadStore } from "./store/downloadStore";
 import { RootState } from "@/store";
+import { ACTIONS } from './store/actions';
 
 const useDownloadPage = () => {
   const dispatch = useAppDispatch();
@@ -15,7 +15,7 @@ const useDownloadPage = () => {
   );
 
   const fetch = (srcPath: string) => {
-    dispatch(downloadStore.actions.TRIGGER(srcPath));
+    dispatch(ACTIONS.APP_DOWNLOAD(srcPath));
   };
 
   return {

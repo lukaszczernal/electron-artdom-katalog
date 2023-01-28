@@ -13,6 +13,7 @@
     "src/events.ts",
     "src/models/index.ts",
     "src/models/redux.ts",
-    "src/models/store.ts"
+    "src/models/store.ts",
+    "src/services/store/actions.ts"
   ]
 }

@@ -28,8 +28,8 @@ import { release } from "os";
 import { join } from "path";
 import { registerEventHandlers } from "./eventsHandler";
 import contextMenu from "electron-context-menu";
-import { BROWSER_EVENTS } from "../../src/events";
 import { reduxEvent } from "./utils";
+import { ACTIONS } from '../../src/services/store/actions';
 
 contextMenu();
 
@@ -112,35 +112,25 @@ async function createWindow() {
   win.webContents.session.on("will-download", (_event, item, webContents) => {
     item.on("updated", (_event, state) => {
       if (state === "interrupted") {
-        webContents.send(
-          ...reduxEvent(BROWSER_EVENTS.APP_DOWNLOAD_STATUS, state)
-        );
+        webContents.send(...reduxEvent(ACTIONS.APP_DOWNLOAD_STATUS(state)));
       } else if (state === "progressing") {
         if (item.isPaused()) {
-          webContents.send(
-            ...reduxEvent(BROWSER_EVENTS.APP_DOWNLOAD_STATUS, "paused")
-          );
+          webContents.send(...reduxEvent(ACTIONS.APP_DOWNLOAD_STATUS("paused")));
         } else {
           const progress =
             Math.round((item.getReceivedBytes() / item.getTotalBytes()) * 100) /
             100;
-          webContents.send(
-            ...reduxEvent(BROWSER_EVENTS.APP_DOWNLOAD_STATUS, state)
-          );
-          webContents.send(
-            ...reduxEvent(BROWSER_EVENTS.APP_DOWNLOAD_PROGRESS, progress)
-          );
+          webContents.send(...reduxEvent(ACTIONS.APP_DOWNLOAD_STATUS(state)));
+          webContents.send(...reduxEvent(ACTIONS.APP_DOWNLOAD_PROGRESS(progress)));
         }
       }
     });
     item.once("done", (_event, state) => {
-      webContents.send(
-        ...reduxEvent(BROWSER_EVENTS.APP_DOWNLOAD_STATUS, state)
-      );
+      webContents.send(...reduxEvent(ACTIONS.APP_DOWNLOAD_STATUS(state)));
       if (state === "completed") {
-        webContents.send(...reduxEvent(BROWSER_EVENTS.APP_DOWNLOAD_SUCCESS));
+        webContents.send(...reduxEvent(ACTIONS.APP_DOWNLOAD_SUCCESS()));
       } else {
-        webContents.send(...reduxEvent(BROWSER_EVENTS.APP_DOWNLOAD_FAIL));
+        webContents.send(...reduxEvent(ACTIONS.APP_DOWNLOAD_FAIL()));
       }
     });
   });

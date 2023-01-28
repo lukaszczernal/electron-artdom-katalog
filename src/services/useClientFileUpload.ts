@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "./redux";
-import { clientFileUploadStore } from "./store/clientFileUploadStore";
 import { RootState } from "@/store";
+import { ACTIONS } from './store/actions';
 
 const useClientFileUpload = () => {
   const dispatch = useAppDispatch();
@@ -9,12 +9,17 @@ const useClientFileUpload = () => {
     (state: RootState) => state.clientFileUpload.status
   );
 
-  const upload = (srcPath: string) => {
-    dispatch(clientFileUploadStore.actions.TRIGGER(srcPath));
+  const upload = (path: string) => {
+    dispatch(ACTIONS.CLIENT_FILE_UPLOAD(path));
+  };
+
+  const uploadAll = (paths: string[]) => {
+    dispatch(ACTIONS.CLIENT_FILE_UPLOAD_ALL(paths));
   };
 
   return {
     upload,
+    uploadAll,
     uploadFileStatus
   };
 };

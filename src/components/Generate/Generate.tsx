@@ -1,11 +1,5 @@
 import { useEffect } from "react";
-import {
-  useClientFileRemove,
-  useClientFileUpload,
-  useCompareCatalog,
-  useGenerateCatalog,
-  useSwitch,
-} from "@/services";
+import { useCompareCatalog, useGenerateCatalog, useSwitch } from "@/services";
 import {
   ActionIcon,
   Affix,
@@ -43,9 +37,6 @@ const Generate: React.FC = () => {
     removedPages,
   } = useCompareCatalog();
 
-  const { upload } = useClientFileUpload();
-  const { removeFile } = useClientFileRemove();
-
   const {
     state: isSyncModalOpen,
     setOn: openSyncModal,
@@ -55,18 +46,6 @@ const Generate: React.FC = () => {
   const onGenerate = () => {
     generate();
     catalogGenerateStartNotification();
-  };
-
-  const onUpload = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    e.preventDefault();
-    const pageId = e.currentTarget.dataset.pageid;
-    pageId && upload(pageId);
-  };
-
-  const onRemove = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    e.preventDefault();
-    const pageId = e.currentTarget.dataset.pageid;
-    pageId && removeFile(pageId);
   };
 
   useEffect(() => {
@@ -124,21 +103,13 @@ const Generate: React.FC = () => {
           {removePageError && <span>Remove error: {removePageError}</span>} */}
 
             <span>Zaktualizowane strony: {updatedPages?.length}</span>
-            <FileList
-              list={updatedPages}
-              action={onUpload}
-              altAction={onRemove}
-            />
+            <FileList list={updatedPages} />
 
             <span>Dodane strony: {newPages?.length}</span>
-            <FileList list={newPages} action={onUpload} altAction={onRemove} />
+            <FileList list={newPages} />
 
             <span>Usunięte strony: {removedPages?.length}</span>
-            <FileList
-              list={removedPages}
-              action={onUpload}
-              altAction={onRemove}
-            />
+            <FileList list={removedPages} />
 
             <span>Generowane pliku PDF</span>
             <span>Synchronizacja katalogu klientów</span>

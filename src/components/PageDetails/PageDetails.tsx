@@ -1,4 +1,3 @@
-import { ipcRenderer as nodeEventBus } from "electron";
 import { useContext, useEffect, useState } from "react";
 import { BROWSER_EVENTS as EVENTS } from "@/events";
 import { useRefreshPage, useUpdatePage } from "../../services";
