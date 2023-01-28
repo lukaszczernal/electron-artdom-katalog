@@ -23,6 +23,7 @@ import {
   fetchClientData,
   uploadClientPage,
   removeClientPage,
+  uploadAllClientPages,
 } from "./services/pages";
 import { reduxEvent } from "./utils";
 
@@ -146,6 +147,31 @@ const registerEventHandlers = (browser: BrowserWindow) => {
         .catch(() =>
           event.reply(...reduxEvent(ACTIONS.CLIENT_FILE_UPLOAD_FAIL(pageId)))
         );
+    }
+  );
+
+  browserEventBus.on(
+    EVENTS.CLIENT_FILE_UPLOAD_ALL,
+    (event: IpcMainEvent, pageIds?: string[]) => {
+      if (!pageIds) {
+        event.reply(
+          ...reduxEvent(
+            ACTIONS.CLIENT_FILE_UPLOAD_ALL_FAIL("No pageIds provided.")
+          )
+        );
+        return;
+      }
+
+      uploadAllClientPages(pageIds).subscribe({
+        next: (pageId) =>
+          event.reply(
+            ...reduxEvent(ACTIONS.CLIENT_FILE_UPLOAD_SUCCESS(pageId))
+          ),
+        error: (pageId) =>
+          event.reply(...reduxEvent(ACTIONS.CLIENT_FILE_UPLOAD_FAIL(pageId))),
+        complete: () =>
+          event.reply(...reduxEvent(ACTIONS.CLIENT_FILE_UPLOAD_ALL_SUCCESS())),
+      });
     }
   );
 

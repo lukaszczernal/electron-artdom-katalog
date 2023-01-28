@@ -6,13 +6,18 @@ interface Props {
 }
 
 export const FileList: React.FC<Props> = ({ list }) => {
-  const { upload, uploadFileStatus } = useClientFileUpload();
+  const { upload, uploadAll, uploadFileStatus } = useClientFileUpload();
   const { removeFile, removeFileStatus } = useClientFileRemove();
 
   const onUpload = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     e.preventDefault();
     const pageId = e.currentTarget.dataset.pageid;
     pageId && upload(pageId);
+  };
+
+  const onUploadAll = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    e.preventDefault();
+    uploadAll(list);
   };
 
   const onRemove = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
@@ -23,7 +28,11 @@ export const FileList: React.FC<Props> = ({ list }) => {
 
   return (
     <ul>
-      <li>Upload</li>
+      <li>
+        <a href="" onClick={onUploadAll}>
+          Upload
+        </a>
+      </li>
       {list.map((pageId) => (
         <li key={pageId}>
           <Stack spacing="xs">

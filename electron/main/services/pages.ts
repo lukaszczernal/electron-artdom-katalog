@@ -217,8 +217,12 @@ const generatePDF = async () => {
 
 const removePageImages = (filename: string) =>
   removeFileAsync(`${getPath().JPG_STORAGE_PATH}/${filename}.jpg`)
-    .then(() => removeFileAsync(`${getPath().CLIENT_JPG_STORAGE_PATH}/${filename}.jpg`))
-    .then(() => removeFileAsync(`${getPath().THUMB_STORAGE_PATH}/${filename}.jpg`))
+    .then(() =>
+      removeFileAsync(`${getPath().CLIENT_JPG_STORAGE_PATH}/${filename}.jpg`)
+    )
+    .then(() =>
+      removeFileAsync(`${getPath().THUMB_STORAGE_PATH}/${filename}.jpg`)
+    )
     .then(() =>
       removeFileAsync(`${getPath().PNG_STORAGE_PATH}/${filename}.png`)
     )
@@ -259,7 +263,12 @@ const uploadClientPage = (pageId: string) => {
   return fetch(`${HOST}/upload.php`, {
     method: "POST",
     body: formData,
-  }).then(handleResponse);
+  })
+    .then(handleResponse)
+    .then(() => pageId)
+    .catch(() => {
+      throw pageId;
+    });
 };
 
 const removeClientPage = (pageId: string) => {
@@ -271,6 +280,11 @@ const removeClientPage = (pageId: string) => {
   return fetch(`${HOST}/remove.php?pageId=${pageId}`, {
     method: "DELETE",
   }).then(handleResponse);
+};
+
+const uploadAllClientPages = (pageIds: string[]) => {
+  const concurrency = 2;
+  return from(pageIds).pipe(mergeMap(uploadClientPage, concurrency));
 };
 
 export {
@@ -286,4 +300,5 @@ export {
   fetchClientData,
   uploadClientPage,
   removeClientPage,
+  uploadAllClientPages,
 };
