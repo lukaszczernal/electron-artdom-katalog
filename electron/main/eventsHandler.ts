@@ -5,9 +5,24 @@ import {
   IpcMainEvent,
 } from "electron";
 import fetch from "node-fetch";
+import {
+  flatMap,
+  from,
+  last,
+  merge,
+  mergeAll,
+  mergeMap,
+  pipe,
+  switchMap,
+  tap,
+} from "rxjs";
+import { SOURCE_FILE_NAME } from "../../src/constants";
 import { BROWSER_EVENTS as EVENTS } from "../../src/events";
 import { EnvInfo, FileInfo, Page } from "../../src/models";
-import { ACTIONS } from "../../src/services/store/actions";
+import {
+  ACTIONS,
+  ClientFileUpdatePayload,
+} from "../../src/services/store/actions";
 import { setDirectories } from "./services/directories";
 import { registerSourcePath, getSourcePath } from "./services/env";
 import {
@@ -21,9 +36,8 @@ import {
   generatePDF,
   removePage,
   fetchClientData,
-  uploadClientPage,
-  removeClientPage,
-  uploadAllClientPages,
+  updateClientPage,
+  uploadClientData,
 } from "./services/pages";
 import { reduxEvent } from "./utils";
 
@@ -112,8 +126,12 @@ const registerEventHandlers = (browser: BrowserWindow) => {
 
   browserEventBus.on(EVENTS.PDF_GENERATE, (event: IpcMainEvent) => {
     generatePDF()
-      .then(() => event.reply(EVENTS.PDF_GENERATE_SUCCESS))
-      .catch((error) => event.reply(EVENTS.PDF_GENERATE_FAIL, error));
+      .then(() => {
+        event.reply(...reduxEvent(ACTIONS.PDF_GENERATE_SUCCESS()));
+      })
+      .catch((error) =>
+        event.reply(...reduxEvent(ACTIONS.PDF_GENERATE_FAIL(error)))
+      );
   });
 
   browserEventBus.on(EVENTS.APP_CHECK_UPDATES, (event: IpcMainEvent) => {
@@ -133,63 +151,92 @@ const registerEventHandlers = (browser: BrowserWindow) => {
   });
 
   browserEventBus.on(
-    EVENTS.CLIENT_FILE_UPLOAD,
-    (event: IpcMainEvent, pageId?: string) => {
-      if (!pageId) {
-        event.reply(...reduxEvent(ACTIONS.CLIENT_CATALOG_FAIL(pageId)));
+    EVENTS.CLIENT_FILE_UPDATE,
+    (event: IpcMainEvent, page: ClientFileUpdatePayload) => {
+      if (!page && !page.fileId) {
+        event.reply(
+          ...reduxEvent(ACTIONS.CLIENT_FILE_UPDATE_FAIL(page.fileId))
+        );
         return;
       }
 
-      uploadClientPage(pageId)
-        .then(() =>
-          event.reply(...reduxEvent(ACTIONS.CLIENT_FILE_UPLOAD_SUCCESS(pageId)))
+      updateClientPage(page)
+        .then((pageId) =>
+          event.reply(...reduxEvent(ACTIONS.CLIENT_FILE_UPDATE_SUCCESS(pageId)))
         )
-        .catch(() =>
-          event.reply(...reduxEvent(ACTIONS.CLIENT_FILE_UPLOAD_FAIL(pageId)))
+        .catch((pageId) =>
+          event.reply(...reduxEvent(ACTIONS.CLIENT_FILE_UPDATE_FAIL(pageId)))
         );
     }
   );
 
+  // TODO handle redux actions and payload typing on browserEventBus event handler method
   browserEventBus.on(
-    EVENTS.CLIENT_FILE_UPLOAD_ALL,
-    (event: IpcMainEvent, pageIds?: string[]) => {
-      if (!pageIds) {
+    EVENTS.CLIENT_CATALOG_UPDATE,
+    (event: IpcMainEvent, pages: ClientFileUpdatePayload[]) => {
+      /**
+       * Clear previous update states
+       */
+      event.reply(...reduxEvent(ACTIONS.CLIENT_FILE_UPDATE_CLEAR()));
+
+      /**
+       *  Trigger katalog generation
+       */
+      event.reply(...reduxEvent(ACTIONS.PDF_GENERATE()));
+
+      /**
+       * Fail if no pageIds provided
+       */
+      if (!pages) {
         event.reply(
           ...reduxEvent(
-            ACTIONS.CLIENT_FILE_UPLOAD_ALL_FAIL("No pageIds provided.")
+            ACTIONS.CLIENT_CATALOG_UPDATE_FAIL("No pageIds provided.")
           )
         );
         return;
       }
 
-      uploadAllClientPages(pageIds).subscribe({
-        next: (pageId) =>
+      const fileUpdateEventPipe = tap({
+        next: (pageId: string) =>
           event.reply(
-            ...reduxEvent(ACTIONS.CLIENT_FILE_UPLOAD_SUCCESS(pageId))
+            ...reduxEvent(ACTIONS.CLIENT_FILE_UPDATE_SUCCESS(pageId))
           ),
-        error: (pageId) =>
-          event.reply(...reduxEvent(ACTIONS.CLIENT_FILE_UPLOAD_FAIL(pageId))),
-        complete: () =>
-          event.reply(...reduxEvent(ACTIONS.CLIENT_FILE_UPLOAD_ALL_SUCCESS())),
+        error: (pageId: string) =>
+          event.reply(...reduxEvent(ACTIONS.CLIENT_FILE_UPDATE_FAIL(pageId))),
       });
-    }
-  );
 
-  browserEventBus.on(
-    EVENTS.CLIENT_FILE_REMOVE,
-    (event: IpcMainEvent, pageId?: string) => {
-      if (!pageId) {
-        event.reply(...reduxEvent(ACTIONS.CLIENT_FILE_REMOVE_FAIL(pageId)));
-        return;
-      }
-
-      removeClientPage(pageId)
-        .then(() =>
-          event.reply(...reduxEvent(ACTIONS.CLIENT_FILE_REMOVE_SUCCESS(pageId)))
-        )
-        .catch(() =>
-          event.reply(...reduxEvent(ACTIONS.CLIENT_FILE_REMOVE_FAIL(pageId)))
+      const updateClientPagePipe = mergeMap((page: ClientFileUpdatePayload) => {
+        event.reply(
+          ...reduxEvent(ACTIONS.CLIENT_FILE_UPDATE_LOADING(page.fileId))
         );
+        return updateClientPage(page);
+      }, 2);
+
+      const updateClientDataPipe = switchMap(() => {
+        event.reply(
+          ...reduxEvent(ACTIONS.CLIENT_FILE_UPDATE_LOADING(SOURCE_FILE_NAME))
+        );
+        return uploadClientData();
+      });
+
+      from(pages)
+        .pipe(
+          updateClientPagePipe,
+          fileUpdateEventPipe,
+          last((v) => Boolean(v), true), // Returning 'true' value by default if no page array is empty
+          updateClientDataPipe,
+          fileUpdateEventPipe
+        )
+        .subscribe({
+          next: () =>
+            event.reply(...reduxEvent(ACTIONS.CLIENT_CATALOG_UPDATE_SUCCESS())),
+          error: (err) =>
+            event.reply(
+              ...reduxEvent(
+                ACTIONS.CLIENT_CATALOG_UPDATE_FAIL(err.message || err)
+              )
+            ),
+        });
     }
   );
 

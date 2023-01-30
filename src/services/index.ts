@@ -1,10 +1,10 @@
 export { default as useUpdatePage } from "./useUpdatePage";
 export { default as useAddPage } from "./useAddPage";
-export { default as useGenerateCatalog } from "./useGenerateCatalog";
+export { default as usePdfGenerateCatalog } from "./usePdfGenerateCatalog";
 export { default as useRefreshPage } from "./useRefreshPage";
 export { default as useUpdateCheck } from "./useUpdateCheck";
 export { default as useClientCatalog } from "./useClientCatalog";
 export { default as useCompareCatalog } from "./useCompareCatalog";
-export { default as useClientFileUpload } from "./useClientFileUpload";
-export { default as useClientFileRemove } from "./useClientFileRemove";
+export { default as useClientFileUpdate } from "./useClientFileUpdate";
+export { default as useClientCatalogUpdate } from "./useClientCatalogUpdate";
 export { default as useSwitch } from "./useSwitch";

@@ -9,6 +9,8 @@ import pngConverter, { ImageSize } from "./pngConverter";
 import { from, lastValueFrom, map, mergeMap } from "rxjs";
 import fetch from "node-fetch";
 import FormData from "form-data";
+import { ClientFileUpdatePayload } from "../../../src/services/store/actions";
+import { SOURCE_FILE_NAME } from "../../../src/constants";
 
 // TODO move to env variables
 const HOST = "http://localhost:80"; // http://artdom.opole.pl
@@ -242,10 +244,17 @@ const fetchClientData = () =>
     },
   });
 
+const updateClientPage = (page: ClientFileUpdatePayload) => {
+  return page.type === "remove"
+    ? removeClientPage(page.fileId)
+    : uploadClientPage(page.fileId);
+};
+
 const uploadClientPage = (pageId: string) => {
   const page = readPages().find((page) => page.svg.file === pageId);
   if (!page) {
-    return Promise.reject(`No page found for id: ${pageId}`);
+    // return Promise.reject(`No page found for id: ${pageId}`); // TODO add error structure {id:..., message:...}
+    return Promise.reject(pageId);
   }
 
   const imagePath = `${getPath().CLIENT_JPG_STORAGE_PATH}/${pageId}.jpg`;
@@ -271,20 +280,48 @@ const uploadClientPage = (pageId: string) => {
     });
 };
 
-const removeClientPage = (pageId: string) => {
-  const page = readPages().find((page) => page.svg.file === pageId);
-  if (!page) {
-    return Promise.reject(`No page found for id: ${pageId}`);
-  }
-
-  return fetch(`${HOST}/remove.php?pageId=${pageId}`, {
+const removeClientPage = (pageId: string) =>
+  fetch(`${HOST}/remove.php?pageId=${pageId}`, {
     method: "DELETE",
-  }).then(handleResponse);
-};
+  })
+    .then(handleResponse)
+    .then(() => pageId)
+    .catch(() => {
+      throw pageId;
+    });
 
-const uploadAllClientPages = (pageIds: string[]) => {
-  const concurrency = 2;
-  return from(pageIds).pipe(mergeMap(uploadClientPage, concurrency));
+const uploadClientData = () => {
+  const dataPath = `${getPath().PAGE_STORAGE_PATH}`;
+
+  // TODO read file async
+  let readStream = fs.readFileSync(dataPath);
+
+  const formData = new FormData();
+  formData.append("uploadType", UploadType.DATA);
+  formData.append("upfile", readStream, {
+    contentType: "application/json",
+    filename: SOURCE_FILE_NAME,
+  });
+
+  return fetch(`${HOST}/upload.php`, {
+    method: "POST",
+    body: formData,
+  })
+    .then((res) => {
+      const delayed = new Promise((resolve) => {
+        setTimeout(() => resolve(res), 2000);
+      });
+      return delayed;
+    })
+    .catch(err => {
+      console.log('data upload error', err);
+      throw err;
+    })
+    .then(handleResponse)
+    .then(() => SOURCE_FILE_NAME)
+    .catch(() => {
+      throw SOURCE_FILE_NAME;
+    });;
 };
 
 export {
@@ -298,7 +335,6 @@ export {
   generatePDF,
   removePage,
   fetchClientData,
-  uploadClientPage,
-  removeClientPage,
-  uploadAllClientPages,
+  updateClientPage,
+  uploadClientData,
 };
