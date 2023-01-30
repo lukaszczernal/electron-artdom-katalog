@@ -13,7 +13,8 @@ const nextFilename = (filename: string) => {
   return filenameParts.join("-");
 };
 
-export const findNewFilename = (filename: string, pages: Page[]) => {
+export const findNewFilename = (rawFilename: string, pages: Page[]) => {
+  const filename = encodeURI(rawFilename);
   const pageIndex = pages.findIndex((item) => item.svg.file === filename);
 
   if (pageIndex < 0) {
