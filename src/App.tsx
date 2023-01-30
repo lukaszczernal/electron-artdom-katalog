@@ -10,7 +10,7 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { IconFilePlus, IconX } from "@tabler/icons";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useAddPage } from "./services";
 import { debounceTime, ReplaySubject } from "rxjs";
 import { Settings } from "./components/Settings";
@@ -33,6 +33,7 @@ const App: React.FC = () => {
   const theme = useMantineTheme();
   const { classes } = useStyles();
   const [pagePreview, setPagePreview] = useState<string | null>();
+  const addPageResetRef = useRef<() => void>(null);
 
   const searchPhraseStream = useMemo(() => new ReplaySubject<string>(), []);
 
@@ -44,6 +45,11 @@ const App: React.FC = () => {
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
 
   const { addPage } = useAddPage();
+
+  const onAddPage = (file: File | null) => {
+    addPage(file);
+    addPageResetRef.current?.();
+  };
 
   useEffect(() => {
     if (sourcePath) {
@@ -108,7 +114,11 @@ const App: React.FC = () => {
 
       <Tooltip label="Dodaj nową stronę" position="left" withArrow>
         <Affix position={{ bottom: 40, right: 16 }}>
-          <FileButton onChange={addPage} accept="image/svg">
+          <FileButton
+            onChange={onAddPage}
+            resetRef={addPageResetRef}
+            accept="image/svg"
+          >
             {(props) => (
               <ActionIcon
                 color="blue"
