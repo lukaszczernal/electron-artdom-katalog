@@ -4,7 +4,7 @@
 {
   appId: "ArtdomProductCatalog",
   productName: "ArtdomProductCatalog",
-  copyright: "Copyright © 2022 ${author}",
+  copyright: "Copyright © 2023 ${author}",
   asar: true,
   directories: {
     output: "release/${version}",

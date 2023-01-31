@@ -9,7 +9,7 @@ import {
   handleResponseError,
   removeFileAsync,
 } from "./utils";
-import { getPath } from "./env";
+import { getHost, getPath } from "./env";
 import pngConverter, { ImageSize } from "./pngConverter";
 import { from, lastValueFrom, map, mergeMap } from "rxjs";
 import fetch from "node-fetch";
@@ -18,7 +18,7 @@ import { ClientFileUpdatePayload } from "../../../src/services/store/actions";
 import { SOURCE_FILE_NAME } from "../../../src/constants";
 
 // TODO move to env variables
-const HOST = "http://localhost:80"; // http://artdom.opole.pl
+const HOST = getHost()
 
 const readPages = (): Page[] => {
   if (getPath().PAGE_STORAGE_PATH === null) {

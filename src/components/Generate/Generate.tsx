@@ -91,18 +91,18 @@ const Generate: React.FC = () => {
               }
             >
               <ListItem
-                text="Generuje pliku PDF"
+                text="Generuj plik PDF dla iPad"
                 status={generateCatalogStatus}
               />
               {allChangedPages.map(({ fileId }) => (
                 <ListItem
                   key={fileId}
-                  text={`Aktualizuję: ${fileId}`}
+                  text={`Aktualizuj: ${fileId}`}
                   status={fileUpdateStatus[fileId]}
                 />
               ))}
               <ListItem
-                text="Aktualizuję listę stron"
+                text="Aktualizuj listę stron"
                 status={fileUpdateStatus[SOURCE_FILE_NAME]}
               />
             </List>

@@ -23,8 +23,18 @@ const getSourcePath = () => {
   return SOURCE_PATH;
 }
 
+const getHost = () => {
+  switch (process.env.NODE_ENV) {
+    case 'production':
+      return 'http://artdom.opole.pl';
+    default:
+      return 'http://localhost:80'
+  }
+}
+
 export {
   registerSourcePath,
   getSourcePath,
   getPath,
+  getHost,
 };
