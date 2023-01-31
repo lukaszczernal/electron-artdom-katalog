@@ -141,7 +141,6 @@ const registerEventHandlers = (browser: BrowserWindow) => {
 
   browserEventBus.on(EVENTS.CLIENT_CATALOG, (event: IpcMainEvent) => {
     fetchClientData()
-      .then((res) => res.json())
       .then((res: Page[]) =>
         event.reply(...reduxEvent(ACTIONS.CLIENT_CATALOG_SUCCESS(res)))
       )
@@ -176,6 +175,7 @@ const registerEventHandlers = (browser: BrowserWindow) => {
     (event: IpcMainEvent, pages: ClientFileUpdatePayload[]) => {
       /**
        * Clear previous update states
+       * TODO - we should trigger CLIENT_CATALOG_UPDATE_CLEAR and clear both uploads and pdf generation status
        */
       event.reply(...reduxEvent(ACTIONS.CLIENT_FILE_UPDATE_CLEAR()));
 

@@ -1,4 +1,5 @@
 import { Loader } from "@mantine/core";
+import { ErrorMessage } from "../ErrorMessage";
 
 interface Props {
   error?: string;
@@ -16,7 +17,7 @@ const AsyncSection: React.FC<Props> = ({ children, isLoading, error }) => {
   }
 
   if (error) {
-    return <span>{error}</span>;
+    return <ErrorMessage error={error} />;
   }
 
   return children;

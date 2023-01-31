@@ -1,13 +1,13 @@
 import { ipcRenderer as nodeEventBus } from "electron";
 import { BROWSER_EVENTS } from "@/events";
-import { Page } from "@/models";
 import { createSlice } from "@reduxjs/toolkit";
 import { ACTIONS } from "./actions";
 import { getDefaultState } from "./utils";
+import { Page } from '@/models';
 
 export const clientCatalogStore = createSlice({
   name: BROWSER_EVENTS.CLIENT_CATALOG,
-  initialState: getDefaultState([] as Page[]),
+  initialState: getDefaultState<Page[] | undefined>(),
   reducers: {},
   extraReducers: (builder) =>
     builder

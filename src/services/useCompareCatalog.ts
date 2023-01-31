@@ -1,7 +1,8 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { PagesContext } from "./context/pagesContext";
 import { difference } from "lodash-es";
 import useClientCatalog from "./useClientCatalog";
+import { ClientFileUpdatePayload } from "./store/actions";
 
 const useCompareCatalog = () => {
   const { pageIds, pages } = useContext(PagesContext);
@@ -42,6 +43,24 @@ const useCompareCatalog = () => {
     setUpdatedPages(updatedPages);
   }, [pageIds, clientData]);
 
+  const allChangedPages = useMemo(() => {
+    const uploadPages: ClientFileUpdatePayload[] = updatedPages
+      .concat(newPages)
+      .map((fileId) => ({
+        type: "upload",
+        fileId,
+      }));
+
+    const removePages: ClientFileUpdatePayload[] = removedPages.map(
+      (fileId) => ({
+        type: "remove",
+        fileId,
+      })
+    );
+
+    return uploadPages.concat(removePages);
+  }, [newPages, removedPages, updatedPages]);
+
   return {
     compare,
     isLoading,
@@ -49,6 +68,7 @@ const useCompareCatalog = () => {
     updatedPages,
     removedPages,
     newPages,
+    allChangedPages,
   };
 };
 

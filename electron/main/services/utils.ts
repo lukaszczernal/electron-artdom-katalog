@@ -52,3 +52,7 @@ export const handleResponse = (res: Response) => {
   }
   return res.json();
 };
+
+export const handleResponseError = (res: any) => {
+  throw typeof res === "string" ? res : "Unhandled error";
+};

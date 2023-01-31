@@ -16,7 +16,13 @@ const useClientCatalogUpdate = () => {
     dispatch(ACTIONS.CLIENT_CATALOG_UPDATE(pages));
   };
 
+  const clearUpdateStatus = () => {
+    dispatch(ACTIONS.CLIENT_FILE_UPDATE_CLEAR());
+    dispatch(ACTIONS.PDF_GENERATE_CLEAR());
+  };
+
   return {
+    clearUpdateStatus,
     updateCatalog,
     isLoading,
     error,

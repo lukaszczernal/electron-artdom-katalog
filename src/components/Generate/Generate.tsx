@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import {
   useClientCatalogUpdate,
+  useClientFileUpdate,
   useCompareCatalog,
   usePdfGenerateCatalog,
   useSwitch,
@@ -8,24 +9,26 @@ import {
 import {
   ActionIcon,
   Affix,
-  Alert,
   Button,
   Group,
+  List,
   Modal,
   Stack,
+  ThemeIcon,
   Tooltip,
 } from "@mantine/core";
-import { IconAlertCircle, IconFileExport } from "@tabler/icons";
-import { FileList } from "./components/FileList";
+import { IconCircleCheck, IconFileExport } from "@tabler/icons";
 import { AsyncSection } from "@/components/AsyncSection";
-import { ClientFileUpdatePayload } from "@/services/store/actions";
 import { SOURCE_FILE_NAME } from "@/constants";
+import { ListItem } from "./components/ListItem";
+import { ErrorMessage } from "../ErrorMessage";
 
 const Generate: React.FC = () => {
   const { status: generateCatalogStatus } = usePdfGenerateCatalog();
-
+  const { fileUpdateStatus } = useClientFileUpdate();
   const {
     updateCatalog,
+    clearUpdateStatus,
     error: catalogUpdateError,
     isLoading: isCatalogUpdating,
   } = useClientCatalogUpdate();
@@ -34,10 +37,7 @@ const Generate: React.FC = () => {
   const {
     compare,
     isLoading: isLoadingClientCatalog,
-    error: clientCatalogError,
-    updatedPages,
-    newPages,
-    removedPages,
+    allChangedPages,
   } = useCompareCatalog();
 
   const {
@@ -47,26 +47,12 @@ const Generate: React.FC = () => {
   } = useSwitch();
 
   const onCatalogUpdate = () => {
-    const uploadPages: ClientFileUpdatePayload[] = updatedPages
-      .concat(newPages)
-      .map((fileId) => ({
-        type: "upload",
-        fileId,
-      }));
-
-    const removePages: ClientFileUpdatePayload[] = removedPages.map(
-      (fileId) => ({
-        type: "remove",
-        fileId,
-      })
-    );
-
-    const updatePages = uploadPages.concat(removePages);
-    updateCatalog(updatePages);
+    updateCatalog(allChangedPages);
   };
 
   useEffect(() => {
     isSyncModalOpen && compare();
+    return () => clearUpdateStatus(); // TODO this should be a side effect of CLIENT_CATALOG_UPDATE_CLEAR
   }, [isSyncModalOpen]);
 
   return (
@@ -89,52 +75,44 @@ const Generate: React.FC = () => {
       <Modal
         opened={isSyncModalOpen}
         onClose={closeSyncModal}
-        title="Lista zmian"
-        size="md"
+        title="Aktualizacja katalogu"
+        size="lg"
       >
-        <AsyncSection
-          isLoading={isLoadingClientCatalog}
-          error={clientCatalogError}
-        >
+        <AsyncSection isLoading={isLoadingClientCatalog}>
           <Stack spacing="xl">
+            <List
+              spacing="xs"
+              size="sm"
+              center
+              icon={
+                <ThemeIcon color="teal" size={24} radius="xl">
+                  <IconCircleCheck size={16} />
+                </ThemeIcon>
+              }
+            >
+              <ListItem
+                text="Generuje pliku PDF"
+                status={generateCatalogStatus}
+              />
+              {allChangedPages.map(({ fileId }) => (
+                <ListItem
+                  key={fileId}
+                  text={`Aktualizuję: ${fileId}`}
+                  status={fileUpdateStatus[fileId]}
+                />
+              ))}
+              <ListItem
+                text="Aktualizuję listę stron"
+                status={fileUpdateStatus[SOURCE_FILE_NAME]}
+              />
+            </List>
+
             {catalogUpdateError && (
-              <Alert
-                icon={<IconAlertCircle size={16} />}
-                title="Nie udało się"
-                color="red"
-              >
-                <>
-                  <p>Aktualizacja katalogu nie powiodła się.</p>
-                  <span>(Błąd: {catalogUpdateError})</span>;
-                </>
-              </Alert>
+              <ErrorMessage
+                message="Aktualizacja katalogu klientów nie powiodła się."
+                error={catalogUpdateError}
+              />
             )}
-
-            {updatedPages?.length > 0 && (
-              <>
-                <span>Zaktualizowane strony: {updatedPages?.length}</span>
-                <FileList list={updatedPages} />
-              </>
-            )}
-
-            {newPages?.length > 0 && (
-              <>
-                <span>Nowe strony: {newPages?.length}</span>
-                <FileList list={newPages} />
-              </>
-            )}
-
-            {removedPages?.length > 0 && (
-              <>
-                <span>Usunięte strony: {removedPages?.length}</span>
-                <FileList list={removedPages} />
-              </>
-            )}
-
-            <span>Generowane pliku PDF {generateCatalogStatus}</span>
-
-            <span>Dane katalogu:</span>
-            <FileList list={[SOURCE_FILE_NAME]} />
 
             <Group position="right">
               <Button onClick={closeSyncModal}>Anuluj</Button>

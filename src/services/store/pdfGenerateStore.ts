@@ -25,5 +25,8 @@ export const pdfGenerateStore = createSlice({
       })
       .addCase(ACTIONS.PDF_GENERATE_FAIL, (state) => {
         state.status = AsyncStatus.FAILED;
+      })
+      .addCase(ACTIONS.PDF_GENERATE_CLEAR, (state) => {
+        state.status = undefined;
       }),
 });

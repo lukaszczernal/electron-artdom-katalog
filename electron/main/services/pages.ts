@@ -3,7 +3,12 @@ import { spawn } from "child_process";
 import PDFkit from "pdfkit";
 import { FileInfo, Page, UploadType } from "../../../src/models";
 import svgConverter from "./svgConverter";
-import { findNewFilename, handleResponse, removeFileAsync } from "./utils";
+import {
+  findNewFilename,
+  handleResponse,
+  handleResponseError,
+  removeFileAsync,
+} from "./utils";
 import { getPath } from "./env";
 import pngConverter, { ImageSize } from "./pngConverter";
 import { from, lastValueFrom, map, mergeMap } from "rxjs";
@@ -242,7 +247,9 @@ const fetchClientData = () =>
     headers: {
       "Content-Type": "application/json",
     },
-  });
+  })
+    .then(handleResponse)
+    .catch(handleResponseError);
 
 const updateClientPage = (page: ClientFileUpdatePayload) => {
   return page.type === "remove"
@@ -313,15 +320,14 @@ const uploadClientData = () => {
       });
       return delayed;
     })
-    .catch(err => {
-      console.log('data upload error', err);
+    .catch((err) => {
       throw err;
     })
     .then(handleResponse)
     .then(() => SOURCE_FILE_NAME)
     .catch(() => {
       throw SOURCE_FILE_NAME;
-    });;
+    });
 };
 
 export {
