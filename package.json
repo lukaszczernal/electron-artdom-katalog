@@ -11,10 +11,11 @@
     "url": "https://github.com/lukaszczernal/electron-artdom-katalog.git"
   },
   "scripts": {
-    "dev": "APP_DEV=true vite",
+    "dev": "cross-env APP_DEV=true vite",
     "prebuild": "npm uninstall sharp --force && npm install --platform=win32 --arch=ia32 sharp --force",
     "build": "tsc --build --dry && vite build && electron-builder -w",
     "startWin": "npm uninstall sharp --force && npm install --platform=win32 --arch=x64 sharp --force && npm run dev",
+    "startWinProd": "npm uninstall sharp --force && npm install --platform=win32 --arch=x64 sharp --force && vite",
     "start": "npm uninstall sharp --force && npm install --platform=darwin --arch=x64 sharp --force && npm run dev"
   },
   "engines": {
@@ -27,6 +28,7 @@
     "@types/sharp": "^0.31.1",
     "@types/sortablejs": "^1.15.0",
     "@vitejs/plugin-react": "^2.0.1",
+    "cross-env": "^7.0.3",
     "electron": "^20.0.2",
     "electron-builder": "^23.3.3",
     "react": "^18.2.0",

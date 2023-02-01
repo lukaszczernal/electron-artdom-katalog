@@ -306,7 +306,6 @@ const uploadClientData = () => {
   const formData = new FormData();
   formData.append("uploadType", UploadType.DATA);
   formData.append("upfile", readStream, {
-    contentType: "application/json",
     filename: SOURCE_FILE_NAME,
   });
 
@@ -314,12 +313,6 @@ const uploadClientData = () => {
     method: "POST",
     body: formData,
   })
-    .then((res) => {
-      const delayed = new Promise((resolve) => {
-        setTimeout(() => resolve(res), 2000);
-      });
-      return delayed;
-    })
     .catch((err) => {
       throw err;
     })
