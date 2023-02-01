@@ -3,14 +3,18 @@ import { SOURCE_FILE_NAME } from "../../../src/constants";
 let SOURCE_PATH = null;
 
 const getPath = () => ({
-  PAGE_STORAGE_PATH: SOURCE_PATH ? `${SOURCE_PATH}/data/${SOURCE_FILE_NAME}` : null,
-  PAGE_STORAGE_PATH_BACKUP: SOURCE_PATH ? `${SOURCE_PATH}/data/temp.${SOURCE_FILE_NAME}` : null,
-  SVG_STORAGE_PATH:SOURCE_PATH ? `${SOURCE_PATH}/svg` : null,
-  PNG_STORAGE_PATH: SOURCE_PATH ?`${SOURCE_PATH}/png` : null,
-  JPG_STORAGE_PATH: SOURCE_PATH ?`${SOURCE_PATH}/jpg` : null,
-  PDF_STORAGE_PATH: SOURCE_PATH ?`${SOURCE_PATH}/pdf` : null,
-  CLIENT_JPG_STORAGE_PATH: SOURCE_PATH ?`${SOURCE_PATH}/jpg/client` : null,
-  THUMB_STORAGE_PATH: SOURCE_PATH ?`${SOURCE_PATH}/jpg/thumb` : null,
+  PAGE_STORAGE_PATH: SOURCE_PATH
+    ? `${SOURCE_PATH}/data/${SOURCE_FILE_NAME}`
+    : null,
+  PAGE_STORAGE_PATH_BACKUP: SOURCE_PATH
+    ? `${SOURCE_PATH}/data/temp.${SOURCE_FILE_NAME}`
+    : null,
+  SVG_STORAGE_PATH: SOURCE_PATH ? `${SOURCE_PATH}/svg` : null,
+  PNG_STORAGE_PATH: SOURCE_PATH ? `${SOURCE_PATH}/png` : null,
+  JPG_STORAGE_PATH: SOURCE_PATH ? `${SOURCE_PATH}/jpg` : null,
+  PDF_STORAGE_PATH: SOURCE_PATH ? `${SOURCE_PATH}/pdf` : null,
+  CLIENT_JPG_STORAGE_PATH: SOURCE_PATH ? `${SOURCE_PATH}/jpg/client` : null,
+  THUMB_STORAGE_PATH: SOURCE_PATH ? `${SOURCE_PATH}/jpg/thumb` : null,
 });
 
 const registerSourcePath = (sourcePath?: string) => {
@@ -21,20 +25,15 @@ const registerSourcePath = (sourcePath?: string) => {
 
 const getSourcePath = () => {
   return SOURCE_PATH;
-}
+};
 
 const getHost = () => {
-  switch (process.env.NODE_ENV) {
-    case 'production':
-      return 'http://artdom.opole.pl';
+  switch (process.env.APP_DEV) {
+    case "true":
+      return "http://localhost:80";
     default:
-      return 'http://localhost:80'
+      return "http://artdom.opole.pl";
   }
-}
-
-export {
-  registerSourcePath,
-  getSourcePath,
-  getPath,
-  getHost,
 };
+
+export { registerSourcePath, getSourcePath, getPath, getHost };

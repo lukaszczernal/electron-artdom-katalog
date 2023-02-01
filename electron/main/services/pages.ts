@@ -242,7 +242,7 @@ const removePage = (filename: string) =>
   });
 
 const fetchClientData = () =>
-  fetch(`${HOST}/data/pages-array.json`, {
+  fetch(`${HOST}/data/${SOURCE_FILE_NAME}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
