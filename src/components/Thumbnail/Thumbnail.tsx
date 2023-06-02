@@ -15,7 +15,7 @@ const useStyles = createStyles((theme) => ({
     border: `1px solid ${theme.colors.gray[3]}`,
   },
   disabled: {
-    opacity: 0.5,
+    opacity: 0.3,
     boxShadow: "none",
     border: `1px solid ${theme.colors.gray[4]}`,
 
