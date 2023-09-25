@@ -141,7 +141,7 @@ const updatePage = (
         // Update existing page
         pages[pageIndex] = {
           ...page,
-          version: page.version ? page.version + 1 : 1,
+          version: Date.now(),
         };
       }
 
