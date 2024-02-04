@@ -8,7 +8,6 @@ import {
 } from "@/services";
 import {
   ActionIcon,
-  Affix,
   Button,
   Group,
   List,
@@ -21,7 +20,7 @@ import { IconCircleCheck, IconFileExport } from "@tabler/icons";
 import { AsyncSection } from "@/components/AsyncSection";
 import { SOURCE_FILE_NAME } from "@/constants";
 import { ListItem } from "./components/ListItem";
-import { ErrorMessage } from "../ErrorMessage";
+import { ErrorMessage } from "@/components/ErrorMessage";
 
 const Generate: React.FC = () => {
   const { status: generateCatalogStatus } = usePdfGenerateCatalog();
@@ -58,18 +57,16 @@ const Generate: React.FC = () => {
   return (
     <>
       <Tooltip label="Generuj PDF" position="left" withArrow>
-        <Affix position={{ bottom: 100, right: 16 }}>
-          <ActionIcon
-            loading={isCatalogUpdating}
-            color="blue"
-            size="xl"
-            radius="xl"
-            variant="filled"
-            onClick={openSyncModal}
-          >
-            <IconFileExport size={18} />
-          </ActionIcon>
-        </Affix>
+        <ActionIcon
+          loading={isCatalogUpdating}
+          color="blue"
+          size="xl"
+          radius="xl"
+          variant="filled"
+          onClick={openSyncModal}
+        >
+          <IconFileExport size={18} />
+        </ActionIcon>
       </Tooltip>
 
       <Modal

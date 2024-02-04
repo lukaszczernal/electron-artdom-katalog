@@ -19,7 +19,7 @@ import { PagesContext } from "./services/context/pagesContext";
 import { SourcePathContext } from "./services/context/sourcePathContext";
 import { PageDetails } from "./components/PageDetails";
 import { PagePreview } from "./components/PagePreview";
-import { Generate } from "./components/Generate";
+import { Generate } from "./features/Generate";
 
 const useStyles = createStyles(() => ({
   header: {
@@ -43,6 +43,7 @@ const App: React.FC = () => {
   const { pageIds, fetchPages, searchPages } = useContext(PagesContext);
 
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
+  const selectedPageTitle = selectedPageId;
 
   const { addPage } = useAddPage();
 
@@ -110,7 +111,9 @@ const App: React.FC = () => {
         />
       </Affix>
 
-      <Generate />
+      <Affix position={{ bottom: 100, right: 16 }}>
+        <Generate />
+      </Affix>
 
       <Tooltip label="Dodaj nową stronę" position="left" withArrow>
         <Affix position={{ bottom: 40, right: 16 }}>
@@ -141,14 +144,14 @@ const App: React.FC = () => {
         onClose={() => setSelectedPageId(null)}
         position="bottom"
         padding="xl"
-        size="xl"
+        title={selectedPageTitle}
       >
-        {selectedPageId && (
+        {
           <PageDetails
             pageId={selectedPageId}
             onFinish={() => setSelectedPageId(null)}
           />
-        )}
+        }
       </Drawer>
 
       {pagePreview && (

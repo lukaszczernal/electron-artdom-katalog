@@ -23,7 +23,7 @@ import { SourcePathContext } from "@/services/context/sourcePathContext";
 import useDownloadPage from "@/services/useDownloadPage";
 
 interface Prosp {
-  pageId: string;
+  pageId: string | null;
   onFinish: () => void;
 }
 
@@ -34,8 +34,7 @@ const useStyles = createStyles(() => ({
   },
   page: {
     paddingRight: "1rem",
-    paddingBottom: "2.4rem",
-    width: "300px",
+    width: "16rem",
   },
   actions: {
     margin: "0 1rem",
@@ -65,7 +64,7 @@ const PageDetails: React.FC<Prosp> = ({ pageId, onFinish }) => {
   } = useDownloadPage();
   const theme = useMantineTheme();
 
-  const page = pages?.[pageId] || null;
+  const page = pageId ? pages?.[pageId] : null;
   const isPageActive = localPage?.status === "enable";
   const togglePageLabel = isPageActive ? "Ukryj" : "Aktywuj";
   const thumbnailSrc = `safe-file-protocol://${sourcePath}/jpg/client/${page?.svg.file}.jpg?cache=${page?.version}`;
@@ -139,7 +138,11 @@ const PageDetails: React.FC<Prosp> = ({ pageId, onFinish }) => {
     localPage && refreshPage(localPage);
   };
 
-  return localPage ? (
+  if (!localPage) {
+    return null;
+  }
+
+  return (
     <>
       <div className={classes.overview}>
         <div className={classes.page}>
@@ -202,7 +205,7 @@ const PageDetails: React.FC<Prosp> = ({ pageId, onFinish }) => {
         </Stack>
       </Modal>
     </>
-  ) : null;
+  );
 };
 
 export default PageDetails;

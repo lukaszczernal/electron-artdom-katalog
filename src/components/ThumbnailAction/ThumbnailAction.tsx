@@ -9,7 +9,7 @@ interface Props {
   children: React.ReactElement;
 }
 
-const useStyles = createStyles((theme, _params, _getRef) => ({
+const useStyles = createStyles((theme, _params) => ({
   wrapper: {
     position: "relative",
     display: "flex",
@@ -22,7 +22,7 @@ const useStyles = createStyles((theme, _params, _getRef) => ({
       padding: "0",
       border: `1px solid ${theme.colors.blue[2]}`,
 
-      // TODO span should be changed to getRef('link')
+      // TODO span should be changed to getStylesRef('link')
       "> span": {
         display: "flex",
       },
