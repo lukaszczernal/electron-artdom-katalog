@@ -207,6 +207,9 @@ const generatePDF = async () => {
     pages.forEach((page) => {
       const jpgPath = `${getPath().JPG_STORAGE_PATH}/${page.svg.file}.jpg`;
       pdf.addPage();
+      if (page.keywords) {
+        pdf.fillColor('#ffffff').text(page.keywords.join(' '), 0, 0)
+      }
       pdf.image(jpgPath, 20, 0, { fit: [595, 841] });
     });
     pdf.end();
