@@ -2,27 +2,26 @@ import fs from "fs";
 import { Response } from "node-fetch";
 import { Page } from "../../../src/models";
 
-const nextFilename = (filename: string) => {
-  const filenameParts = filename.split("-");
-  let prefix = Number(filenameParts[0]);
-  if (isNaN(prefix)) {
-    filenameParts.unshift("1");
-  } else {
-    filenameParts[0] = String(prefix + 1);
-  }
-  return filenameParts.join("-");
+const getCurrentFormattedDate = () => {
+  // Get the current date
+  const now = new Date();
+
+  // Extract date components
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+
+  // Format date as yyyy-mm-dd_hh:mm:ss
+  return `${year}-${month}-${day}_${hours}:${minutes}:${seconds}`;
 };
 
 export const findNewFilename = (rawFilename: string, pages: Page[]) => {
   const filename = encodeURI(rawFilename);
-  const pageIndex = pages.findIndex((item) => item.svg.file === filename);
 
-  if (pageIndex < 0) {
-    return filename;
-  }
-
-  const newFilename = nextFilename(filename);
-  return findNewFilename(newFilename, pages);
+  return `${filename}-${getCurrentFormattedDate()}`;
 };
 
 export const removeFileAsync = (path: string) => {
