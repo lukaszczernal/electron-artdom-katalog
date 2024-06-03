@@ -14,8 +14,8 @@ const getCurrentFormattedDate = () => {
   const minutes = String(now.getMinutes()).padStart(2, "0");
   const seconds = String(now.getSeconds()).padStart(2, "0");
 
-  // Format date as yyyy-mm-dd_hh:mm:ss
-  return `${year}-${month}-${day}_${hours}:${minutes}:${seconds}`;
+  // Format date as yyyy-mm-dd_hh-mm-ss
+  return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
 };
 
 export const findNewFilename = (rawFilename: string, pages: Page[]) => {
