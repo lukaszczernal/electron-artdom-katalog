@@ -14,6 +14,9 @@
     "dev": "cross-env APP_DEV=true vite",
     "prebuild": "npm uninstall sharp --force && npm install --os=win32 --cpu=ia32 sharp --force",
     "build": "tsc --build --dry && vite build && electron-builder -w",
+    "prebuild64": "npm uninstall sharp --force && npm install --os=win32 --cpu=x64 sharp --force",
+    "build64": "tsc --build --dry && vite build && electron-builder -w",
+    "buildOptional": "tsc --build --dry && vite build && electron-builder -w",
     "startWin": "npm uninstall sharp --force && npm install --os=win32 --cpu=x64 sharp --force && npm run dev",
     "startWinProd": "npm uninstall sharp --force && npm install --os=win32 --cpu=x64 sharp --force && vite",
     "start": "npm uninstall sharp --force && npm install --os=darwin --cpu=x64 sharp --force && npm run dev"
@@ -29,7 +32,7 @@
     "@types/sortablejs": "^1.15.0",
     "@vitejs/plugin-react": "^2.0.1",
     "cross-env": "^7.0.3",
-    "electron": "^22.3.27",
+    "electron": "^28.3.3",
     "electron-builder": "^24.9.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
