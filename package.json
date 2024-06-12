@@ -12,14 +12,13 @@
   },
   "scripts": {
     "dev": "cross-env APP_DEV=true vite",
-    "prebuild": "npm uninstall sharp --force && npm install --os=win32 --cpu=ia32 sharp --force",
+    "prebuild": "npm uninstall sharp --force && npm install --platform=win32 --arch=ia32 sharp@0.32.6 --force",
     "build": "tsc --build --dry && vite build && electron-builder -w",
-    "prebuild64": "npm uninstall sharp --force && npm install --os=win32 --cpu=x64 sharp --force",
+    "prebuild64": "npm uninstall sharp --force && npm install --platform=win32 --arch=x64 sharp@0.32.6 --force",
     "build64": "tsc --build --dry && vite build && electron-builder -w",
-    "buildOptional": "tsc --build --dry && vite build && electron-builder -w",
-    "startWin": "npm uninstall sharp --force && npm install --os=win32 --cpu=x64 sharp --force && npm run dev",
-    "startWinProd": "npm uninstall sharp --force && npm install --os=win32 --cpu=x64 sharp --force && vite",
-    "start": "npm uninstall sharp --force && npm install --os=darwin --cpu=x64 sharp --force && npm run dev"
+    "startWin": "npm uninstall sharp --force && npm install --platform=win32 --arch=x64 sharp@0.32.6 --force && npm run dev",
+    "startWinProd": "npm uninstall sharp --force && npm install --platform=win32 --arch=x64 sharp@0.32.6 --force && vite",
+    "start": "npm uninstall sharp --force && npm install --platform=darwin --arch=x64 sharp@0.32.6 --force && npm run dev"
   },
   "engines": {
     "node": "^14.18.0 || >=16.0.0"
@@ -32,7 +31,7 @@
     "@types/sortablejs": "^1.15.0",
     "@vitejs/plugin-react": "^2.0.1",
     "cross-env": "^7.0.3",
-    "electron": "^28.3.3",
+    "electron": "^22.3.27",
     "electron-builder": "^24.9.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -69,7 +68,7 @@
     "react-sortablejs": "^6.1.4",
     "react-virtuoso": "^3.1.4",
     "rxjs": "^7.5.6",
-    "sharp": "^0.33.4",
+    "sharp": "^0.32.6",
     "sortablejs": "^1.15.0",
     "swiper": "^8.4.4"
   }
