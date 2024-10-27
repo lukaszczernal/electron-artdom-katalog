@@ -11,6 +11,7 @@
     "url": "https://github.com/lukaszczernal/electron-artdom-katalog.git"
   },
   "scripts": {
+    "test": "vitest --config ./vitest.config.ts",
     "dev": "cross-env APP_DEV=true vite",
     "prebuild": "npm uninstall sharp --force && npm install --platform=win32 --arch=ia32 sharp@0.32.6 --force",
     "build": "tsc --build --dry && vite build && electron-builder -w",
@@ -38,7 +39,8 @@
     "sass": "^1.54.4",
     "typescript": "^4.7.4",
     "vite": "^3.0.7",
-    "vite-plugin-electron": "^0.9.2"
+    "vite-plugin-electron": "^0.9.2",
+    "vitest": "^2.1.2"
   },
   "debug": {
     "env": {

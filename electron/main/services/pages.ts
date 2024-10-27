@@ -157,8 +157,7 @@ const uploadPage = (
   successCallback: (filename: string) => void,
   failCallback: (message: string) => void
 ) => {
-  const pages = readPages();
-  const filename = findNewFilename(file.name, pages);
+  const filename = findNewFilename(file.name);
 
   var is = fs.createReadStream(file.path);
   var os = fs.createWriteStream(`${getPath().SVG_STORAGE_PATH}/${filename}`);

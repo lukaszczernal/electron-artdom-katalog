@@ -4,6 +4,7 @@
 ## Prerequisites
 
 📦 'inkscape' CLI installed - version 0.48.4
+- Node 16.20.2 for builds and releases
 
 #### Create following folder structure to host data:
 ```

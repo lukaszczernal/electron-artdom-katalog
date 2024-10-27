@@ -1,6 +1,5 @@
 import fs from "fs";
 import { Response } from "node-fetch";
-import { Page } from "../../../src/models";
 
 const getCurrentFormattedDate = () => {
   // Get the current date
@@ -18,10 +17,15 @@ const getCurrentFormattedDate = () => {
   return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
 };
 
-export const findNewFilename = (rawFilename: string, pages: Page[]) => {
+export const findNewFilename = (rawFilename: string) => {
   const filename = encodeURI(rawFilename);
+  const suffixIndex = filename.lastIndexOf('.');
+  const noSuffix = filename.substring(0, suffixIndex);
+  const suffix = filename.substring(suffixIndex, filename.length);
+  const cleanedSuffix: string = new RegExp(/^(\.)[a-zA-Z0-9]+/, 'gm').exec(suffix)[0];
 
-  return `${filename}-${getCurrentFormattedDate()}`;
+  return `${noSuffix}-${getCurrentFormattedDate()}${cleanedSuffix}`;
+
 };
 
 export const removeFileAsync = (path: string) => {
