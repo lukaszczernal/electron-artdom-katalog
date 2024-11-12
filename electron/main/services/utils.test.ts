@@ -18,6 +18,9 @@ describe("utils", () => {
   test("isFilenameValid", () => {
     expect(isFilenameValid("1-KUBKI_czerwone.svg")).toBeTruthy();
     expect(
+      isFilenameValid("1-KPL.SARA,KLOS.SVG")
+    ).toBeTruthy();
+    expect(
       isFilenameValid("1-KUBKI_czerwone-2024-12-27_18-09-22.svg")
     ).toBeTruthy();
     expect(

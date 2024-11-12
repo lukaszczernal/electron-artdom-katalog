@@ -18,7 +18,7 @@ const getCurrentFormattedDate = () => {
 };
 
 export const isFilenameValid = (rawFilename: string) => {
-  return new RegExp(/(\.)svg$/, "gm").test(rawFilename);
+  return new RegExp(/(\.)svg$/, "gm").test(rawFilename.toLowerCase());
 };
 
 export const getCleanFilenameChunks = (rawFilename: string) => {

@@ -131,7 +131,7 @@ const PageList: React.FC<Props> = ({
   // Update local state only if the number of items change
   useEffect(() => {
     setPages(list);
-  }, [list.length]);
+  }, [list]);
 
   const onSortEnd = ({ oldIndex, newIndex }) => {
     // Update local state first to make app feel more responsive
