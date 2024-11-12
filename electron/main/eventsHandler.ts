@@ -30,7 +30,7 @@ import {
   refreshPage,
   refreshAllPages,
   editPage,
-  updatePage,
+  replacePageData,
   uploadPage,
   savePages,
   generatePDF,
@@ -67,8 +67,9 @@ const registerEventHandlers = (browser: BrowserWindow) => {
   browserEventBus.on(EVENTS.PAGE_REFRESH, (event: IpcMainEvent, page: Page) => {
     refreshPage(page.svg.file)
       .then(() =>
-        updatePage(
+        replacePageData(
           page,
+          page.svg.file,
           () => event.reply(EVENTS.PAGE_UPDATE_SUCCESS),
           () => event.reply(EVENTS.PAGE_UPDATE_FAIL)
         )
@@ -85,7 +86,7 @@ const registerEventHandlers = (browser: BrowserWindow) => {
   });
 
   browserEventBus.on(EVENTS.PAGE_EDIT, (event: IpcMainEvent, page: Page) => {
-    editPage(page.svg.file, () => {
+    editPage(page.svg.file, (page) => {
       event.reply(EVENTS.PAGE_EDIT_SUCCESS, page);
     });
   });
@@ -100,8 +101,9 @@ const registerEventHandlers = (browser: BrowserWindow) => {
   );
 
   browserEventBus.on(EVENTS.PAGE_UPDATE, (event: IpcMainEvent, page: Page) => {
-    updatePage(
+    replacePageData(
       page,
+      page.svg.file,
       () => event.reply(EVENTS.PAGE_UPDATE_SUCCESS),
       () => event.reply(EVENTS.PAGE_UPDATE_FAIL)
     );

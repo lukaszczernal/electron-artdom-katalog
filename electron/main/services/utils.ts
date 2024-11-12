@@ -17,15 +17,26 @@ const getCurrentFormattedDate = () => {
   return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
 };
 
-export const findNewFilename = (rawFilename: string) => {
+export const isFilenameValid = (rawFilename: string) => {
+  return new RegExp(/(\.)svg$/, "gm").test(rawFilename);
+};
+
+export const getCleanFilenameChunks = (rawFilename: string) => {
   const filename = encodeURI(rawFilename);
-  const suffixIndex = filename.lastIndexOf('.');
+  const suffixIndex = filename.lastIndexOf(".");
   const noSuffix = filename.substring(0, suffixIndex);
   const suffix = filename.substring(suffixIndex, filename.length);
-  const cleanedSuffix: string = new RegExp(/^(\.)[a-zA-Z0-9]+/, 'gm').exec(suffix)[0];
+  const cleanedSuffix: string = new RegExp(/^(\.)[a-zA-Z0-9]+/, "gm").exec(
+    suffix
+  )[0];
+
+  return [noSuffix, cleanedSuffix];
+};
+
+export const findNewFilename = (rawFilename: string) => {
+  const [noSuffix, cleanedSuffix] = getCleanFilenameChunks(rawFilename);
 
   return `${noSuffix}-${getCurrentFormattedDate()}${cleanedSuffix}`;
-
 };
 
 export const removeFileAsync = (path: string) => {

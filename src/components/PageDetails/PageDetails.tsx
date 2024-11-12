@@ -57,24 +57,21 @@ const PageDetails: React.FC<Prosp> = ({ pageId, onFinish }) => {
   const { sourcePath } = useContext(SourcePathContext);
   const { updatePage } = useUpdatePage();
   const { refreshPage, isLoading: isRefreshing } = useRefreshPage();
-  const {
-    fetch: downloadPage,
-    isLoading: isDownloading,
-    progress,
-  } = useDownloadPage();
+  const { fetch: downloadPage, isLoading: isDownloading } = useDownloadPage();
   const theme = useMantineTheme();
 
   const page = pageId ? pages?.[pageId] : null;
   const isPageActive = localPage?.status === "enable";
   const togglePageLabel = isPageActive ? "Ukryj" : "Aktywuj";
-  const thumbnailSrc = `safe-file-protocol://${sourcePath}/jpg/client/${page?.svg.file}.jpg?cache=${page?.version}`;
+  const thumbnailSrc = `safe-file-protocol://${sourcePath}/jpg/client/${localPage?.svg.file}.jpg?cache=${localPage?.version}`;
 
   useEffect(() => {
     page && setLocalPage(page);
   }, [page]);
 
-  useEvent<Page>(EVENTS.PAGE_EDIT_SUCCESS, (_, page) => {
-    refreshPage(page);
+  useEvent<Page>(EVENTS.PAGE_EDIT_SUCCESS, (_, updatedPage) => {
+    refreshPage(updatedPage);
+    setLocalPage(updatedPage);
   });
 
   useEvent(EVENTS.PAGE_DELETE_SUCCESS, onFinish);

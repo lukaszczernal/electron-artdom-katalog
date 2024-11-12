@@ -1,5 +1,9 @@
 import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
-import { findNewFilename } from "./utils";
+import {
+  findNewFilename,
+  getCleanFilenameChunks,
+  isFilenameValid,
+} from "./utils";
 
 describe("utils", () => {
   beforeAll(() => {
@@ -11,13 +15,39 @@ describe("utils", () => {
     vi.useRealTimers();
   });
 
+  test("isFilenameValid", () => {
+    expect(isFilenameValid("1-KUBKI_czerwone.svg")).toBeTruthy();
+    expect(
+      isFilenameValid("1-KUBKI_czerwone-2024-12-27_18-09-22.svg")
+    ).toBeTruthy();
+    expect(
+      isFilenameValid("1-KUBKI_czerwone.svg-2023-12-21_18-10-20")
+    ).toBeFalsy();
+  });
+
+  test("getCleanFilenameChunks", () => {
+    expect(getCleanFilenameChunks("1-KUBKI_czerwone.svg")).toEqual([
+      "1-KUBKI_czerwone",
+      ".svg",
+    ]);
+
+    expect(
+      getCleanFilenameChunks("1-KUBKI_czerwone-2024-12-27_18-09-22.svg")
+    ).toEqual(["1-KUBKI_czerwone-2024-12-27_18-09-22", ".svg"]);
+
+    expect(
+      getCleanFilenameChunks("1-KUBKI_czerwone.svg-2023-12-21_18-10-20")
+    ).toEqual(["1-KUBKI_czerwone", ".svg"]);
+  });
+
   test("findNewFilename", () => {
     vi.spyOn(Date, "now").mockImplementation(() => 1728841199135);
 
     expect(findNewFilename("1-KUBKI_biale.svg")).toBe(
       "1-KUBKI_biale-2024-11-27_18-09-22.svg"
     );
-    expect(findNewFilename("1-KUBKI_czerwone.svg-2024-11-27_18-09-22")).toBe(
+
+    expect(findNewFilename("1-KUBKI_czerwone.svg-2023-12-21_18-10-20")).toBe(
       "1-KUBKI_czerwone-2024-11-27_18-09-22.svg"
     );
   });

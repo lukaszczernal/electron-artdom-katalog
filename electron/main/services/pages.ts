@@ -7,6 +7,7 @@ import {
   findNewFilename,
   handleResponse,
   handleResponseError,
+  isFilenameValid,
   removeFileAsync,
 } from "./utils";
 import { getHost, getPath } from "./env";
@@ -18,7 +19,7 @@ import { ClientFileUpdatePayload } from "../../../src/services/store/actions";
 import { SOURCE_FILE_NAME } from "../../../src/constants";
 
 // TODO move to env variables
-const HOST = getHost()
+const HOST = getHost();
 
 const readPages = (): Page[] => {
   if (getPath().PAGE_STORAGE_PATH === null) {
@@ -95,8 +96,42 @@ const refreshAllPages = async (pages: Page[]) => {
   return lastValueFrom(refreshStream);
 };
 
-const editPage = (filename: string, successCallback: () => void) => {
+const getPageData = (filename: string) =>
+  readPages().find((page) => filename === page.id);
+
+const fixPageFilename = (originalPage: Page) => {
+  const filename = originalPage.svg.file;
   const filePath = `${getPath().SVG_STORAGE_PATH}/${filename}`;
+
+  if (isFilenameValid(filename)) {
+    return originalPage;
+  }
+
+  const newFileName = findNewFilename(filename);
+  const newFilePath = `${getPath().SVG_STORAGE_PATH}/${newFileName}`;
+
+  // copy svg file on disk with new name
+  fs.copyFileSync(filePath, newFilePath);
+
+  // remove all png's and jpg's related to that file
+  removePageImages(filename);
+
+  const fixedPage = { ...originalPage };
+  fixedPage.svg.file = newFileName;
+  fixedPage.id = newFileName;
+
+  replacePageData(fixedPage, filename);
+
+  return fixedPage;
+};
+
+const editPage = (filename: string, successCallback: (page: Page) => void) => {
+  const originalPage = getPageData(filename);
+  const fixedPage = fixPageFilename(originalPage);
+  const fixedFilename = fixedPage.svg.file;
+
+  const filePath = `${getPath().SVG_STORAGE_PATH}/${fixedFilename}`;
+
   fs.exists(filePath, function (exists) {
     if (exists) {
       console.log("file exists", filePath);
@@ -113,7 +148,7 @@ const editPage = (filename: string, successCallback: () => void) => {
           console.error("Inkscape was killed with signal", signal);
         } else {
           console.log("Inkscape exited okay");
-          successCallback();
+          successCallback(fixedPage);
         }
       });
     } else {
@@ -122,16 +157,17 @@ const editPage = (filename: string, successCallback: () => void) => {
   });
 };
 
-const updatePage = (
+const replacePageData = (
   page: Page,
-  successCallback: () => void,
-  failCallback: (message: string) => void
+  filenameToUpdate: string,
+  successCallback?: () => void,
+  failCallback?: (message: string) => void
 ) => {
   fs.exists(getPath().PAGE_STORAGE_PATH, (exists) => {
     if (exists) {
       const pages = readPages();
       const pageIndex = pages.findIndex(
-        (item) => item.svg.file === page.svg.file
+        (item) => item.svg.file === filenameToUpdate
       );
 
       if (pageIndex < 0) {
@@ -147,7 +183,7 @@ const updatePage = (
 
       savePages(pages).then(successCallback).catch(failCallback);
     } else {
-      failCallback("Page storage does not exist");
+      failCallback?.("Page storage does not exist");
     }
   });
 };
@@ -207,7 +243,7 @@ const generatePDF = async () => {
       const jpgPath = `${getPath().JPG_STORAGE_PATH}/${page.svg.file}.jpg`;
       pdf.addPage();
       if (page.keywords) {
-        pdf.fillColor('#ffffff').text(page.keywords.join(' '), 0, 0)
+        pdf.fillColor("#ffffff").text(page.keywords.join(" "), 0, 0);
       }
       pdf.image(jpgPath, 20, 0, { fit: [595, 841] });
     });
@@ -330,7 +366,7 @@ export {
   refreshPage,
   refreshAllPages,
   editPage,
-  updatePage,
+  replacePageData,
   uploadPage,
   savePages,
   generatePDF,
