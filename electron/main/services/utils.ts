@@ -17,10 +17,6 @@ const getCurrentFormattedDate = () => {
   return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
 };
 
-export const isFilenameValid = (rawFilename: string) => {
-  return new RegExp(/(\.)svg$/, "gm").test(rawFilename.toLowerCase());
-};
-
 export const getCleanFilenameChunks = (rawFilename: string) => {
   const filename = encodeURI(rawFilename);
   const suffixIndex = filename.lastIndexOf(".");

@@ -7,7 +7,6 @@ import {
   findNewFilename,
   handleResponse,
   handleResponseError,
-  isFilenameValid,
   removeFileAsync,
 } from "./utils";
 import { getHost, getPath } from "./env";
@@ -96,16 +95,17 @@ const refreshAllPages = async (pages: Page[]) => {
   return lastValueFrom(refreshStream);
 };
 
-const getPageData = (filename: string) =>
-  readPages().find((page) => filename === page.id);
+const getPageData = (pageId: string) =>
+  readPages().find((page) => pageId === page.id);
 
-const fixPageFilename = (originalPage: Page) => {
+const fixPageFilename = (
+  pageId: string,
+  successCallback: (page: Page) => void,
+  failCallback: (page: Page) => void
+) => {
+  const originalPage = getPageData(pageId);
   const filename = originalPage.svg.file;
   const filePath = `${getPath().SVG_STORAGE_PATH}/${filename}`;
-
-  if (isFilenameValid(filename)) {
-    return originalPage;
-  }
 
   const newFileName = findNewFilename(filename);
   const newFilePath = `${getPath().SVG_STORAGE_PATH}/${newFileName}`;
@@ -120,17 +120,16 @@ const fixPageFilename = (originalPage: Page) => {
   fixedPage.svg.file = newFileName;
   fixedPage.id = newFileName;
 
-  replacePageData(fixedPage, filename);
-
-  return fixedPage;
+  replacePageData(
+    fixedPage,
+    filename,
+    () => successCallback(fixedPage),
+    () => failCallback(fixedPage)
+  );
 };
 
-const editPage = (filename: string, successCallback: (page: Page) => void) => {
-  const originalPage = getPageData(filename);
-  const fixedPage = fixPageFilename(originalPage);
-  const fixedFilename = fixedPage.svg.file;
-
-  const filePath = `${getPath().SVG_STORAGE_PATH}/${fixedFilename}`;
+const editPage = (filename: string, successCallback: () => void) => {
+  const filePath = `${getPath().SVG_STORAGE_PATH}/${filename}`;
 
   fs.exists(filePath, function (exists) {
     if (exists) {
@@ -148,7 +147,7 @@ const editPage = (filename: string, successCallback: (page: Page) => void) => {
           console.error("Inkscape was killed with signal", signal);
         } else {
           console.log("Inkscape exited okay");
-          successCallback(fixedPage);
+          successCallback();
         }
       });
     } else {
@@ -366,6 +365,7 @@ export {
   refreshPage,
   refreshAllPages,
   editPage,
+  fixPageFilename,
   replacePageData,
   uploadPage,
   savePages,

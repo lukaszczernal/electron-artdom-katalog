@@ -7,3 +7,7 @@ export const pageMetadata = (file: string): Page => ({
   status: PageStatus.enable,
   id: file,
 });
+
+export const isFilenameValid = (rawFilename: string) => {
+  return new RegExp(/(\.)svg$/, "gm").test(rawFilename.toLowerCase());
+};

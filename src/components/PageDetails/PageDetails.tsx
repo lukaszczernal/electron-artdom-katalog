@@ -21,8 +21,10 @@ import { PagesContext } from "@/services/context/pagesContext";
 import useEvent from "@/services/useEvent";
 import { SourcePathContext } from "@/services/context/sourcePathContext";
 import useDownloadPage from "@/services/useDownloadPage";
+import useFixFilename from "@/services/useFixFilename";
+import { isFilenameValid } from "@/services/utils";
 
-interface Prosp {
+interface Props {
   pageId: string | null;
   onFinish: () => void;
 }
@@ -49,13 +51,15 @@ const keywordInitialValues = {
   keyword: "",
 };
 
-const PageDetails: React.FC<Prosp> = ({ pageId, onFinish }) => {
+const PageDetails: React.FC<Props> = ({ pageId, onFinish }) => {
   const { classes } = useStyles();
   const [toDelete, setToDelete] = useState<string | null>(null);
+  const [toFixPageId, setToFixPageId] = useState<string | null>(null);
   const [localPage, setLocalPage] = useState<Page>();
   const { pages, editPage, removePage } = useContext(PagesContext);
   const { sourcePath } = useContext(SourcePathContext);
   const { updatePage } = useUpdatePage();
+  const { fixFilename } = useFixFilename();
   const { refreshPage, isLoading: isRefreshing } = useRefreshPage();
   const { fetch: downloadPage, isLoading: isDownloading } = useDownloadPage();
   const theme = useMantineTheme();
@@ -75,6 +79,7 @@ const PageDetails: React.FC<Prosp> = ({ pageId, onFinish }) => {
   });
 
   useEvent(EVENTS.PAGE_DELETE_SUCCESS, onFinish);
+  useEvent(EVENTS.PAGE_FILENAME_FIX_SUCCESS, () => window.location.reload());
 
   const form = useForm({
     initialValues: keywordInitialValues,
@@ -122,6 +127,7 @@ const PageDetails: React.FC<Prosp> = ({ pageId, onFinish }) => {
 
   const closeConfirmModal = () => {
     setToDelete(null);
+    setToFixPageId(null);
   };
 
   const requestPageDelete = () =>
@@ -133,6 +139,15 @@ const PageDetails: React.FC<Prosp> = ({ pageId, onFinish }) => {
 
   const onRefreshPage = () => {
     localPage && refreshPage(localPage);
+  };
+
+  const onEditPage = (page: Page) => {
+    if (isFilenameValid(page.svg.file)) {
+      editPage(page);
+      return;
+    }
+
+    setToFixPageId(page.id);
   };
 
   if (!localPage) {
@@ -178,7 +193,7 @@ const PageDetails: React.FC<Prosp> = ({ pageId, onFinish }) => {
             <Button onClick={onRefreshPage} disabled={isRefreshing}>
               Odśwież
             </Button>
-            <Button onClick={() => editPage(localPage)}>Edytuj</Button>
+            <Button onClick={() => onEditPage(localPage)}>Edytuj</Button>
             <Button onClick={onDownloadPage} disabled={isDownloading}>
               Pobierz
             </Button>
@@ -198,6 +213,26 @@ const PageDetails: React.FC<Prosp> = ({ pageId, onFinish }) => {
           <Group position="right">
             <Button onClick={closeConfirmModal}>Nie</Button>
             <Button onClick={() => removePage(toDelete)}>Tak</Button>
+          </Group>
+        </Stack>
+      </Modal>
+
+      <Modal
+        opened={Boolean(toFixPageId)}
+        onClose={closeConfirmModal}
+        title="Nazwa pliku jest niepoprawna"
+        size="md"
+      >
+        <Stack spacing="xl">
+          <p>
+            Edycja pliku zablokowana ze względu na niepoprawą nazwę pliku.
+            Wymagana jest jej aktualizacja.
+          </p>
+          <Group position="right">
+            <Button onClick={closeConfirmModal}>Anuluj</Button>
+            <Button onClick={() => fixFilename(toFixPageId)}>
+              Aktualizuj nazwę
+            </Button>
           </Group>
         </Stack>
       </Modal>

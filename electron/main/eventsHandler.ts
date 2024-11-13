@@ -38,6 +38,7 @@ import {
   fetchClientData,
   updateClientPage,
   uploadClientData,
+  fixPageFilename,
 } from "./services/pages";
 import { reduxEvent } from "./utils";
 
@@ -86,7 +87,7 @@ const registerEventHandlers = (browser: BrowserWindow) => {
   });
 
   browserEventBus.on(EVENTS.PAGE_EDIT, (event: IpcMainEvent, page: Page) => {
-    editPage(page.svg.file, (page) => {
+    editPage(page.svg.file, () => {
       event.reply(EVENTS.PAGE_EDIT_SUCCESS, page);
     });
   });
@@ -116,6 +117,20 @@ const registerEventHandlers = (browser: BrowserWindow) => {
       () => event.reply(EVENTS.PAGE_ADD_FAIL, file)
     );
   });
+
+  browserEventBus.on(
+    EVENTS.PAGE_FILENAME_FIX,
+    (event: IpcMainEvent, pageId: string) => {
+      fixPageFilename(
+        pageId,
+        (fixedPage) =>
+          refreshPage(fixedPage.id).then(() =>
+            event.reply(EVENTS.PAGE_FILENAME_FIX_SUCCESS, fixedPage.id)
+          ),
+        (fixedPage) => event.reply(EVENTS.PAGE_FILENAME_FIX_FAIL, fixedPage.id)
+      );
+    }
+  );
 
   browserEventBus.on(
     EVENTS.PAGES_SAVE,
